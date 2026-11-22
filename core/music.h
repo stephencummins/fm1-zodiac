@@ -88,11 +88,13 @@ static inline f32 m_pluck(MPluck *p, f32 dt, f32 rel, f32 cut)
 }
 
 /* a drum, or a low plucked note: a sine that falls to its pitch */
-typedef struct { f32 ph, hz, base, env; } MDrum;
-static inline void m_drum_on(MDrum *d, f32 hz, f32 vel, f32 from) { d->base = hz; d->hz = hz * from; d->env = vel; }
+typedef struct { f32 ph, hz, base, env, peak; int rise; } MDrum;
+static inline void m_drum_on(MDrum *d, f32 hz, f32 vel, f32 from) { d->base = hz; d->hz = hz * from; d->peak = vel; d->rise = d->env < vel; }
 static inline f32 m_drum(MDrum *d, f32 dt, f32 dec, f32 bend)
 {
-    d->hz += (d->base - d->hz) * bend; d->env -= d->env * dec;
+    d->hz += (d->base - d->hz) * bend;
+    if (d->rise) { d->env += (d->peak - d->env) * sat(900.0f * dt); if (d->env > 0.97f * d->peak) d->rise = 0; }    /* a few thousandths of a second to come up: no click */
+    else d->env -= d->env * dec;
     d->ph += d->hz * dt; if (d->ph >= 1.0f) d->ph -= 1.0f;
     return sin_turns(d->ph) * d->env;
 }

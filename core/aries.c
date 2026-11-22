@@ -72,21 +72,16 @@ static void fire(void)
         tongue(i, CX + dx * 66.0f, CY + dy * 66.0f, dx, dy, h + 16.0f, b, INK_RED, 0.44f + 0.26f * heat, 0.22f + 0.30f * heat);
         tongue(i + 40, CX + dx * 66.0f, CY + dy * 66.0f, dx, dy, (h + 16.0f) * 0.66f, b * 0.55f, INK_AMBER, 0.50f + 0.35f * heat, 0.0f);
     }
-    f32 hx[12], in[12];
+    f32 hx[12];
     f32 beat = 1.0f + 0.012f * sin_turns(A.t * 0.11f) + 0.05f * A.roar;
     for (int k = 0; k < 6; k++) {
         f32 th = (f32)k / 6.0f + 0.25f;
         hx[2 * k] = CX + cos_turns(th) * HEXR * beat; hx[2 * k + 1] = CY + sin_turns(th) * HEXR * beat;
-        in[2 * k] = CX + cos_turns(th) * (HEXR - 6.0f) * beat; in[2 * k + 1] = CY + sin_turns(th) * (HEXR - 6.0f) * beat;
     }
     g_mode(G_GROUND); g_fill(hx, 6, 1.0f);                    /* the frame hides the flames' roots */
     g_mode(G_MAX);
     g_glow(CX, CY + 10.0f, 70.0f, 0.22f + 0.30f * heat + 0.3f * A.roar);
     g_ink(INK_AMBER); g_fill(hx, 6, 0.03f + 0.05f * heat + 0.12f * A.roar);
-    g_ink(INK_GOLD);
-    for (int k = 0; k < 6; k++) g_line(CX, CY, in[2 * k], in[2 * k + 1], 0.8f, 0.10f + 0.25f * A.roar);
-    g_poly(hx, 6, 1, 1.6f, 0.95f);
-    g_poly(in, 6, 1, 0.8f, 0.45f);
 }
 
 static void embers(f32 dt)

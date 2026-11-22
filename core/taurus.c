@@ -8,7 +8,7 @@
 enum { K_LINE, K_UMBER, K_OCHRE, K_GREEN };
 
 #define NBIT 40
-#define NPUFF 6
+#define NPUFF 28
 typedef struct { f32 x, y, vx, vy, age, life; } Bit;
 
 static struct {
@@ -19,13 +19,14 @@ static struct {
     f32 next_snort, chew, chewing;
     Bit bit[NBIT]; f32 spawn; int dust;
     Bit puff[NPUFF];
+    f32 flare, steam, hy;        /* how wide the nostrils are; steam owed; how far the head has dropped */
 } T;
 
 void taurus_init(void)
 {
     sc_init(&T.s, 11u);
     T.temper = 0.0f; T.stamp = 0.0f; T.stamp_t = -1.0f; T.swing = 0.0f; T.next_snort = 8.0f; T.chew = 0.0f; T.chewing = 1.0f;
-    T.spawn = 0.0f; T.dust = 0;
+    T.spawn = 0.0f; T.dust = 0; T.flare = 0.0f; T.steam = 0.0f; T.hy = 0.0f;
     for (int i = 0; i < NBIT; i++) T.bit[i].life = 0.0f;
     for (int i = 0; i < NPUFF; i++) T.puff[i].life = 0.0f;
 }
@@ -37,8 +38,8 @@ static void snort(f32 hard)
         Bit *b = &T.puff[i];
         if (b->life > 0.0f) continue;
         f32 sg = made ? 1.0f : -1.0f;
-        b->x = CX + sg * 8.5f; b->y = 190.0f; b->vx = sg * (9.0f + 9.0f * hard); b->vy = 15.0f + 12.0f * hard;
-        b->age = 0.0f; b->life = 1.1f + 0.5f * hard;
+        b->x = CX + sg * 8.5f; b->y = 187.0f + T.hy; b->vx = sg * (16.0f + 22.0f * hard); b->vy = 20.0f + 14.0f * hard;
+        b->age = 0.0f; b->life = 2.2f + 1.4f * hard;
         made++;
     }
 }
@@ -127,10 +128,10 @@ static void bits(f32 dt)
         if (b->life <= 0.0f) continue;
         b->age += dt;
         if (b->age >= b->life) { b->life = 0.0f; continue; }
-        b->vx *= 1.0f - dt * 1.5f; b->vy *= 1.0f - dt * 1.5f;
-        b->x += b->vx * dt; b->y += b->vy * dt;
+        b->vx *= 1.0f - dt * 1.5f; b->vy = b->vy * (1.0f - dt * 1.5f) - 22.0f * dt;      /* out and down, then it rises */
+        b->x += (b->vx + sin_turns(b->age * 0.35f + (f32)i * 0.3f) * 5.0f) * dt; b->y += b->vy * dt;
         f32 u = b->age / b->life;
-        g_glow(b->x, b->y, 4.0f + 13.0f * u, 0.55f * (1.0f - u));
+        g_glow(b->x, b->y, 5.0f + 26.0f * u, (u < 0.08f ? u * 12.0f : 1.0f) * 0.95f * (1.0f - u * u));
     }
 }
 
@@ -149,11 +150,17 @@ static void bull_move(int g, f32 *xy, int n, f32 *gain, void *ctx)
     case TAURUS_G_JAW:                                                       /* it chews, round and round, sideways */
         sc_shift(xy, n, 2.4f * T.chewing * sin_turns(T.chew), (1.6f + 1.6f * cos_turns(T.chew)) * T.chewing);
         break;
+    case TAURUS_G_NOSEL: case TAURUS_G_NOSER:
+        for (int k = 0; k < n; k++) {
+            f32 cx = g == TAURUS_G_NOSEL ? 111.8f : 128.2f;
+            xy[2 * k] = cx + (xy[2 * k] - cx) * (1.0f + 0.9f * T.flare); xy[2 * k + 1] = 185.6f + (xy[2 * k + 1] - 185.6f) * (1.0f + 1.3f * T.flare);
+        }
+        break;
     case TAURUS_G_EYEL: case TAURUS_G_EYER:
-        *gain = 0.60f + 0.70f * temper; break;
+        *gain = 0.85f + 0.40f * temper; break;
     case TAURUS_G_LIDL: case TAURUS_G_LIDR: {                                /* heavy lids: they lift as its temper does */
-        f32 s = 1.05f + 0.22f * sin_turns(t * 0.021f) - 0.90f * temper;
-        sc_squash(xy, n, 121.5f, s + (2.05f - s) * T.s.blink);
+        f32 s = maxf(0.12f, 0.42f + 0.14f * sin_turns(t * 0.021f) - 0.75f * temper);
+        sc_squash(xy, n, 118.0f, s + (3.3f - s) * T.s.blink);
         break; }
     case TAURUS_G_RING:
         sc_rot(xy, n, CX, 186.0f, 0.010f * sin_turns(t * 0.23f) + T.swing * sin_turns(t * 1.7f));
@@ -172,6 +179,7 @@ static void bull_move(int g, f32 *xy, int n, f32 *gain, void *ctx)
     f32 sway = 0.004f * sin_turns(t * 0.031f);
     f32 c = cos_turns(sway), s = sin_turns(sway);
     f32 dy = 5.0f * T.stamp + 7.0f * temper * temper + 1.2f * sin_turns(t * 0.085f + 0.2f);
+    T.hy = dy;
     f32 shx = T.stamp * 1.5f * (noise1(t * 25.0f, 41u) - 0.5f);
     for (int k = 0; k < n; k++) {
         f32 x = (xy[2 * k] - CX) * sc, y = (xy[2 * k + 1] - 140.0f) * sc;
@@ -186,6 +194,11 @@ void taurus_frame(f32 dt, const ZParams *want)
     T.swing *= 1.0f - minf(1.0f, dt * 0.7f);
     if (T.stamp_t >= 0.0f) { T.stamp_t += dt; if (T.stamp_t > 0.6f) T.stamp_t = -1.0f; }
     T.stamp = sc_follow(T.stamp, T.stamp_t >= 0.0f && T.stamp_t < 0.10f ? 1.0f : 0.0f, dt, 40.0f, 6.0f);
+    /* Echo is its breath: the more of it, the wider the nostrils flare on each breath out and the more steam */
+    f32 out = maxf(0.0f, sin_turns(T.s.t * (0.16f + 0.16f * T.s.p.echo)));
+    T.flare = sc_follow(T.flare, sat(T.s.p.echo * (0.25f + 0.75f * out) + (T.stamp_t >= 0.0f ? 0.8f : 0.0f) + 0.3f * T.temper), dt, 14.0f, 4.0f);
+    T.steam += dt * T.s.p.echo * out * 22.0f;
+    if (T.steam >= 1.0f) { T.steam -= 1.0f; snort(0.25f + 0.6f * T.s.p.echo); }
     T.next_snort -= dt;
     if (T.next_snort < 0.0f) { T.next_snort = 9.0f + sc_rnd(&T.s) * 9.0f; snort(0.3f); }
     /* it chews in spells, and not at all when it is cross */

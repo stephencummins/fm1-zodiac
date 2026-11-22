@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 240 240">
+<rect width="240" height="240" fill="#000"/>
+<path id="neckL-shape_h" d="M68.00,182.00 L88.00,182.00 L90.00,150.00 L66.00,150.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="neckL-shape" d="M68.00,182.00 L88.00,182.00 L90.00,150.00 L66.00,150.00 Z" fill="#F08A1C" fill-opacity="0.18" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="jawL-shape_h" d="M105.00,143.00 L108.50,148.00 L104.00,159.00 L88.00,164.00 L77.00,150.00 L84.00,142.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="jawL-shape" d="M105.00,143.00 L108.50,148.00 L104.00,159.00 L88.00,164.00 L77.00,150.00 L84.00,142.00 Z" fill="#F08A1C" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-line_h" d="M84.00,82.00 L101.00,90.00 L105.00,104.00 L103.00,113.00 L114.00,129.00 L106.50,132.50 L109.50,138.00 L105.00,142.50 L84.00,145.00 L66.00,151.00 L61.00,150.00 L57.00,120.00 L65.00,94.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="headL-line" d="M84.00,82.00 L101.00,90.00 L105.00,104.00 L103.00,113.00 L114.00,129.00 L106.50,132.50 L109.50,138.00 L105.00,142.50 L84.00,145.00 L66.00,151.00 L61.00,150.00 L57.00,120.00 L65.00,94.00 Z" fill="#E8D9A8" fill-opacity="0.06" stroke="#E8D9A8" stroke-width="1.5" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-brow" d="M84.00,82.00 L101.00,90.00 L105.00,104.00 L86.00,108.00 Z" fill="#F08A1C" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-crown" d="M84.00,82.00 L86.00,108.00 L57.00,120.00 L65.00,94.00 Z" fill="#B3202A" fill-opacity="0.4" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-cheek" d="M86.00,108.00 L103.00,113.00 L114.00,129.00 L106.50,132.50 L90.00,128.00 Z" fill="#F08A1C" fill-opacity="0.32" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-back" d="M86.00,108.00 L90.00,128.00 L84.00,145.00 L66.00,151.00 L57.00,120.00 Z" fill="#F08A1C" fill-opacity="0.16" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headL-ear" d="M70.00,124.00 L66.00,130.00 L70.00,137.00 L74.00,131.00 Z" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-shape_h" d="M90.00,112.00 L96.50,108.50 L102.00,113.00 L96.00,116.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="eyeL-shape" d="M90.00,112.00 L96.50,108.50 L102.00,113.00 L96.00,116.00 Z" fill="#E8D9A8" fill-opacity="0.9" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="pupilL-dot" d="M97.50,112.40 L98.50,112.60" fill="none" stroke="#000000" stroke-width="3.4" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-brow" d="M88.00,106.00 L96.00,102.50 L104.00,106.50" fill="none" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="neckR-shape_h" d="M172.00,182.00 L152.00,182.00 L150.00,150.00 L174.00,150.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="neckR-shape" d="M172.00,182.00 L152.00,182.00 L150.00,150.00 L174.00,150.00 Z" fill="#2B3F9E" fill-opacity="0.18" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="jawR-shape_h" d="M135.00,143.00 L131.50,148.00 L136.00,159.00 L152.00,164.00 L163.00,150.00 L156.00,142.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="jawR-shape" d="M135.00,143.00 L131.50,148.00 L136.00,159.00 L152.00,164.00 L163.00,150.00 L156.00,142.00 Z" fill="#2B3F9E" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-line_h" d="M156.00,82.00 L139.00,90.00 L135.00,104.00 L137.00,113.00 L126.00,129.00 L133.50,132.50 L130.50,138.00 L135.00,142.50 L156.00,145.00 L174.00,151.00 L179.00,150.00 L183.00,120.00 L175.00,94.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="headR-line" d="M156.00,82.00 L139.00,90.00 L135.00,104.00 L137.00,113.00 L126.00,129.00 L133.50,132.50 L130.50,138.00 L135.00,142.50 L156.00,145.00 L174.00,151.00 L179.00,150.00 L183.00,120.00 L175.00,94.00 Z" fill="#E8D9A8" fill-opacity="0.06" stroke="#E8D9A8" stroke-width="1.5" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-brow" d="M156.00,82.00 L139.00,90.00 L135.00,104.00 L154.00,108.00 Z" fill="#2B3F9E" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-crown" d="M156.00,82.00 L154.00,108.00 L183.00,120.00 L175.00,94.00 Z" fill="#B3202A" fill-opacity="0.4" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-cheek" d="M154.00,108.00 L137.00,113.00 L126.00,129.00 L133.50,132.50 L150.00,128.00 Z" fill="#2B3F9E" fill-opacity="0.32" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-back" d="M154.00,108.00 L150.00,128.00 L156.00,145.00 L174.00,151.00 L183.00,120.00 Z" fill="#2B3F9E" fill-opacity="0.16" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="headR-ear" d="M170.00,124.00 L174.00,130.00 L170.00,137.00 L166.00,131.00 Z" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-shape_h" d="M150.00,112.00 L143.50,108.50 L138.00,113.00 L144.00,116.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="eyeR-shape" d="M150.00,112.00 L143.50,108.50 L138.00,113.00 L144.00,116.00 Z" fill="#E8D9A8" fill-opacity="0.9" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="pupilR-dot" d="M142.50,112.40 L141.50,112.60" fill="none" stroke="#000000" stroke-width="3.4" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-brow" d="M152.00,106.00 L144.00,102.50 L136.00,106.50" fill="none" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,33 +1,47 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Zodiac: Aries</title>
+<title>Zodiac</title>
 <style>
  body{margin:0;background:#0b0a09;color:#cdbf95;font:15px/1.4 Georgia,serif;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
  h1{font-weight:normal;letter-spacing:.3em;font-size:16px;margin:0 0 16px}
  canvas{width:min(480px,92vw);height:auto;aspect-ratio:1;image-rendering:pixelated;border:1px solid #2a251c;border-radius:6px;background:#000}
  .k{width:min(480px,92vw);margin-top:18px;display:grid;grid-template-columns:5em 1fr;gap:10px 12px;align-items:center}
  input{width:100%;accent-color:#c8782a}
+ .s{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+ .s button{margin-top:0;padding:8px 14px}
+ .s button.on{border-color:#e8d9a8;background:#2a2217}
  button{margin-top:18px;background:#1b1611;color:#e8d9a8;border:1px solid #6b5a34;border-radius:4px;padding:10px 22px;font:inherit;min-height:44px}
  p{width:min(480px,92vw);color:#7d7460;font-size:13px}
 </style></head><body>
-<h1>ARIES</h1>
+<div class="s" id="signs"></div>
+<h1 id="name">ARIES</h1>
 <canvas id="c" width="240" height="240"></canvas>
 <div class="k">
- <label for="heat">Heat</label><input id="heat" type="range" min="0" max="1" step="0.01" value="0.45">
+ <label for="heat" id="knob">Heat</label><input id="heat" type="range" min="0" max="1" step="0.01" value="0.45">
  <label for="echo">Echo</label><input id="echo" type="range" min="0" max="1" step="0.01" value="0">
  <label for="mist">Mist</label><input id="mist" type="range" min="0" max="1" step="0.01" value="0.15">
  <label for="light">Light</label><input id="light" type="range" min="0" max="1" step="0.01" value="0.7">
 </div>
 <button id="roar">Strike (a note)</button>
-<p>A first draft, at the FM-1's 240 by 240 pixels, shown twice the size. The sliders stand in for the knobs; the button, the picture or any key stands in for a note played.</p>
+<p>First drafts, at the FM-1's 240 by 240 pixels, shown twice the size. The sliders stand in for the knobs; the button, the picture or any key stands in for a note played.</p>
 <script>
 var Module = { onRuntimeInitialized: function () {
   var ctx = document.getElementById('c').getContext('2d'), img = ctx.createImageData(240, 240);
   var v = function (id) { return +document.getElementById(id).value; };
-  Module._z_init();
+  var S = [['Aries', 'fire', 'Heat'], ['Taurus', 'earth', 'Growth'], ['Gemini', 'air', 'Wind'], ['Cancer', 'water', 'Tide']];
+  var pick = function (i) {
+    Module._z_init(i);
+    document.getElementById('name').textContent = S[i][0].toUpperCase() + ' \u00b7 ' + S[i][1];
+    document.getElementById('knob').textContent = S[i][2];
+    [].forEach.call(document.querySelectorAll('#signs button'), function (b, k) { b.className = k === i ? 'on' : ''; });
+    try { history.replaceState(null, '', '#' + S[i][0].toLowerCase()); } catch (e) {}
+  };
+  S.forEach(function (s, i) { var b = document.createElement('button'); b.textContent = s[0]; b.onclick = function () { pick(i); }; document.getElementById('signs').appendChild(b); });
+  var first = 0; S.forEach(function (s, i) { if (location.hash === '#' + s[0].toLowerCase()) first = i; });
+  pick(first);
   var hit = function () { Module._z_strike(); };
   document.getElementById('roar').onclick = hit; document.getElementById('c').onclick = hit;
-  addEventListener('keydown', function (e) { if (!e.repeat && e.target.tagName !== 'INPUT') hit(); });
+  addEventListener('keydown', function (e) { if (!e.repeat && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') hit(); });
   var last = performance.now();
   (function tick(now) {
     var dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;

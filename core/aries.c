@@ -244,5 +244,14 @@ void aries_palette(uint16_t pal[256])
     f32 l = A.p.light, w = sat(l * 1.4f);
     uint32_t gold = ((uint32_t)(0xC8 + (int)(0x20 * w)) << 16) | ((uint32_t)(0x78 + (int)(0x61 * w)) << 8) | (uint32_t)(0x40 + (int)(0x68 * w));
     uint32_t inks[G_INKS] = {gold, 0xC0202Au, 0xF58A1Cu, 0x3048B8u};
-    g_palette(inks, 0.30f + 0.85f * l + 0.25f * A.roar, pal);
+    /* the ground behind everything takes its colour from the four settings, so a turn of any knob shows at once:
+     * Heat red, Echo violet, Mist blue, Light yellow; a roar flashes it */
+    static const f32 tint[4][3] = {{150, 14, 8}, {96, 22, 132}, {22, 70, 150}, {150, 118, 10}};
+    f32 wt[4] = {A.p.heat * A.p.heat, A.p.echo, A.p.mist, l * l * 0.8f}, c[3];
+    for (int k = 0; k < 3; k++) {
+        f32 v = 0.0f;
+        for (int j = 0; j < 4; j++) v += tint[j][k] * wt[j];
+        c[k] = minf(170.0f, v * (0.58f + 0.45f * A.roar));
+    }
+    g_palette_on(inks, 0.30f + 0.85f * l + 0.25f * A.roar, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
 }

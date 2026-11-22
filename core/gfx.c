@@ -10,7 +10,8 @@ void g_fade(int mul256)
 {
     for (int i = 0; i < GW * GH; i++) {
         uint8_t p = g_fb[i];
-        if (p & 63) g_fb[i] = (uint8_t)((p & 0xC0) | (((p & 63) * mul256) >> 8));
+        int lv = ((p & 63) * mul256) >> 8;
+        g_fb[i] = lv ? (uint8_t)((p & 0xC0) | lv) : 0;                       /* what fades out, and last frame's black, is ground again */
     }
 }
 
@@ -28,7 +29,9 @@ static inline void put(int x, int y, f32 c, f32 a)
         if (lv > (*p & 63)) *p = (uint8_t)(ink_bits | lv);
     } else {
         f32 was = (f32)(*p & 63) * (1.0f - c), now = a * 63.0f * c;        /* the stronger part keeps its ink */
-        *p = (uint8_t)((now >= was ? ink_bits : (*p & 0xC0)) | (int)(was + now + 0.5f));
+        int lv = (int)(was + now + 0.5f);
+        if (lv) *p = (uint8_t)((now >= was ? ink_bits : (*p & 0xC0)) | lv);
+        else if (c >= 0.5f) *p = 0x40;                                       /* black, which is not the ground (0) */
     }
 }
 
@@ -143,13 +146,17 @@ void g_glow(f32 cx, f32 cy, f32 r, f32 a)
         }
 }
 
-void g_palette(const uint32_t rgb[G_INKS], f32 light, uint16_t out[256])
+void g_palette(const uint32_t rgb[G_INKS], f32 light, uint16_t out[256]) { g_palette_on(rgb, light, 0u, out); }
+
+/* the same over a coloured ground: the empty sheet is that colour and every ink rises out of it; painted black stays black */
+void g_palette_on(const uint32_t rgb[G_INKS], f32 light, uint32_t ground, uint16_t out[256])
 {
+    f32 gr = (f32)((ground >> 16) & 255), gg = (f32)((ground >> 8) & 255), gb = (f32)(ground & 255);
     for (int k = 0; k < G_INKS; k++) {
         f32 r = (f32)((rgb[k] >> 16) & 255), g = (f32)((rgb[k] >> 8) & 255), b = (f32)(rgb[k] & 255);
         for (int l = 0; l < G_LEVELS; l++) {
-            f32 u = (f32)l * (1.0f / 63.0f) * light;
-            int R = (int)(r * u), G = (int)(g * u), B = (int)(b * u);
+            f32 v = (f32)l * (1.0f / 63.0f), u = v * light, w = (l || !k) ? (1.0f - v) * (1.0f - v) : 0.0f;
+            int R = (int)(r * u + gr * w), G = (int)(g * u + gg * w), B = (int)(b * u + gb * w);
             if (R > 255) R = 255; if (G > 255) G = 255; if (B > 255) B = 255;
             out[k * 64 + l] = (uint16_t)(((R >> 3) << 11) | ((G >> 2) << 5) | (B >> 3));
         }

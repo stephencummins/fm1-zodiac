@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 240 240">
+<rect width="240" height="240" fill="#000"/>
+<path id="legL0-seg_h" d="M80.00,131.50 L58.00,124.80 L46.00,150.00 L61.00,130.60 L80.00,136.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legL0-seg" d="M80.00,131.50 L58.00,124.80 L46.00,150.00 L61.00,130.60 L80.00,136.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legL1-seg_h" d="M78.00,139.50 L54.00,138.80 L44.00,166.00 L57.00,144.60 L78.00,144.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legL1-seg" d="M78.00,139.50 L54.00,138.80 L44.00,166.00 L57.00,144.60 L78.00,144.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legL2-seg_h" d="M80.00,147.50 L58.00,152.80 L52.00,180.00 L61.00,158.60 L80.00,152.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legL2-seg" d="M80.00,147.50 L58.00,152.80 L52.00,180.00 L61.00,158.60 L80.00,152.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legL3-seg_h" d="M86.00,154.50 L68.00,164.80 L66.00,190.00 L71.00,170.60 L86.00,159.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legL3-seg" d="M86.00,154.50 L68.00,164.80 L66.00,190.00 L71.00,170.60 L86.00,159.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legR0-seg_h" d="M160.00,131.50 L182.00,124.80 L194.00,150.00 L179.00,130.60 L160.00,136.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legR0-seg" d="M160.00,131.50 L182.00,124.80 L194.00,150.00 L179.00,130.60 L160.00,136.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legR1-seg_h" d="M162.00,139.50 L186.00,138.80 L196.00,166.00 L183.00,144.60 L162.00,144.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legR1-seg" d="M162.00,139.50 L186.00,138.80 L196.00,166.00 L183.00,144.60 L162.00,144.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legR2-seg_h" d="M160.00,147.50 L182.00,152.80 L188.00,180.00 L179.00,158.60 L160.00,152.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legR2-seg" d="M160.00,147.50 L182.00,152.80 L188.00,180.00 L179.00,158.60 L160.00,152.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="legR3-seg_h" d="M154.00,154.50 L172.00,164.80 L174.00,190.00 L169.00,170.60 L154.00,159.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="legR3-seg" d="M154.00,154.50 L172.00,164.80 L174.00,190.00 L169.00,170.60 L154.00,159.50 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-line_h" d="M120.00,122.00 L100.00,120.00 L84.00,126.00 L74.00,138.00 L80.00,152.00 L98.00,162.00 L120.00,164.00 L142.00,162.00 L160.00,152.00 L166.00,138.00 L156.00,126.00 L140.00,120.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="body-line" d="M120.00,122.00 L100.00,120.00 L84.00,126.00 L74.00,138.00 L80.00,152.00 L98.00,162.00 L120.00,164.00 L142.00,162.00 L160.00,152.00 L166.00,138.00 L156.00,126.00 L140.00,120.00 Z" fill="#E8D9A8" fill-opacity="0.06" stroke="#E8D9A8" stroke-width="1.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-topL" d="M120.00,122.00 L100.00,120.00 L96.00,138.00 L120.00,142.00 Z" fill="#B3202A" fill-opacity="0.62" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-sideL" d="M100.00,120.00 L84.00,126.00 L74.00,138.00 L96.00,138.00 Z" fill="#B3202A" fill-opacity="0.4" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-lowL" d="M74.00,138.00 L80.00,152.00 L98.00,162.00 L96.00,138.00 Z" fill="#B3202A" fill-opacity="0.24" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-bellyL" d="M96.00,138.00 L98.00,162.00 L120.00,164.00 L120.00,142.00 Z" fill="#F08A1C" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-jawL" d="M113.00,153.00 L116.00,158.00 L120.00,156.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-topR" d="M120.00,122.00 L140.00,120.00 L144.00,138.00 L120.00,142.00 Z" fill="#B3202A" fill-opacity="0.62" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-sideR" d="M140.00,120.00 L156.00,126.00 L166.00,138.00 L144.00,138.00 Z" fill="#B3202A" fill-opacity="0.4" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-lowR" d="M166.00,138.00 L160.00,152.00 L142.00,162.00 L144.00,138.00 Z" fill="#B3202A" fill-opacity="0.24" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-bellyR" d="M144.00,138.00 L142.00,162.00 L120.00,164.00 L120.00,142.00 Z" fill="#F08A1C" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-jawR" d="M127.00,153.00 L124.00,158.00 L120.00,156.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="body-mouth" d="M114.00,159.50 L126.00,159.50" fill="none" stroke="#000000" stroke-width="1.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-stalk" d="M110.00,121.00 L108.00,107.00" fill="none" stroke="#E8D9A8" stroke-width="1.7" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-ball_h" d="M103.50,104.00 L108.00,99.50 L112.50,104.00 L108.00,108.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="eyeL-ball" d="M103.50,104.00 L108.00,99.50 L112.50,104.00 L108.00,108.50 Z" fill="#E8D9A8" fill-opacity="1" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-pupil" d="M108.00,103.40 L108.00,104.60" fill="none" stroke="#000000" stroke-width="3.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-stalk" d="M130.00,121.00 L132.00,107.00" fill="none" stroke="#E8D9A8" stroke-width="1.7" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-ball_h" d="M136.50,104.00 L132.00,99.50 L127.50,104.00 L132.00,108.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="eyeR-ball" d="M136.50,104.00 L132.00,99.50 L127.50,104.00 L132.00,108.50 Z" fill="#E8D9A8" fill-opacity="1" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-pupil" d="M132.00,103.40 L132.00,104.60" fill="none" stroke="#000000" stroke-width="3.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armL-upper_h" d="M88.00,123.00 L84.00,131.00 L58.00,116.00 L61.00,108.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="armL-upper" d="M88.00,123.00 L84.00,131.00 L58.00,116.00 L61.00,108.00 Z" fill="#B3202A" fill-opacity="0.36" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armL-fore_h" d="M56.00,112.00 L64.00,113.00 L70.00,93.00 L62.00,91.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="armL-fore" d="M56.00,112.00 L64.00,113.00 L70.00,93.00 L62.00,91.00 Z" fill="#B3202A" fill-opacity="0.5" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armL-claw_h" d="M58.74,78.18 L62.82,68.50 L69.37,59.71 L78.03,52.80 L72.60,63.12 L68.38,71.64 L69.32,79.80 L80.44,86.08 L73.89,94.87 L58.11,89.13 Z" fill="#000000" fill-opacity="1"/>
+<path id="armL-claw" d="M58.74,78.18 L62.82,68.50 L69.37,59.71 L78.03,52.80 L72.60,63.12 L68.38,71.64 L69.32,79.80 L80.44,86.08 L73.89,94.87 L58.11,89.13 Z" fill="#B3202A" fill-opacity="0.66" stroke="#E8D9A8" stroke-width="1.3" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armL-knuckle" d="M58.74,78.18 L69.32,79.80 L80.44,86.08" fill="none" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="fingerL-shape_h" d="M71.30,80.52 L77.26,74.87 L79.51,65.63 L81.98,54.24 L84.17,65.09 L83.54,76.04 L80.44,86.08 Z" fill="#000000" fill-opacity="1"/>
+<path id="fingerL-shape" d="M71.30,80.52 L77.26,74.87 L79.51,65.63 L81.98,54.24 L84.17,65.09 L83.54,76.04 L80.44,86.08 Z" fill="#F08A1C" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="1.3" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armR-upper_h" d="M152.00,123.00 L156.00,131.00 L182.00,116.00 L179.00,108.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="armR-upper" d="M152.00,123.00 L156.00,131.00 L182.00,116.00 L179.00,108.00 Z" fill="#B3202A" fill-opacity="0.36" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armR-fore_h" d="M184.00,112.00 L176.00,113.00 L170.00,93.00 L178.00,91.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="armR-fore" d="M184.00,112.00 L176.00,113.00 L170.00,93.00 L178.00,91.00 Z" fill="#B3202A" fill-opacity="0.5" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armR-claw_h" d="M181.26,78.18 L177.18,68.50 L170.63,59.71 L161.97,52.80 L167.40,63.12 L171.62,71.64 L170.68,79.80 L159.56,86.08 L166.11,94.87 L181.89,89.13 Z" fill="#000000" fill-opacity="1"/>
+<path id="armR-claw" d="M181.26,78.18 L177.18,68.50 L170.63,59.71 L161.97,52.80 L167.40,63.12 L171.62,71.64 L170.68,79.80 L159.56,86.08 L166.11,94.87 L181.89,89.13 Z" fill="#B3202A" fill-opacity="0.66" stroke="#E8D9A8" stroke-width="1.3" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="armR-knuckle" d="M181.26,78.18 L170.68,79.80 L159.56,86.08" fill="none" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="fingerR-shape_h" d="M168.70,80.52 L162.74,74.87 L160.49,65.63 L158.02,54.24 L155.83,65.09 L156.46,76.04 L159.56,86.08 Z" fill="#000000" fill-opacity="1"/>
+<path id="fingerR-shape" d="M168.70,80.52 L162.74,74.87 L160.49,65.63 L158.02,54.24 L155.83,65.09 L156.46,76.04 L159.56,86.08 Z" fill="#F08A1C" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="1.3" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

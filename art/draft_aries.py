@@ -1,39 +1,7 @@
 #!/usr/bin/env python3
 """Writes art/aries.svg: a first draft of the ram, drawn by numbers. Once the SVG is redrawn by hand in a
-drawing app this script is history: tools/svg2sign.py reads the SVG, whoever made it.
-
-The colours are the four inks (tools/svg2sign.py INKS); black fills hide what is behind them."""
-import math, pathlib
-
-GOLD, RED, AMBER, BLUE, BLACK = "#E8D9A8", "#B3202A", "#F08A1C", "#2B3F9E", "#000000"
-out = []
-
-def path(d, pid, stroke=None, width=1.2, fill=None, so=1.0, fo=1.0):
-    a = f'<path id="{pid}" d="{d}"'
-    a += f' fill="{fill}" fill-opacity="{fo:g}"' if fill else ' fill="none"'
-    if stroke:
-        a += f' stroke="{stroke}" stroke-width="{width:g}" stroke-opacity="{so:g}" stroke-linecap="round" stroke-linejoin="round"'
-    out.append(a + "/>")
-
-def P(pts, close=False):
-    return "M" + " L".join(f"{x:.2f},{y:.2f}" for x, y in pts) + (" Z" if close else "")
-
-def mirror_d(segs):
-    """segs: a start point and cubic segments down the left half, from the top centre to the bottom centre.
-    Returns the closed outline, the right half mirrored about x = 120."""
-    start, cubs = segs
-    d = f"M{start[0]:g},{start[1]:g}"
-    for c in cubs:
-        d += " C" + " ".join(f"{x:g},{y:g}" for x, y in c)
-    pts = [start] + [p for c in cubs for p in c]          # start, c1, c2, end, c1, c2, end ...
-    rev = [(240 - x, y) for x, y in reversed(pts)]
-    for i in range(1, len(rev), 3):
-        d += " C" + " ".join(f"{x:g},{y:g}" for x, y in rev[i:i + 3])
-    return d + " Z"
-
-def both(fn):
-    fn(lambda x: x, "L")
-    fn(lambda x: 240 - x, "R")
+drawing app this script is history: tools/svg2sign.py reads the SVG, whoever made it."""
+from draftlib import *
 
 # ---- ears --------------------------------------------------------------------------------------------------
 def ear(m, s):
@@ -42,9 +10,6 @@ def ear(m, s):
     path(d, f"ear{s}-leaf", stroke=GOLD, width=1.2, fill=RED, fo=0.5)
     path(f"M{m(93):g},112 L{m(68):g},112", f"ear{s}-vein", stroke=GOLD, width=0.9, so=0.6)
 both(ear)
-
-def sym(pts):                                   # a left half (top centre to bottom centre) and its mirror
-    return pts + [(240 - x, y) for x, y in reversed(pts) if x != 120]
 
 # ---- the mouth: the maw behind, then tongue, lower teeth and the jaw (these drop when it roars) ------------
 path(P([(103, 174), (137, 174), (134, 196), (120, 202), (106, 196)], True), "maw-dark", fill=RED, fo=0.5)
@@ -85,32 +50,13 @@ for i, (x, h, w) in enumerate([(105.5, 9, 2.6), (111.5, 4, 1.9), (116.5, 3, 1.6)
 # ---- the horns: a ridged band along a spiral ---------------------------------------------------------------
 def horn(m, s):
     cx, cy, total = 58.0, 112.0, 630.0
-    def at(deg, side):                       # side -1 inner edge, +1 outer edge, 0 the middle
+    def at(deg, side):
         u = deg / total
         r = 47 - 41 * u ** 0.9
         w = 16 * (1 - u) ** 0.8 + 2
         phi = math.radians(-21 - deg)
         rr = r + side * w / 2
         return (m(cx + rr * math.cos(phi)), cy + rr * math.sin(phi))
-    step, deg, i = 15.0, 0.0, 0
-    ridges = [0.0]
-    while deg < total - 1:
-        nxt = min(deg + step, total)
-        mid = (deg + nxt) / 2
-        quad = [at(deg, 1), at(mid, 1), at(nxt, 1), at(nxt, -1), at(mid, -1), at(deg, -1)]
-        ink, fo = [(RED, 0.60), (AMBER, 0.50), (RED, 0.40), (AMBER, 0.62)][i % 4]
-        path(P(quad, True), f"horn{s}-cell{i}", fill=ink, fo=fo)
-        ridges.append(nxt)
-        deg, i = nxt, i + 1
-    n = 84
-    for side, name in ((1, "outer"), (-1, "inner")):
-        path(P([at(total * k / n, side) for k in range(n + 1)]), f"horn{s}-{name}", stroke=GOLD, width=1.3)
-    for k, deg in enumerate(ridges):
-        path(P([at(deg, -1), at(deg, 1)]), f"horn{s}-ridge{k}", stroke=GOLD, width=0.9, so=0.8)
+    band(f"horn{s}", at, total, 15.0, [(RED, 0.60), (AMBER, 0.50), (RED, 0.40), (AMBER, 0.62)])
 both(horn)
-
-svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 240 240">\n'
-       '<rect width="240" height="240" fill="#000"/>\n' + "\n".join(out) + "\n</svg>\n")
-p = pathlib.Path(__file__).with_name("aries.svg")
-p.write_text(svg)
-print(p, len(out), "paths")
+write("aries")

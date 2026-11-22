@@ -29,3 +29,4 @@ void g_dot(f32 x, f32 y, f32 a);                   /* one grain */
 
 /* the palette: four ink colours (0xRRGGBB) into 256 RGB565 entries */
 void g_palette(const uint32_t rgb[G_INKS], f32 light, uint16_t out[256]);
+void g_palette_on(const uint32_t rgb[G_INKS], f32 light, uint32_t ground, uint16_t out[256]);

@@ -1,5 +1,5 @@
 /* LEO: the lion, fire. Warm, proud, generous, ruled by the Sun: it sits crowned in its own light.
- * At a note it throws its head up to the right and roars, mouth wide, and the sun behind it flares.
+ * At a note it raises its head and roars, mouth wide, and the sun behind it flares.
  * The lion is art/pic/leo.jpg; the rays and the sparks are drawn here. */
 #include "scene.h"
 #include "pic_leo.h"
@@ -37,27 +37,37 @@ void leo_frame(f32 dt, const ZParams *want)
 {
     sc_step(&L.s, dt, want);
     f32 t = L.s.t;
-    /* one big roar, head thrown up to the right: quick to open, held, slower to close */
+    /* one big roar, the head raised: quick to open, held, slower to close */
     L.age += dt;
     f32 w = L.age < 0.22f ? L.age / 0.22f : L.age < 1.5f ? 1.0f : L.age < 2.2f ? (2.2f - L.age) / 0.7f : 0.0f;
     w = w * w * (3.0f - 2.0f * w); L.roar = w;
-    f32 lean = w;
     sc_begin(&L.s);
     sun(w);
     sc_mist(&L.s, K_ORANGE);
     /* the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
     int jaw = (int)(w * (16.0f + 1.6f * sin_turns(t * 10.0f)) + 0.5f);
     p_begin(leo_pic);
+    /* living eyes: gold, a pupil that looks about, a glint; they blink, and narrow while it roars */
+    int gx = (int)((noise1(t * 0.22f, 5u) - 0.5f) * 6.0f); if (gx > 2) gx = 2; if (gx < -2) gx = -2;
+    if (w > 0.2f) gx = 0;
+    int lid = (int)(maxf(L.s.blink, 0.45f * w) * 6.0f + 0.5f);
+    for (int e = 0; e < 2; e++) {
+        int ex = e ? 133 : 99;
+        p_fill(ex, 110, 8, 6, 0x40 | 63);
+        p_fill(ex + 3 + gx, 111, 3, 4, 0xC0 | 12);
+        p_fill(ex + 3 + gx, 111, 1, 1, 0x00 | 63);
+        if (lid > 0) p_fill(ex, 110, 8, lid, 0xC0 | 63);
+    }
     if (jaw > 0) {
         p_fill(102, 156, 36, jaw, 0xC0 | 63);
         p_fill(105, 157, 30, jaw, 0xC0 | 20);
         if (jaw > 6) { p_fill(110, 157 + jaw - 6, 20, 6, 0x80 | 63); p_fill(119, 157 + jaw - 6, 2, 4, 0x80 | 40); }
         p_move(leo_pic, 100, 156, 40, 22, 0, jaw);
     }
-    /* then the whole head, mouth and all, lifts and turns to that side */
+    /* then the whole head, mouth and all, is raised */
     for (int i = 0; i < GW * GH; i++) head[i] = g_work[i];
     p_warp(head, 120.0f, 126.0f, 86.0f, 86.0f, 0.05f * w + 0.006f * sin_turns(t * 0.09f),
-           0.034f * lean + 0.003f * sin_turns(t * 0.05f), 9.0f * lean, -8.0f * w, 0);
+           0.003f * sin_turns(t * 0.05f), 0.0f, -10.0f * w, 0);
     g_blit(g_work, 1.0f + 0.008f * sin_turns(t * 0.08f), 0.0f, 0.3f + 1.3f * L.s.p.heat, 0.03f, t * 0.6f, 0.95f + 0.25f * w);
 }
 

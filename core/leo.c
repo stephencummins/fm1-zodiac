@@ -10,7 +10,7 @@ static struct { Scene s; f32 age, roar; } L;      /* age: seconds since the note
 static uint8_t head[GW * GH];             /* the head with its mouth open, before it is turned */
 
 void leo_init(void) { sc_init(&L.s, 53u); L.age = 99.0f; L.roar = 0.0f; }
-void leo_strike(void) { if (L.age > 3.0f) L.age = 0.0f; }   /* a note in the middle of a roar does not start it again */
+void leo_strike(void) { L.age = 0.0f; }
 
 static void sun(f32 w)
 {
@@ -61,18 +61,10 @@ void leo_frame(f32 dt, const ZParams *want)
 {
     sc_step(&L.s, dt, want);
     f32 t = L.s.t;
-    /* a roar the way a lion gives it: three calls, each bigger than the last, the mouth never quite shut between */
+    /* one big roar, the head raised: quick to open, held, slower to close */
     L.age += dt;
-    f32 w = L.age < 3.4f ? 0.10f * sat(L.age * 8.0f) * sat((3.4f - L.age) * 3.0f) : 0.0f;
-    for (int k = 0; k < 3; k++) {
-        static const f32 at[3] = {0.0f, 0.85f, 1.75f}, len[3] = {0.7f, 0.8f, 1.45f}, big[3] = {0.5f, 0.72f, 1.0f};
-        f32 u = (L.age - at[k]) / len[k];
-        if (u <= 0.0f || u >= 1.0f) continue;
-        f32 e = u < 0.22f ? u / 0.22f : u < 0.62f ? 1.0f : (1.0f - u) / 0.38f;
-        e = e * e * (3.0f - 2.0f * e) * big[k];
-        if (e > w) w = e;
-    }
-    L.roar = w;
+    f32 w = L.age < 0.22f ? L.age / 0.22f : L.age < 1.5f ? 1.0f : L.age < 2.2f ? (2.2f - L.age) / 0.7f : 0.0f;
+    w = w * w * (3.0f - 2.0f * w); L.roar = w;
     sc_begin(&L.s);
     sun(w);
     sc_mist(&L.s, K_ORANGE);

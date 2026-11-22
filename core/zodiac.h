@@ -7,4 +7,5 @@ typedef struct { f32 heat, echo, mist, light; } ZParams;
 
 void aries_init(void);
 void aries_frame(f32 dt, const ZParams *want);     /* move on by dt seconds and draw into g_fb */
+void aries_strike(void);                           /* a note, a key: it roars */
 void aries_palette(uint16_t pal[256]);             /* this frame's colours (after aries_frame) */

@@ -6,6 +6,8 @@ static uint8_t rgba[GW * GH * 4];
 
 EMSCRIPTEN_KEEPALIVE void z_init(void) { aries_init(); }
 
+EMSCRIPTEN_KEEPALIVE void z_strike(void) { aries_strike(); }
+
 EMSCRIPTEN_KEEPALIVE uint8_t *z_frame(float dt, float heat, float echo, float mist, float light)
 {
     static uint16_t pal[256];

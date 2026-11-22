@@ -27,8 +27,8 @@ static inline void put(int x, int y, f32 c, f32 a)
         int lv = (int)(c * a * 63.0f + 0.5f);
         if (lv > (*p & 63)) *p = (uint8_t)(ink_bits | lv);
     } else {
-        f32 lv = (f32)(*p & 63) * (1.0f - c) + a * 63.0f * c;
-        *p = (uint8_t)((c >= 0.5f ? ink_bits : (*p & 0xC0)) | (int)(lv + 0.5f));
+        f32 was = (f32)(*p & 63) * (1.0f - c), now = a * 63.0f * c;        /* the stronger part keeps its ink */
+        *p = (uint8_t)((now >= was ? ink_bits : (*p & 0xC0)) | (int)(was + now + 0.5f));
     }
 }
 

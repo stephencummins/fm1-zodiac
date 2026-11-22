@@ -35,60 +35,52 @@ def both(fn):
     fn(lambda x: x, "L")
     fn(lambda x: 240 - x, "R")
 
-# ---- the neck: a fleece of scales --------------------------------------------------------------------------
-neck = [(103, 168), (94, 200), (84, 240), (156, 240), (146, 200), (137, 168)]
-path(P(neck, True), "neck-shape", fill=BLACK)
-def in_neck(x, y):
-    t = (y - 168) / 72.0
-    half = 17 + 19 * t
-    return abs(x - 120) < half - 3
-row = 0
-y = 204.0
-while y < 246:
-    r = 6.5
-    off = r if row % 2 else 0.0
-    x = 120 - 8 * 2 * r + off
-    while x < 240:
-        if in_neck(x, y - 3):
-            arc = [(x + r * math.cos(math.pi * k / 6), y - 6 + r * 0.9 * math.sin(math.pi * k / 6)) for k in range(7)]
-            path(P(arc), f"neck-s{row}_{int(x)}", stroke=GOLD, width=1.0, so=0.5)
-        x += 2 * r
-    y += 8.0
-    row += 1
-
 # ---- ears --------------------------------------------------------------------------------------------------
 def ear(m, s):
-    d = f"M{m(96):g},128 C{m(84):g},127 {m(72):g},137 {m(63):g},153 C{m(77):g},153 {m(91):g},147 {m(98):g},138 Z"
+    d = f"M{m(96):g},112 L{m(80):g},104 L{m(62):g},112 L{m(78):g},121 Z"
     path(d, f"ear{s}-shape", fill=BLACK)
-    path(d, f"ear{s}-leaf", stroke=GOLD, width=1.2, fill=RED, fo=0.42)
-    path(f"M{m(93):g},133 C{m(84):g},136 {m(76):g},142 {m(69):g},150", f"ear{s}-vein", stroke=GOLD, width=0.9, so=0.6)
+    path(d, f"ear{s}-leaf", stroke=GOLD, width=1.2, fill=RED, fo=0.5)
+    path(f"M{m(93):g},112 L{m(68):g},112", f"ear{s}-vein", stroke=GOLD, width=0.9, so=0.6)
 both(ear)
 
-# ---- the face ----------------------------------------------------------------------------------------------
-face = ((120, 84), [
-    [(109, 84), (100, 86), (96, 94)],
-    [(92, 102), (94, 116), (97, 128)],
-    [(100, 142), (103, 160), (107, 176)],
-    [(109, 184), (109, 192), (112, 196)],
-    [(115, 199), (118, 200), (120, 200)],
-])
-fd = mirror_d(face)
-path(fd, "face-shape", fill=BLACK)
-path(fd, "face-mask", stroke=GOLD, width=1.4, fill=GOLD, fo=0.13)
+def sym(pts):                                   # a left half (top centre to bottom centre) and its mirror
+    return pts + [(240 - x, y) for x, y in reversed(pts) if x != 120]
 
-def features(m, s):
-    eye = f"M{m(98):g},127 C{m(102):g},119.5 {m(110):g},119 {m(114.5):g},125.5 C{m(110):g},130 {m(102):g},131 {m(98):g},127 Z"
-    path(eye, f"eye{s}-almond", stroke=GOLD, width=1.1, fill=AMBER, fo=0.95)
-    path(f"M{m(103):g},125 L{m(110):g},125", f"eye{s}-pupil", stroke=BLACK, width=2.2)
-    path(f"M{m(96.5):g},119 C{m(102):g},113.5 {m(110):g},113.5 {m(116):g},119.5", f"eye{s}-brow", stroke=GOLD, width=1.0, so=0.75)
-    path(f"M{m(115):g},130 C{m(115.5):g},150 {m(116.5):g},168 {m(116.5):g},181", f"face-bridge{s}", stroke=GOLD, width=0.9, so=0.55)
-    path(f"M{m(112.5):g},184.5 C{m(114):g},189 {m(117.5):g},190.5 {m(120):g},189", f"face-nostril{s}", stroke=GOLD, width=1.2)
-    path(f"M{m(100.5):g},140 C{m(103):g},152 {m(105.5):g},164 {m(108):g},174", f"face-cheek{s}", stroke=GOLD, width=0.8, so=0.35)
-both(features)
-path("M120,189 L120,195 M114.5,196.5 C117,198.5 123,198.5 125.5,196.5", "face-mouth", stroke=GOLD, width=1.0, so=0.8)
-for i, (cy, r) in enumerate([(96, 4.2), (106.5, 3.2), (115, 2.4)]):
-    path(P([(120, cy - r * 1.35), (120 + r, cy), (120, cy + r * 1.35), (120 - r, cy)], True), f"jewel-{i}",
-         stroke=GOLD, width=0.9, fill=RED, fo=0.95)
+# ---- the mouth: the maw behind, then tongue, lower teeth and the jaw (these drop when it roars) ------------
+path(P([(103, 174), (137, 174), (134, 196), (120, 202), (106, 196)], True), "maw-dark", fill=RED, fo=0.5)
+path(P([(113, 182), (120, 167), (127, 182), (120, 186)], True), "tongue-t", stroke=GOLD, width=0.8, fill=AMBER, fo=0.9)
+for i, (x, h, w) in enumerate([(109.5, 7, 2.4), (114.5, 3.5, 1.8), (125.5, 3.5, 1.8), (130.5, 7, 2.4)]):
+    path(P([(x - w, 178), (x, 178 - h), (x + w, 178)], True), f"teethlo-{i}", fill=GOLD, fo=1.0)
+jaw = sym([(120, 177), (104, 176), (107, 194), (113, 203), (120, 205)])
+path(P(jaw, True), "jaw-shape", fill=BLACK)
+path(P(jaw, True), "jaw-line", stroke=GOLD, width=1.3, fill=GOLD, fo=0.10)
+path(P([(111, 189), (129, 189), (120, 204)], True), "jaw-chin", stroke=GOLD, width=0.7, so=0.4, fill=RED, fo=0.40)
+path(P([(115, 205), (120, 219), (125, 205)]), "jaw-beard", stroke=GOLD, width=1.1, so=0.9)
+path(P([(118, 206), (120, 213), (122, 206)]), "jaw-beard2", stroke=GOLD, width=0.8, so=0.5)
+
+# ---- the head: straight edges and flat planes, as cut glass ------------------------------------------------
+head = sym([(120, 80), (104, 84), (91, 100), (94, 124), (101, 146), (104, 164), (101, 178), (111, 174), (120, 177)])
+path(P(head, True), "head-shape", fill=BLACK)
+path(P(head, True), "head-line", stroke=GOLD, width=1.5, fill=GOLD, fo=0.08)
+path(P([(120, 80), (110, 100), (120, 120), (130, 100)], True), "head-crown", stroke=GOLD, width=0.8, so=0.5, fill=AMBER, fo=0.42)
+path(P([(113, 130), (127, 130), (127, 165), (113, 165)], True), "head-bridge", stroke=GOLD, width=0.7, so=0.35, fill=AMBER, fo=0.36)
+def planes(m, s):
+    path(P([(m(104), 84), (m(91), 100), (m(110), 100)], True), f"head-temple{s}", stroke=GOLD, width=0.8, so=0.45, fill=RED, fo=0.55)
+    path(P([(m(91), 100), (m(94), 124), (m(113), 130), (m(120), 120), (m(110), 100)], True), f"head-socket{s}", stroke=GOLD, width=0.7, so=0.3, fill=RED, fo=0.22)
+    path(P([(m(94), 124), (m(101), 146), (m(113), 150), (m(113), 130)], True), f"head-cheek{s}", stroke=GOLD, width=0.8, so=0.45, fill=RED, fo=0.42)
+    path(P([(m(101), 146), (m(104), 164), (m(101), 178), (m(111), 174), (m(113), 165), (m(113), 150)], True), f"head-muzzle{s}", stroke=GOLD, width=0.8, so=0.45, fill=AMBER, fo=0.30)
+    path(P([(m(115.5), 168.5), (m(117.5), 170.5)]), f"head-nostril{s}", stroke=BLACK, width=1.6)
+    # the eye: slanted, the inner corner low; and a heavy brow over it
+    path(P([(m(97), 119), (m(114), 127.5), (m(110), 132), (m(100), 128)], True), f"eye{s}-shape", stroke=GOLD, width=1.0, fill=AMBER, fo=1.0)
+    path(P([(m(106.5), 122.5), (m(106), 130.5)]), f"eye{s}-pupil", stroke=BLACK, width=2.4)
+    path(P([(m(92), 111), (m(116), 124), (m(116), 128.5), (m(94), 117.5)], True), f"brow{s}-shape", fill=BLACK)
+    path(P([(m(92), 111), (m(116), 124), (m(116), 128.5), (m(94), 117.5)], True), f"brow{s}-fold", stroke=GOLD, width=1.1, fill=GOLD, fo=0.55)
+both(planes)
+path(P([(113, 165), (127, 165), (123.5, 172), (116.5, 172)], True), "head-nose", fill=BLACK)
+path(P([(113, 165), (127, 165), (123.5, 172), (116.5, 172)], True), "head-nose2", stroke=GOLD, width=1.0, fill=GOLD, fo=0.75)
+path("M120,172 L120,176.5", "head-philtrum", stroke=GOLD, width=1.0, so=0.8)
+for i, (x, h, w) in enumerate([(105.5, 9, 2.6), (111.5, 4, 1.9), (116.5, 3, 1.6), (123.5, 3, 1.6), (128.5, 4, 1.9), (134.5, 9, 2.6)]):
+    path(P([(x - w, 175), (x, 175 + h), (x + w, 175)], True), f"teethup-{i}", fill=GOLD, fo=1.0)
 
 # ---- the horns: a ridged band along a spiral ---------------------------------------------------------------
 def horn(m, s):

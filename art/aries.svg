@@ -1,57 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 240 240">
 <rect width="240" height="240" fill="#000"/>
-<path id="neck-shape" d="M103.00,168.00 L94.00,200.00 L84.00,240.00 L156.00,240.00 L146.00,200.00 L137.00,168.00 Z" fill="#000000" fill-opacity="1"/>
-<path id="neck-s0_107" d="M113.50,198.00 L112.63,200.93 L110.25,203.07 L107.00,203.85 L103.75,203.07 L101.37,200.93 L100.50,198.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s0_120" d="M126.50,198.00 L125.63,200.93 L123.25,203.07 L120.00,203.85 L116.75,203.07 L114.37,200.93 L113.50,198.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s0_133" d="M139.50,198.00 L138.63,200.93 L136.25,203.07 L133.00,203.85 L129.75,203.07 L127.37,200.93 L126.50,198.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s1_100" d="M107.00,206.00 L106.13,208.93 L103.75,211.07 L100.50,211.85 L97.25,211.07 L94.87,208.93 L94.00,206.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s1_113" d="M120.00,206.00 L119.13,208.93 L116.75,211.07 L113.50,211.85 L110.25,211.07 L107.87,208.93 L107.00,206.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s1_126" d="M133.00,206.00 L132.13,208.93 L129.75,211.07 L126.50,211.85 L123.25,211.07 L120.87,208.93 L120.00,206.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s1_139" d="M146.00,206.00 L145.13,208.93 L142.75,211.07 L139.50,211.85 L136.25,211.07 L133.87,208.93 L133.00,206.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s2_94" d="M100.50,214.00 L99.63,216.93 L97.25,219.07 L94.00,219.85 L90.75,219.07 L88.37,216.93 L87.50,214.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s2_107" d="M113.50,214.00 L112.63,216.93 L110.25,219.07 L107.00,219.85 L103.75,219.07 L101.37,216.93 L100.50,214.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s2_120" d="M126.50,214.00 L125.63,216.93 L123.25,219.07 L120.00,219.85 L116.75,219.07 L114.37,216.93 L113.50,214.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s2_133" d="M139.50,214.00 L138.63,216.93 L136.25,219.07 L133.00,219.85 L129.75,219.07 L127.37,216.93 L126.50,214.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s2_146" d="M152.50,214.00 L151.63,216.93 L149.25,219.07 L146.00,219.85 L142.75,219.07 L140.37,216.93 L139.50,214.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s3_100" d="M107.00,222.00 L106.13,224.93 L103.75,227.07 L100.50,227.85 L97.25,227.07 L94.87,224.93 L94.00,222.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s3_113" d="M120.00,222.00 L119.13,224.93 L116.75,227.07 L113.50,227.85 L110.25,227.07 L107.87,224.93 L107.00,222.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s3_126" d="M133.00,222.00 L132.13,224.93 L129.75,227.07 L126.50,227.85 L123.25,227.07 L120.87,224.93 L120.00,222.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s3_139" d="M146.00,222.00 L145.13,224.93 L142.75,227.07 L139.50,227.85 L136.25,227.07 L133.87,224.93 L133.00,222.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s4_94" d="M100.50,230.00 L99.63,232.93 L97.25,235.07 L94.00,235.85 L90.75,235.07 L88.37,232.93 L87.50,230.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s4_107" d="M113.50,230.00 L112.63,232.93 L110.25,235.07 L107.00,235.85 L103.75,235.07 L101.37,232.93 L100.50,230.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s4_120" d="M126.50,230.00 L125.63,232.93 L123.25,235.07 L120.00,235.85 L116.75,235.07 L114.37,232.93 L113.50,230.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s4_133" d="M139.50,230.00 L138.63,232.93 L136.25,235.07 L133.00,235.85 L129.75,235.07 L127.37,232.93 L126.50,230.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s4_146" d="M152.50,230.00 L151.63,232.93 L149.25,235.07 L146.00,235.85 L142.75,235.07 L140.37,232.93 L139.50,230.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_87" d="M94.00,238.00 L93.13,240.93 L90.75,243.07 L87.50,243.85 L84.25,243.07 L81.87,240.93 L81.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_100" d="M107.00,238.00 L106.13,240.93 L103.75,243.07 L100.50,243.85 L97.25,243.07 L94.87,240.93 L94.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_113" d="M120.00,238.00 L119.13,240.93 L116.75,243.07 L113.50,243.85 L110.25,243.07 L107.87,240.93 L107.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_126" d="M133.00,238.00 L132.13,240.93 L129.75,243.07 L126.50,243.85 L123.25,243.07 L120.87,240.93 L120.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_139" d="M146.00,238.00 L145.13,240.93 L142.75,243.07 L139.50,243.85 L136.25,243.07 L133.87,240.93 L133.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="neck-s5_152" d="M159.00,238.00 L158.13,240.93 L155.75,243.07 L152.50,243.85 L149.25,243.07 L146.87,240.93 L146.00,238.00" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="earL-shape" d="M96,128 C84,127 72,137 63,153 C77,153 91,147 98,138 Z" fill="#000000" fill-opacity="1"/>
-<path id="earL-leaf" d="M96,128 C84,127 72,137 63,153 C77,153 91,147 98,138 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="earL-vein" d="M93,133 C84,136 76,142 69,150" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="earR-shape" d="M144,128 C156,127 168,137 177,153 C163,153 149,147 142,138 Z" fill="#000000" fill-opacity="1"/>
-<path id="earR-leaf" d="M144,128 C156,127 168,137 177,153 C163,153 149,147 142,138 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="earR-vein" d="M147,133 C156,136 164,142 171,150" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-shape" d="M120,84 C109,84 100,86 96,94 C92,102 94,116 97,128 C100,142 103,160 107,176 C109,184 109,192 112,196 C115,199 118,200 120,200 C122,200 125,199 128,196 C131,192 131,184 133,176 C137,160 140,142 143,128 C146,116 148,102 144,94 C140,86 131,84 120,84 Z" fill="#000000" fill-opacity="1"/>
-<path id="face-mask" d="M120,84 C109,84 100,86 96,94 C92,102 94,116 97,128 C100,142 103,160 107,176 C109,184 109,192 112,196 C115,199 118,200 120,200 C122,200 125,199 128,196 C131,192 131,184 133,176 C137,160 140,142 143,128 C146,116 148,102 144,94 C140,86 131,84 120,84 Z" fill="#E8D9A8" fill-opacity="0.13" stroke="#E8D9A8" stroke-width="1.4" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeL-almond" d="M98,127 C102,119.5 110,119 114.5,125.5 C110,130 102,131 98,127 Z" fill="#F08A1C" fill-opacity="0.95" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeL-pupil" d="M103,125 L110,125" fill="none" stroke="#000000" stroke-width="2.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeL-brow" d="M96.5,119 C102,113.5 110,113.5 116,119.5" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-bridgeL" d="M115,130 C115.5,150 116.5,168 116.5,181" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-nostrilL" d="M112.5,184.5 C114,189 117.5,190.5 120,189" fill="none" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-cheekL" d="M100.5,140 C103,152 105.5,164 108,174" fill="none" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeR-almond" d="M142,127 C138,119.5 130,119 125.5,125.5 C130,130 138,131 142,127 Z" fill="#F08A1C" fill-opacity="0.95" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeR-pupil" d="M137,125 L130,125" fill="none" stroke="#000000" stroke-width="2.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="eyeR-brow" d="M143.5,119 C138,113.5 130,113.5 124,119.5" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-bridgeR" d="M125,130 C124.5,150 123.5,168 123.5,181" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-nostrilR" d="M127.5,184.5 C126,189 122.5,190.5 120,189" fill="none" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-cheekR" d="M139.5,140 C137,152 134.5,164 132,174" fill="none" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="face-mouth" d="M120,189 L120,195 M114.5,196.5 C117,198.5 123,198.5 125.5,196.5" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="jewel-0" d="M120.00,90.33 L124.20,96.00 L120.00,101.67 L115.80,96.00 Z" fill="#B3202A" fill-opacity="0.95" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="jewel-1" d="M120.00,102.18 L123.20,106.50 L120.00,110.82 L116.80,106.50 Z" fill="#B3202A" fill-opacity="0.95" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="jewel-2" d="M120.00,111.76 L122.40,115.00 L120.00,118.24 L117.60,115.00 Z" fill="#B3202A" fill-opacity="0.95" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="earL-shape" d="M96,112 L80,104 L62,112 L78,121 Z" fill="#000000" fill-opacity="1"/>
+<path id="earL-leaf" d="M96,112 L80,104 L62,112 L78,121 Z" fill="#B3202A" fill-opacity="0.5" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="earL-vein" d="M93,112 L68,112" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="earR-shape" d="M144,112 L160,104 L178,112 L162,121 Z" fill="#000000" fill-opacity="1"/>
+<path id="earR-leaf" d="M144,112 L160,104 L178,112 L162,121 Z" fill="#B3202A" fill-opacity="0.5" stroke="#E8D9A8" stroke-width="1.2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="earR-vein" d="M147,112 L172,112" fill="none" stroke="#E8D9A8" stroke-width="0.9" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="maw-dark" d="M103.00,174.00 L137.00,174.00 L134.00,196.00 L120.00,202.00 L106.00,196.00 Z" fill="#B3202A" fill-opacity="0.5"/>
+<path id="tongue-t" d="M113.00,182.00 L120.00,167.00 L127.00,182.00 L120.00,186.00 Z" fill="#F08A1C" fill-opacity="0.9" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="teethlo-0" d="M107.10,178.00 L109.50,171.00 L111.90,178.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethlo-1" d="M112.70,178.00 L114.50,174.50 L116.30,178.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethlo-2" d="M123.70,178.00 L125.50,174.50 L127.30,178.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethlo-3" d="M128.10,178.00 L130.50,171.00 L132.90,178.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="jaw-shape" d="M120.00,177.00 L104.00,176.00 L107.00,194.00 L113.00,203.00 L120.00,205.00 L127.00,203.00 L133.00,194.00 L136.00,176.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="jaw-line" d="M120.00,177.00 L104.00,176.00 L107.00,194.00 L113.00,203.00 L120.00,205.00 L127.00,203.00 L133.00,194.00 L136.00,176.00 Z" fill="#E8D9A8" fill-opacity="0.1" stroke="#E8D9A8" stroke-width="1.3" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="jaw-chin" d="M111.00,189.00 L129.00,189.00 L120.00,204.00 Z" fill="#B3202A" fill-opacity="0.4" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="jaw-beard" d="M115.00,205.00 L120.00,219.00 L125.00,205.00" fill="none" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="jaw-beard2" d="M118.00,206.00 L120.00,213.00 L122.00,206.00" fill="none" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-shape" d="M120.00,80.00 L104.00,84.00 L91.00,100.00 L94.00,124.00 L101.00,146.00 L104.00,164.00 L101.00,178.00 L111.00,174.00 L120.00,177.00 L129.00,174.00 L139.00,178.00 L136.00,164.00 L139.00,146.00 L146.00,124.00 L149.00,100.00 L136.00,84.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="head-line" d="M120.00,80.00 L104.00,84.00 L91.00,100.00 L94.00,124.00 L101.00,146.00 L104.00,164.00 L101.00,178.00 L111.00,174.00 L120.00,177.00 L129.00,174.00 L139.00,178.00 L136.00,164.00 L139.00,146.00 L146.00,124.00 L149.00,100.00 L136.00,84.00 Z" fill="#E8D9A8" fill-opacity="0.08" stroke="#E8D9A8" stroke-width="1.5" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-crown" d="M120.00,80.00 L110.00,100.00 L120.00,120.00 L130.00,100.00 Z" fill="#F08A1C" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-bridge" d="M113.00,130.00 L127.00,130.00 L127.00,165.00 L113.00,165.00 Z" fill="#F08A1C" fill-opacity="0.36" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-templeL" d="M104.00,84.00 L91.00,100.00 L110.00,100.00 Z" fill="#B3202A" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-socketL" d="M91.00,100.00 L94.00,124.00 L113.00,130.00 L120.00,120.00 L110.00,100.00 Z" fill="#B3202A" fill-opacity="0.22" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-cheekL" d="M94.00,124.00 L101.00,146.00 L113.00,150.00 L113.00,130.00 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-muzzleL" d="M101.00,146.00 L104.00,164.00 L101.00,178.00 L111.00,174.00 L113.00,165.00 L113.00,150.00 Z" fill="#F08A1C" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-nostrilL" d="M115.50,168.50 L117.50,170.50" fill="none" stroke="#000000" stroke-width="1.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-shape" d="M97.00,119.00 L114.00,127.50 L110.00,132.00 L100.00,128.00 Z" fill="#F08A1C" fill-opacity="1" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeL-pupil" d="M106.50,122.50 L106.00,130.50" fill="none" stroke="#000000" stroke-width="2.4" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="browL-shape" d="M92.00,111.00 L116.00,124.00 L116.00,128.50 L94.00,117.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="browL-fold" d="M92.00,111.00 L116.00,124.00 L116.00,128.50 L94.00,117.50 Z" fill="#E8D9A8" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-templeR" d="M136.00,84.00 L149.00,100.00 L130.00,100.00 Z" fill="#B3202A" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-socketR" d="M149.00,100.00 L146.00,124.00 L127.00,130.00 L120.00,120.00 L130.00,100.00 Z" fill="#B3202A" fill-opacity="0.22" stroke="#E8D9A8" stroke-width="0.7" stroke-opacity="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-cheekR" d="M146.00,124.00 L139.00,146.00 L127.00,150.00 L127.00,130.00 Z" fill="#B3202A" fill-opacity="0.42" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-muzzleR" d="M139.00,146.00 L136.00,164.00 L139.00,178.00 L129.00,174.00 L127.00,165.00 L127.00,150.00 Z" fill="#F08A1C" fill-opacity="0.3" stroke="#E8D9A8" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-nostrilR" d="M124.50,168.50 L122.50,170.50" fill="none" stroke="#000000" stroke-width="1.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-shape" d="M143.00,119.00 L126.00,127.50 L130.00,132.00 L140.00,128.00 Z" fill="#F08A1C" fill-opacity="1" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="eyeR-pupil" d="M133.50,122.50 L134.00,130.50" fill="none" stroke="#000000" stroke-width="2.4" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="browR-shape" d="M148.00,111.00 L124.00,124.00 L124.00,128.50 L146.00,117.50 Z" fill="#000000" fill-opacity="1"/>
+<path id="browR-fold" d="M148.00,111.00 L124.00,124.00 L124.00,128.50 L146.00,117.50 Z" fill="#E8D9A8" fill-opacity="0.55" stroke="#E8D9A8" stroke-width="1.1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-nose" d="M113.00,165.00 L127.00,165.00 L123.50,172.00 L116.50,172.00 Z" fill="#000000" fill-opacity="1"/>
+<path id="head-nose2" d="M113.00,165.00 L127.00,165.00 L123.50,172.00 L116.50,172.00 Z" fill="#E8D9A8" fill-opacity="0.75" stroke="#E8D9A8" stroke-width="1" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="head-philtrum" d="M120,172 L120,176.5" fill="none" stroke="#E8D9A8" stroke-width="1" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="teethup-0" d="M102.90,175.00 L105.50,184.00 L108.10,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethup-1" d="M109.60,175.00 L111.50,179.00 L113.40,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethup-2" d="M114.90,175.00 L116.50,178.00 L118.10,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethup-3" d="M121.90,175.00 L123.50,178.00 L125.10,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethup-4" d="M126.60,175.00 L128.50,179.00 L130.40,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
+<path id="teethup-5" d="M131.90,175.00 L134.50,184.00 L137.10,175.00 Z" fill="#E8D9A8" fill-opacity="1"/>
 <path id="hornL-cell0" d="M110.28,91.93 L106.48,85.68 L102.03,80.01 L87.72,90.41 L90.79,94.19 L93.48,98.38 Z" fill="#B3202A" fill-opacity="0.6"/>
 <path id="hornL-cell1" d="M102.03,80.01 L96.97,75.02 L91.38,70.78 L80.44,84.29 L84.25,87.09 L87.72,90.41 Z" fill="#F08A1C" fill-opacity="0.5"/>
 <path id="hornL-cell2" d="M91.38,70.78 L85.37,67.34 L79.04,64.75 L72.09,80.35 L76.36,82.03 L80.44,84.29 Z" fill="#B3202A" fill-opacity="0.4"/>

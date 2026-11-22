@@ -13,7 +13,7 @@ import glob, os
 fs = sorted(glob.glob("build/stills/*.ppm"))
 ims = [Image.open(f).resize((720, 720), Image.NEAREST) for f in fs]
 for f, im in zip(fs, ims): im.save(f[:-4] + ".png"); os.remove(f)
-sheet = Image.new("RGB", (720 * 3 + 40, 720 * 2 + 30), (24, 24, 24))
-for i, im in enumerate(ims): sheet.paste(im, (10 + (i % 3) * 730, 10 + (i // 3) * 730))
+sheet = Image.new("RGB", (720 * 4 + 50, 720 * 2 + 30), (24, 24, 24))
+for i, im in enumerate(ims): sheet.paste(im, (10 + (i % 4) * 730, 10 + (i // 4) * 730))
 sheet.save("build/stills/sheet.png"); print("build/stills/sheet.png")
 PY

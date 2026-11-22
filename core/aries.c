@@ -2,7 +2,7 @@
 #include "zodiac.h"
 #include "sign.h"
 #include "mathx.h"
-#include "art_aries.h"
+#include "pic_aries.h"
 
 enum { INK_GOLD, INK_RED, INK_AMBER, INK_BLUE };
 
@@ -144,69 +144,6 @@ static void mist(void)
     }
 }
 
-static void rot(f32 *xy, int n, f32 cx, f32 cy, f32 turns)
-{
-    f32 c = cos_turns(turns), s = sin_turns(turns);
-    for (int k = 0; k < n; k++) {
-        f32 x = xy[2 * k] - cx, y = xy[2 * k + 1] - cy;
-        xy[2 * k] = cx + x * c - y * s; xy[2 * k + 1] = cy + x * s + y * c;
-    }
-}
-static void squash(f32 *xy, int n, f32 y0, f32 by) { for (int k = 0; k < n; k++) xy[2 * k + 1] = y0 + (xy[2 * k + 1] - y0) * by; }
-static void drop(f32 *xy, int n, f32 d) { for (int k = 0; k < n; k++) xy[2 * k + 1] += d; }
-
-/* how the ram's parts move */
-static void ram_move(int g, f32 *xy, int n, f32 *gain, void *ctx)
-{
-    (void)ctx;
-    f32 heat = A.p.heat, roar = A.roar, breath = sin_turns(A.t * 0.13f);
-    f32 pant = heat * 0.10f * (0.5f + 0.5f * sin_turns(A.t * (0.35f + 0.5f * heat)));
-    f32 open = sat(roar + pant), d = 21.0f * open;                          /* how far the jaw hangs */
-    f32 glare = sat(0.35f + 0.5f * heat + roar);
-
-    switch (g) {
-    case ARIES_G_MAW:     for (int k = 0; k < n; k++) if (xy[2 * k + 1] > 182.0f) xy[2 * k + 1] += d;
-                          *gain = 0.7f + 0.5f * roar; break;
-    case ARIES_G_TONGUE:  drop(xy, n, d * 0.95f + 2.0f * roar * sin_turns(A.t * 5.0f)); break;
-    case ARIES_G_TEETHLO: squash(xy, n, 178.0f, 0.25f + 0.75f * sat(open * 3.0f)); drop(xy, n, d); break;
-    case ARIES_G_JAW:     drop(xy, n, d); break;
-    case ARIES_G_TEETHUP: squash(xy, n, 175.0f, sat(open * 3.0f)); break;
-    case ARIES_G_HORNL: case ARIES_G_HORNR: {
-        f32 hx = g == ARIES_G_HORNL ? 58.0f : 182.0f, sg = g == ARIES_G_HORNL ? 1.0f : -1.0f;
-        rot(xy, n, hx, 112.0f, sg * (0.004f * breath - 0.012f * roar));
-        if (n == 6) {                                                        /* a cell: light runs down the spiral */
-            f32 rx = xy[0] - hx, ry = xy[1] - 112.0f, r = sqrtf_(rx * rx + ry * ry);
-            f32 w = sin_turns(r * 0.022f + A.t * (0.25f + 0.5f * heat));
-            *gain = 0.62f + 0.42f * w * w + 0.6f * roar + 0.25f * heat;
-        }
-        break; }
-    case ARIES_G_EARL: case ARIES_G_EARR: {
-        f32 fl = noise1(A.t * 0.35f + (g == ARIES_G_EARL ? 0.0f : 9.0f), 21u);
-        fl = fl > 0.68f ? (fl - 0.68f) * 0.12f : 0.0f;
-        if (g == ARIES_G_EARL) rot(xy, n, 96.0f, 112.0f, fl + 0.003f * breath - 0.03f * roar);
-        else rot(xy, n, 144.0f, 112.0f, -fl - 0.003f * breath + 0.03f * roar);
-        break; }
-    case ARIES_G_EYEL: case ARIES_G_EYER:
-        squash(xy, n, 126.0f, (1.0f - 0.92f * A.blink) * (0.82f + 0.38f * roar - 0.12f * heat));
-        *gain = 0.50f + 0.60f * glare + 0.12f * sin_turns(A.t * 0.9f) * heat; break;
-    case ARIES_G_BROWL:   rot(xy, n, 116.0f, 126.0f, 0.012f * heat + 0.03f * roar); drop(xy, n, 0.8f * heat + 1.2f * roar); break;
-    case ARIES_G_BROWR:   rot(xy, n, 124.0f, 126.0f, -0.012f * heat - 0.03f * roar); drop(xy, n, 0.8f * heat + 1.2f * roar); break;
-    case ARIES_G_HEAD:    *gain = 0.85f + 0.25f * heat * noise1(A.t * 1.4f + xy[0] * 0.07f, 5u) + 0.35f * roar; break;
-    }
-
-    /* the whole head: sways, breathes, and comes at you when it roars, shaking */
-    f32 sc = 1.0f + 0.016f * breath + 0.10f * roar;
-    f32 sway = 0.006f * sin_turns(A.t * 0.045f) + 0.004f * (noise1(A.t * 0.5f, 31u) - 0.5f);
-    f32 shx = roar * 1.6f * (noise1(A.t * 23.0f, 41u) - 0.5f), shy = roar * 1.6f * (noise1(A.t * 27.0f, 43u) - 0.5f);
-    f32 c = cos_turns(sway), s = sin_turns(sway);
-    for (int k = 0; k < n; k++) {
-        f32 x = (xy[2 * k] - CX) * sc, y = (xy[2 * k + 1] - 150.0f) * sc;
-        f32 xr = x * c - y * s, yr = x * s + y * c;
-        xy[2 * k] = CX + xr + shx + heat * heat * 0.8f * sin_turns(yr * 0.021f - A.t * 0.8f);
-        xy[2 * k + 1] = 150.0f + yr + shy - 4.0f * roar;
-    }
-}
-
 void aries_frame(f32 dt, const ZParams *want)
 {
     f32 k = 1.0f - 1.0f / (1.0f + dt * 5.0f);
@@ -235,7 +172,9 @@ void aries_frame(f32 dt, const ZParams *want)
     if (A.p.echo > 0.02f) g_fade((int)(256.0f * (0.62f + 0.36f * A.p.echo))); else g_clear();
     fire();
     mist();
-    sign_draw(&aries_art, ram_move, 0);
+    /* the picture shimmers in the heat and swells with a roar */
+    g_blit(aries_pic, 1.0f + 0.008f * sin_turns(A.t * 0.13f) + 0.07f * A.roar, -400.0f,
+           0.3f + 1.6f * A.p.heat, 0.035f, A.t * (0.5f + 0.9f * A.p.heat), 0.92f + 0.3f * A.roar);
     embers(dt);
 }
 

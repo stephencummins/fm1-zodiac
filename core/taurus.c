@@ -3,7 +3,7 @@
  * its head. The bull is art/taurus.svg; the growth, the petals and the dust are drawn here. */
 #include "scene.h"
 #include "sign.h"
-#include "art_taurus.h"
+#include "pic_taurus.h"
 
 enum { K_LINE, K_UMBER, K_OCHRE, K_GREEN };
 
@@ -135,58 +135,6 @@ static void bits(f32 dt)
     }
 }
 
-static void bull_move(int g, f32 *xy, int n, f32 *gain, void *ctx)
-{
-    (void)ctx;
-    f32 t = T.s.t, temper = T.temper, breath = sin_turns(t * 0.085f);
-
-    switch (g) {
-    case TAURUS_G_EARL: case TAURUS_G_EARR: {
-        f32 fl = noise1(t * 0.30f + (g == TAURUS_G_EARL ? 0.0f : 9.0f), 21u);
-        fl = fl > 0.66f ? (fl - 0.66f) * 0.16f : 0.0f;
-        if (g == TAURUS_G_EARL) sc_rot(xy, n, 87.0f, 112.0f, fl - 0.025f * temper);
-        else sc_rot(xy, n, 153.0f, 112.0f, -fl + 0.025f * temper);
-        break; }
-    case TAURUS_G_JAW:                                                       /* it chews, round and round, sideways */
-        sc_shift(xy, n, 2.4f * T.chewing * sin_turns(T.chew), (1.6f + 1.6f * cos_turns(T.chew)) * T.chewing);
-        break;
-    case TAURUS_G_NOSEL: case TAURUS_G_NOSER:
-        for (int k = 0; k < n; k++) {
-            f32 cx = g == TAURUS_G_NOSEL ? 111.8f : 128.2f;
-            xy[2 * k] = cx + (xy[2 * k] - cx) * (1.0f + 0.9f * T.flare); xy[2 * k + 1] = 185.6f + (xy[2 * k + 1] - 185.6f) * (1.0f + 1.3f * T.flare);
-        }
-        break;
-    case TAURUS_G_EYEL: case TAURUS_G_EYER:
-        *gain = 0.85f + 0.40f * temper; break;
-    case TAURUS_G_LIDL: case TAURUS_G_LIDR: {                                /* heavy lids: they lift as its temper does */
-        f32 s = maxf(0.12f, 0.42f + 0.14f * sin_turns(t * 0.021f) - 0.75f * temper);
-        sc_squash(xy, n, 118.0f, s + (3.3f - s) * T.s.blink);
-        break; }
-    case TAURUS_G_RING:
-        sc_rot(xy, n, CX, 186.0f, 0.010f * sin_turns(t * 0.23f) + T.swing * sin_turns(t * 1.7f));
-        break;
-    case TAURUS_G_HORNL: case TAURUS_G_HORNR:
-        if (n == 6) {
-            f32 w = sin_turns((xy[1] - 30.0f) * 0.010f - t * 0.10f);
-            *gain = 0.70f + 0.35f * w * w + 0.5f * temper;
-        }
-        break;
-    case TAURUS_G_HEAD: *gain = 0.90f + 0.30f * temper; break;
-    }
-
-    /* the whole head: heavy breathing, a slow nod; a stamp jolts it; angry, it comes down and close */
-    f32 sc = 1.0f + 0.022f * breath + 0.07f * temper * temper;
-    f32 sway = 0.004f * sin_turns(t * 0.031f);
-    f32 c = cos_turns(sway), s = sin_turns(sway);
-    f32 dy = 5.0f * T.stamp + 7.0f * temper * temper + 1.2f * sin_turns(t * 0.085f + 0.2f);
-    T.hy = dy;
-    f32 shx = T.stamp * 1.5f * (noise1(t * 25.0f, 41u) - 0.5f);
-    for (int k = 0; k < n; k++) {
-        f32 x = (xy[2 * k] - CX) * sc, y = (xy[2 * k + 1] - 140.0f) * sc;
-        xy[2 * k] = CX + x * c - y * s + shx; xy[2 * k + 1] = 140.0f + x * s + y * c + dy;
-    }
-}
-
 void taurus_frame(f32 dt, const ZParams *want)
 {
     sc_step(&T.s, dt, want);
@@ -208,12 +156,9 @@ void taurus_frame(f32 dt, const ZParams *want)
 
     sc_begin(&T.s);
     growth();
-    f32 beat = 1.0f + 0.010f * sin_turns(T.s.t * 0.085f) + 0.03f * T.stamp;
-    sc_frame_back(beat, K_OCHRE, 0.16f + 0.22f * T.s.p.heat);
-    g_ink(K_UMBER); g_glow(CX, 196.0f, 50.0f, 0.30f + 0.4f * T.temper);
-    sc_frame_line(beat, 0.08f + 0.2f * T.temper);
     sc_mist(&T.s, K_GREEN);
-    sign_draw(&taurus_art, bull_move, 0);
+    /* the picture hardly moves: a slow breath, and a jolt when it stamps */
+    g_blit(taurus_pic, 1.06f + 0.008f * sin_turns(T.s.t * 0.085f) + 0.035f * T.stamp, -400.0f, 0.0f, 0.0f, 0.0f, 0.95f + 0.2f * T.stamp);
     bits(dt);
 }
 

@@ -1,537 +1,294 @@
-/* SPDX-License-Identifier: MPL-2.0
- * Copyright (C) 2026 Charles Vestal */
-/* The template app: every control on the screen as it arrives, by the name the app knows it by (plat.h B_*, EN_*,
- * the keys), and a few of them doing something: the keys play a voice and go out over USB-MIDI (MIDI in plays it
- * too), OCT- / OCT+ set the octave, PRESET the wave, MASTER the volume, SAVE stores the settings; the keys are
- * played with velocity and pressure (lib/touch.h), shown on them. One of each thing the platform offers, kept short. Part of the unity build (device/unity.c, host/plat_host.c), after the platform:
- * gfx.c and announce.c are in scope. */
-#include "fastmath.h"
+/* SPDX-License-Identifier: MPL-2.0 */
+/* Zodiac on the FM-1: twelve signs, each a picture and a piece of music that plays itself (the core, ../core).
+ * PRESET (or SELECT) steps through the signs; any key, and any MIDI note, strikes; K1 .. K4 are the sign's own
+ * knob, echo, mist and light; a MIDI program change 0 .. 11 chooses a sign; SAVE keeps the sign and the knobs.
+ * Nothing is written on the picture: a screen reader is told the names.
+ * Part of the unity build, after the platform. Begun from fm1-base's template, Copyright (C) 2026 Charles Vestal.
+ *
+ * Two things run at once: the audio interrupt (app_render: the music) and the main loop (app_frame: the picture).
+ * Each owns its half. They meet only in single numbers: `want` (the sign asked for; each side moves to it in its
+ * own time) and counters that one side adds to and the other only reads. */
+#include "zodiac.h"
+#include "music.h"
 
-#define SET_MAGIC 0x54504C31u            /* "TPL1": the settings record; another magic loads defaults */
+#define SET_MAGIC 0x5A4F4431u            /* "ZOD1" */
+#define P_MAX 200                        /* a knob's range in the settings; one detent is P_STEP */
+#define P_STEP 4
 typedef struct {
     uint32_t magic;
-    int8_t octave;                       /* -2 .. +2 */
-    uint8_t wave;                        /* 0 sine, 1 triangle */
-    uint8_t ble_off;                     /* Bluetooth switched off (REC held); 0, the default: on */
-    uint8_t rsv[1];
+    uint8_t sign;                        /* 0 Aries .. 11 Pisces */
+    uint8_t p[4];                        /* heat (the sign's own knob), echo, mist, light: 0 .. P_MAX */
+    uint8_t rsv[3];
 } settings_t;
 static settings_t set;
-static uint8_t set_dirty;                /* changed since the last save: SAVE is lit */
+static uint8_t set_dirty;
 
-static const char *const WAVE_NAME[] = {"SINE", "TRIANGLE"};
-/* the controls by their names in plat.h, in its order */
-static const char *const BTN_NAME[NB] = {"FX", "SEL", "ENV", "LFO", "EDIT", "GLO", "HOME", "SAVE", "ARP", "SEQ",
-                                         "PLAY", "REC", "OCT-", "OCT+"};
-static const char *const ENC_NAME[NE] = {"SELECT", "ALGO", "PRESET", "K1", "K2", "K3", "K4"};
+static volatile int32_t want;            /* the sign asked for: the encoder (main loop) or a program change (interrupt) */
+static volatile uint32_t key_strikes;    /* keys pressed: the main loop adds, the interrupt plays them */
+static volatile uint32_t pic_strikes;    /* strikes for the picture: the interrupt adds (the music's, MIDI's) */
+static volatile uint8_t silent;          /* app_panic */
+static volatile ZParams P = {0.45f, 0.0f, 0.15f, 0.7f};   /* the knobs as the core reads them */
 
-/* ------------------------------------------------------------------ voice --- */
-/* one voice, the last note wins; the main loop and MIDI in set it, the audio interrupt plays it */
-static volatile int32_t voice_note = -1;     /* MIDI note, -1 = released */
-static volatile float voice_vel = 1.0f;      /* the note's velocity, 0..1 */
-static float voice_phase, voice_level, gain_now;   /* gain_now glides to MASTER: no step at a block's edge */
+/* ------------------------------------------------------------------ music --- */
+static const ZMusic *Mu;                 /* the interrupt's: the piece playing */
+static int32_t mu_sign = -1;
+static uint32_t keys_done;
+static float mbuf[2u * APP_BLOCK], gain_now;
 
-static void note_on(int32_t note, uint32_t vel)
-{
-    voice_vel = (float)vel / 127.0f;
-    voice_note = note;
-}
-static void note_off(int32_t note)
-{
-    if (voice_note == note)
-        voice_note = -1;
-}
-
-static volatile uint32_t midi_last, midi_last_port, midi_count;   /* the last message in (shown), and how many */
-static void midi_in(void)                    /* audio interrupt: the packets that came in */
+static void midi_in(void)
 {
     uint32_t pkt;
     int port;
     while (plat_midi_in(&pkt, &port)) {
-        uint32_t st = (pkt >> 8) & 0xFFu, d1 = (pkt >> 16) & 0x7Fu, d2 = pkt >> 24;
-        if (st != 0xF8u && st != 0xFEu) {    /* (clock and active sensing would flood the screen) */
-            midi_last = pkt;
-            midi_last_port = (uint32_t)port;
-            midi_count++;
+        uint32_t st = (pkt >> 8) & 0xF0u, d1 = (pkt >> 16) & 0x7Fu, d2 = pkt >> 24;
+        if (st == 0x90u && d2) {
+            if (Mu)
+                Mu->strike();
+            else
+                pic_strikes++;
+        } else if (st == 0xC0u && d1 < (uint32_t)z_nsigns) {
+            want = (int32_t)d1;
         }
-        if ((st & 0xF0u) == 0x90u && d2)
-            note_on((int32_t)d1, d2);
-        else if ((st & 0xF0u) == 0x80u || (st & 0xF0u) == 0x90u)
-            note_off((int32_t)d1);
     }
 }
 
 void app_render(int32_t *lr, uint32_t n, uint32_t master_q12)
 {
     uint32_t i;
-    int32_t note = voice_note;
-    float target = note >= 0 ? 0.25f * voice_vel : 0.0f;
-    float inc = note >= 0 ? 440.0f * fm_exp2f((float)(note - 69) / 12.0f) / 44100.0f : 0.0f;
-    float gain = (float)master_q12 / 4096.0f * 8300000.0f;   /* MASTER, read once a block */
+    int32_t w = want;
+    float gain = (float)master_q12 / 4096.0f * 8300000.0f;
+    ZParams p = P;
     midi_in();
-    for (i = 0; i < n; i++) {
+    if (w != mu_sign) {                  /* another sign: its piece from the start, no two playings alike */
+        mu_sign = w;
+        Mu = z_music(w);
+        z_led = Mu != 0;
+        if (Mu) {
+            z_music_seed(((plat_ms() ^ master_q12 << 20) * 2654435761u) | 1u);
+            z_music_start(Mu, 44100.0f);
+        }
+        (void)z_music_event();
+    }
+    while (keys_done != key_strikes) {
+        keys_done++;
+        if (Mu)
+            Mu->strike();
+        else
+            pic_strikes++;
+    }
+    if (n > APP_BLOCK)
+        n = APP_BLOCK;
+    if (Mu && !silent) {
+        z_music_render(Mu, mbuf, (int)n, &p);
+        pic_strikes += (uint32_t)z_music_event();    /* the music leads, the picture follows */
+    } else {
+        for (i = 0; i < 2u * n; i++)
+            mbuf[i] = 0.0f;
+    }
+    for (i = 0; i < 2u * n; i++) {
         float s;
-        voice_level += (target - voice_level) * 0.002f;          /* ~10 ms attack and release */
-        gain_now += (gain - gain_now) * 0.004f;                  /* ~5 ms: turning MASTER does not click */
-        voice_phase += inc;
-        if (voice_phase >= 1.0f)
-            voice_phase -= 1.0f;
-        s = set.wave ? 4.0f * fm_fabsf(voice_phase - 0.5f) - 1.0f : fm_sinf(voice_phase * 6.2831853f);
-        s *= voice_level * gain_now;
-        lr[2 * i] = (int32_t)s;
-        lr[2 * i + 1] = (int32_t)s;
+        if (!(i & 1u))
+            gain_now += (gain - gain_now) * 0.004f;      /* turning MASTER does not click */
+        s = mbuf[i] * gain_now;
+        lr[i] = s > 8388607.0f ? 8388607 : s < -8388607.0f ? -8388607 : (int32_t)s;
     }
 }
 
-void app_panic(void)
-{
-    voice_note = -1;
-    voice_level = 0.0f;
-}
+void app_panic(void) { silent = 1; }
 
 /* --------------------------------------------------------------- settings --- */
-static void settings_defaults(void)
+static void params_set(void)
 {
-    set.magic = SET_MAGIC;
-    set.octave = 0;
-    set.wave = 0;
-    set.ble_off = 0;
+    ZParams p;
+    p.heat = (float)set.p[0] / (float)P_MAX;
+    p.echo = (float)set.p[1] / (float)P_MAX;
+    p.mist = (float)set.p[2] / (float)P_MAX;
+    p.light = (float)set.p[3] / (float)P_MAX;
+    P = p;
 }
 
-static void settings_load(void)          /* the saved settings, or the defaults when there are none or they are wrong */
+static void settings_load(void)
 {
     if (plat_store_load(OBJ_SETTINGS, &set, sizeof set) != (int)sizeof set || set.magic != SET_MAGIC
-        || set.octave < -2 || set.octave > 2 || set.wave > 1u || set.ble_off > 1u)
-        settings_defaults();
+        || set.sign >= (uint32_t)z_nsigns || set.p[0] > P_MAX || set.p[1] > P_MAX || set.p[2] > P_MAX
+        || set.p[3] > P_MAX) {
+        set.magic = SET_MAGIC;
+        set.sign = 0;
+        set.p[0] = 90;                   /* 0.45, 0, 0.15, 0.7: where the pieces were written and heard */
+        set.p[1] = 0;
+        set.p[2] = 30;
+        set.p[3] = 140;
+    }
+    params_set();
+    want = set.sign;
 }
 
 void app_init(void) { settings_load(); }
 
 /* --------------------------------------------------------------------- UI --- */
-static struct {
-    char msg[2][24];                     /* a short message over the header */
-    uint32_t msg_until;
-    uint32_t keys, btn;                  /* held at the last input */
-    uint8_t vel[NKEYS], prs[NKEYS];      /* each key's last velocity, and its pressure while held */
-    int32_t last_key;                    /* the key pressed last: its numbers in the header */
-    uint8_t looking;                     /* Bluetooth MIDI devices: REC pressed, the scan's list up (lib/btdev) */
-    uint32_t rec_t;                      /* REC went down (0: not held, or its hold already acted) */
-    int32_t turns[NE];                   /* detents since boot, per encoder */
-    uint32_t turned_at[NE];              /* when each was last turned: it shows lit for a moment */
-    uint8_t redraw;
-} ui;
+static const ZSign *Z;                   /* the main loop's: the picture showing */
+static int32_t pic_sign = -1;
+static uint32_t pic_done, last_ms, strikes_seen;
+static uint32_t was_keys, was_btn;         /* (not held_keys / held_btn: the host simulator has those, and C would merge them) */
+#define STRIP 24u                        /* the picture goes to the screen in strips of this many lines */
+static uint16_t strip[240u * STRIP] PLAT_POOL;
 
-static void text_cat(char *d, const char *s)
+static void text_cat(char *d, const char *s, uint32_t room)
 {
-    while (*d)
-        d++;
-    while (*s)
-        *d++ = *s++;
-    *d = 0;
-}
-
-static void int_text(int32_t v, char *b)     /* signed, no padding */
-{
-    char t[12];
-    int n = 0;
-    uint32_t u = (uint32_t)(v < 0 ? -v : v);
-    do
-        t[n++] = (char)('0' + u % 10u);
-    while ((u /= 10u) && n < 11);
-    if (v < 0)
-        *b++ = '-';
-    while (n)
-        *b++ = t[--n];
-    *b = 0;
+    uint32_t n = 0;
+    while (d[n])
+        n++;
+    while (*s && n + 1u < room) {
+        char c = *s++;
+        d[n++] = (char)(c >= 'a' && c <= 'z' ? c - 32 : c);
+    }
+    d[n] = 0;
 }
 
 void app_say(const char *a, const char *b)
 {
-    uint32_t i;
     char t[48];
-    for (i = 0; i < 23u && a && a[i]; i++)
-        ui.msg[0][i] = a[i];
-    ui.msg[0][i] = 0;
-    for (i = 0; i < 23u && b && b[i]; i++)
-        ui.msg[1][i] = b[i];
-    ui.msg[1][i] = 0;
-    ui.msg_until = plat_ms() + 1300u;
-    ui.redraw = 1;
-    if (ann_on()) {                          /* and to a screen reader (announce.c, fm1-reader) */
-        t[0] = 0;
-        text_cat(t, ui.msg[0]);
-        if (ui.msg[1][0]) {
-            text_cat(t, " ");
-            text_cat(t, ui.msg[1]);
-        }
-        ann_say(t, 0, ANN_NOW);
+    if (!ann_on())
+        return;
+    t[0] = 0;
+    text_cat(t, a ? a : "", sizeof t);
+    if (b && b[0]) {
+        text_cat(t, " ", sizeof t);
+        text_cat(t, b, sizeof t);
     }
+    ann_say(t, 0, ANN_NOW);
 }
 
-static void octave_text(char *t)
+static void speak(void)                  /* a screen reader that has just started listening hears where it is */
 {
-    t[0] = set.octave < 0 ? '-' : '+';
-    t[1] = (char)('0' + (set.octave < 0 ? -set.octave : set.octave));
-    t[2] = 0;
-}
-
-/* a screen reader that has just started listening (or asks) hears the whole screen */
-static void speak(void)
-{
-    char t[96], o[4];
-    if (ann_on() && ann_where()) {
-        octave_text(o);
+    char t[48];
+    if (ann_on() && ann_where() && Z) {
         t[0] = 0;
-        text_cat(t, APP_NAME ". OCTAVE ");
-        text_cat(t, o);
-        text_cat(t, ". WAVE ");
-        text_cat(t, WAVE_NAME[set.wave]);
-        if (midi_count) {                    /* the last MIDI message in, as the screen shows it */
-            static const char *const PORT[NPORTS] = {"USB", "BLE", "TRS"};
-            static const char HEX[] = "0123456789ABCDEF";
-            uint32_t m = midi_last, b;
-            char h[10];
-            for (b = 0; b < 3u; b++) {
-                uint32_t v = (m >> (8u + 8u * b)) & 0xFFu;
-                h[3 * b] = HEX[v >> 4];
-                h[3 * b + 1] = HEX[v & 15u];
-                h[3 * b + 2] = b < 2u ? ' ' : 0;
-            }
-            text_cat(t, ". MIDI IN ");
-            text_cat(t, midi_last_port < NPORTS ? PORT[midi_last_port] : "");
-            text_cat(t, " ");
-            text_cat(t, h);
-        }
+        text_cat(t, APP_NAME ". ", sizeof t);
+        text_cat(t, Z->name, sizeof t);
         ann_say(t, 0, ANN_NOW);
     }
     ann_tick(plat_ms());
 }
 
-static void note_name(int32_t note, char *b)
+static void sign_show(void)              /* the picture moves to the sign asked for */
 {
-    static const char *const N[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-    char o[12];
-    b[0] = 0;
-    text_cat(b, N[note % 12]);
-    int_text(note / 12 - 1, o);
-    text_cat(b, o);
-}
-
-static void octave_step(int32_t d)
-{
-    int32_t o = clamp(set.octave + d, -2, 2);
-    char t[4];
-    if (o == set.octave)
+    int32_t w = want;
+    if (w == pic_sign)
         return;
-    voice_note = -1;                         /* a key held across the change would not find its note off */
-    set.octave = (int8_t)o;
-    set_dirty = 1;
-    octave_text(t);
-    app_say("OCTAVE", t);
-}
-
-int template_ble_off(void) { return set.ble_off; }
-
-/* REC held a second: Bluetooth off or on (kept with the settings, so it stays so at the next power-on) */
-static void ble_toggle(void)
-{
-    set.ble_off = (uint8_t)!set.ble_off;
-    set_dirty = 1;
-    plat_ble_enable(!set.ble_off);
-    app_say("BLUETOOTH", set.ble_off ? "OFF" : "ON");
-}
-
-/* REC: a Bluetooth MIDI device (FM1B_BLE_CENTRAL, lib/btdev): look for devices, then connect to the one ALGORITHM
- * picks, then let it go */
-static void ble_device_say(void)
-{
-    char name[21];
-    if (btdev_found(btdev_pick(), name, 0))
-        app_say("DEVICE", name);
-    else
-        app_say("BLE", "SCANNING");
-}
-static void ble_device_button(void)
-{
-    int ev;
-    if (!btdev_busy() && !ui.looking) {
-        ui.looking = 1;
-        app_say("BLE", "SCANNING");
-        return;
+    pic_sign = w;
+    Z = &z_signs[w];
+    g_clear();
+    Z->init();
+    pic_done = pic_strikes;              /* strikes meant for the last picture are let go */
+    if (set.sign != (uint8_t)w) {
+        set.sign = (uint8_t)w;
+        set_dirty = 1;
     }
-    ev = btdev_save();
-    ui.looking = 0;
-    app_say(ev == BTDEV_CONNECTING ? btdev_word(ev) : "BLE", ev == BTDEV_CONNECTING ? btdev_name() : btdev_word(ev));
+    app_say(Z->name, "");
 }
 
 static void input(void)
 {
-    uint32_t keys, btn = plat_buttons(), k;
+    static const char *const KNOB[4] = {0, "ECHO", "MIST", "LIGHT"};
+    uint32_t keys = plat_keys(), btn = plat_buttons(), k;
     int32_t e;
-    touch_poll();                            /* the sensed keys' presses, velocities and pressure */
-    keys = touch_keys();
-    for (k = 0; k < NKEYS; k++) {            /* key 0 is F3 (MIDI 53) */
-        uint32_t bit = 1u << k, v;
-        int32_t note = 53 + (int32_t)k + 12 * set.octave;
-        if ((keys & bit) && !(ui.keys & bit)) {
-            v = touch_vel(k);
-            ui.vel[k] = (uint8_t)v;
-            ui.prs[k] = 0;
-            ui.last_key = (int32_t)k;
-            note_on(note, v);
-            plat_midi_send(0x09u | 0x90u << 8 | (uint32_t)note << 16 | v << 24, TO_USB | TO_BLE);   /* BLE: if built with it */
-        } else if (!(keys & bit) && (ui.keys & bit)) {
-            ui.prs[k] = 0;
-            note_off(note);
-            plat_midi_send(0x08u | 0x80u << 8 | (uint32_t)note << 16, TO_USB | TO_BLE);
-        } else if ((keys & bit) && touch_pressure(k) != ui.prs[k]) {   /* pressure: poly aftertouch */
-            ui.prs[k] = touch_pressure(k);
-            ui.redraw = 1;
-            plat_midi_send(0x0Au | 0xA0u << 8 | (uint32_t)note << 16 | (uint32_t)ui.prs[k] << 24, TO_USB | TO_BLE);
-        }
-    }
-    for (k = 0; k < NB; k++) {               /* a button pressed: its name, and what it does here */
-        uint32_t bit = 1u << k;
-        if (!(btn & bit) || (ui.btn & bit))
-            continue;
-        if (k == B_OCTDN)
-            octave_step(-1);
-        else if (k == B_OCTUP)
-            octave_step(1);
-        else if (k == B_REC && FM1B_BLE)
-            ui.rec_t = plat_ms();                /* a press: on release (a hold switches Bluetooth) */
-        else if (k == B_SAVE) {
-            if (plat_store_save(OBJ_SETTINGS, &set, sizeof set) == 0) {
-                set_dirty = 0;
-                app_say("SAVED", "");
-            } else {
-                app_say("SAVE", "FAILED");
-            }
+    if (keys & ~was_keys)               /* a key down: a strike (several at once are one) */
+        key_strikes++;
+    if ((btn & ~was_btn) >> B_SAVE & 1u) {
+        if (plat_store_save(OBJ_SETTINGS, &set, sizeof set) == 0) {
+            set_dirty = 0;
+            app_say("SAVED", "");
         } else {
-            app_say("BUTTON", BTN_NAME[k]);
+            app_say("SAVE", "FAILED");
         }
     }
-    if (FM1B_BLE && ui.rec_t) {             /* REC: held a second, Bluetooth on / off; a press, a device */
-        if (btn >> B_REC & 1u) {
-            if (plat_ms() - ui.rec_t >= 1000u) {
-                ui.rec_t = 0;
-                ble_toggle();
-            }
-        } else {
-            ui.rec_t = 0;
-            if (FM1B_BLE_CENTRAL && !set.ble_off)
-                ble_device_button();
-            else
-                app_say("BUTTON", "REC");
-        }
+    e = plat_enc(EN_PRESET) + plat_enc(EN_SELECT);
+    if (e) {
+        int32_t s = (want + e) % z_nsigns;
+        want = s < 0 ? s + z_nsigns : s;
     }
-    for (k = 0; k < NE; k++) {               /* an encoder turned: its count; PRESET also changes the wave */
-        char t[12];
-        if ((e = plat_enc((int)k)) == 0)
+    for (k = 0; k < 4u; k++) {
+        int32_t v;
+        if ((e = plat_enc((int)(EN_K1 + k))) == 0)
             continue;
-        ui.turns[k] += e;
-        ui.turned_at[k] = plat_ms();
-        ui.redraw = 1;
-        if (k == EN_ALGO && FM1B_BLE_CENTRAL && ui.looking) {
-            btdev_choose(btdev_pick() + e);
-            ble_device_say();
-        } else if (k == EN_PRESET) {
-            set.wave ^= 1u;
+        v = clamp((int32_t)set.p[k] + e * P_STEP, 0, P_MAX);
+        if (v != set.p[k]) {
+            set.p[k] = (uint8_t)v;
             set_dirty = 1;
-            app_say("WAVE", WAVE_NAME[set.wave]);
-        } else {
-            int_text(ui.turns[k], t);
-            app_say(ENC_NAME[k], t);
+            params_set();
         }
+        app_say(k ? KNOB[k] : Z ? Z->knob : "", "");
     }
-    if (keys != ui.keys || btn != ui.btn)
-        ui.redraw = 1;
-    ui.keys = keys;
-    ui.btn = btn;
-    plat_glow(1);                            /* the unlit buttons glow, readable in the dark */
-    plat_leds(btn | (set_dirty ? 1u << B_SAVE : 0u), keys);
+    was_keys = keys;
+    was_btn = btn;
+    plat_glow(1);
+    plat_leds(set_dirty ? 1u << B_SAVE : 0u, keys);
 }
 
 void app_input_only(void) { input(); }
 
-static void cell(int32_t x, int32_t y, int32_t w, const char *s, int on)   /* a labelled box, lit when on */
+static void draw(void)                   /* g_fb through this frame's colours to the screen */
 {
-    cv_rect(x, y, w, 18, on ? C_HI : C_LINE);
-    cv_text(x + (w - text_w(&FONT_XS, s)) / 2, y + 2, &FONT_XS, s, on ? C_BLACK : C_GRAY);
-}
-
-static void key_cell(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t k, uint16_t off)
-{
-    int32_t v, p;
-    cv_rect(x, y, w, h, off);
-    if (!(ui.keys >> k & 1u))
-        return;
-    v = (ui.vel[k] * h + 126) / 127;
-    p = (ui.prs[k] * h + 126) / 127;
-    cv_rect(x, y + h - v, w, v, C_HI);
-    if (p)
-        cv_rect(x + 2, y + h - p, w - 4, p, C_WHITE);
-}
-
-static void draw(void)
-{
-    char t[24];
-    int32_t note = voice_note;
-    uint32_t i, now = plat_ms(), pct = plat_master() * 100u / 4096u;
-    static const uint8_t WK[16] = PLAT_WHITE_KEYS, BK[11] = PLAT_BLACK_KEYS;
-    /* the header: the name and the note, or a message for a moment */
-    cv_begin(240, 32, C_BLACK);
-    if (now < ui.msg_until) {
-        int32_t x = cv_text(10, 6, &FONT_B, ui.msg[0], C_WHITE);
-        cv_text(x + 8, 6, &FONT_B, ui.msg[1], C_HI);
-    } else {
-        int32_t x = cv_text(10, 6, &FONT_B, APP_NAME, C_WHITE);
-        if (FM1B_BLE)                        /* Bluetooth: grey while it waits, lit while a computer is connected */
-            x = cv_text(x + 8, 10, &FONT_XS, "BLE", plat_ble_connected() ? C_HI : C_DIM);
-        if (FM1B_BLE_CENTRAL)                /* a Bluetooth MIDI device: lit while connected */
-            cv_text(x + 6, 10, &FONT_XS, "DEV", plat_ble_device() == BLE_DEV_READY ? C_HI : C_DIM);
-        if (note >= 0) {                     /* the note, and the last key's velocity and pressure */
-            int32_t x;
-            note_name(note, t);
-            x = 230 - text_w(&FONT_B, t);
-            cv_text(x, 6, &FONT_B, t, C_HI);
-            if (ui.keys >> ui.last_key & 1u) {
-                char n[24] = "V ";
-                int_text(ui.vel[ui.last_key], t);
-                text_cat(n, t);
-                text_cat(n, "  P ");
-                int_text(ui.prs[ui.last_key], t);
-                text_cat(n, t);
-                cv_text(x - 12 - text_w(&FONT_XS, n), 10, &FONT_XS, n, C_GRAY);
-            }
-        }
+    static uint16_t pal[256];
+    uint32_t y, i;
+    Z->palette(pal);
+    for (i = 0; i < 256u; i++)
+        pal[i] = (uint16_t)(pal[i] >> 8 | pal[i] << 8);      /* the screen's byte order */
+    for (y = 0; y < 240u; y += STRIP) {
+        const uint8_t *src = g_fb + y * 240u;
+        lcd_sync();                      /* the last strip may still be on its way */
+        for (i = 0; i < 240u * STRIP; i++)
+            strip[i] = pal[src[i]];
+        lcd_blit(0, y, 240, STRIP, strip);
     }
-    cv_blit(0, 0);
-    /* the buttons, 4 to a row, lit while held; the encoders and their counts, lit for a moment after a turn */
-    cv_begin(240, 144, C_BLACK);
-    for (i = 0; i < NB; i++)
-        cell(4 + (int32_t)(i % 4u) * 58, (int32_t)(i / 4u) * 21, 56, BTN_NAME[i], (ui.btn >> i) & 1u);
-    for (i = 0; i < NE; i++) {
-        int32_t x = 4 + (int32_t)(i % 4u) * 58, y = 88 + (int32_t)(i / 4u) * 28;
-        int lit = ui.turned_at[i] && now - ui.turned_at[i] < 300u;
-        cv_text(x, y, &FONT_XS, ENC_NAME[i], lit ? C_HI : C_GRAY);
-        int_text(ui.turns[i], t);
-        cv_text(x, y + 13, &FONT_XS, t, lit ? C_WHITE : C_DIM);
-    }
-    cv_blit(0, 36);
-    /* the keys, black above white: a held key fills to its velocity (amber), its pressure over that (white) */
-    cv_begin(240, 60, C_BLACK);
-    for (i = 0; i < 16u; i++)
-        key_cell(4 + (int32_t)i * 14, 14, 13, 14, WK[i], C_DIM);
-    for (i = 0; i < 11u; i++) {
-        static const uint8_t AT[11] = {0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14};   /* the white key each one follows */
-        key_cell(4 + (int32_t)AT[i] * 14 + 8, 0, 11, 12, BK[i], C_LINE);
-    }
-    octave_text(t);
-    cv_text(4, 36, &FONT_XS, "OCT", C_GRAY);
-    cv_text(30, 36, &FONT_XS, t, C_HI);
-    cv_text(64, 36, &FONT_XS, "PRESET", C_GRAY);
-    cv_text(112, 36, &FONT_XS, WAVE_NAME[set.wave], C_HI);
-    if (midi_count) {                        /* the last MIDI message in, and where from */
-        static const char *const PORT[NPORTS] = {"USB", "BLE", "TRS"};
-        static const char HEX[] = "0123456789ABCDEF";
-        uint32_t m = midi_last, b;
-        char h[12];
-        for (b = 0; b < 3u; b++) {
-            uint32_t v = (m >> (8u + 8u * b)) & 0xFFu;
-            h[3 * b] = HEX[v >> 4];
-            h[3 * b + 1] = HEX[v & 15u];
-            h[3 * b + 2] = b < 2u ? ' ' : 0;
-        }
-        cv_text(4, 48, &FONT_XS, "MIDI IN", C_GRAY);
-        cv_text(52, 48, &FONT_XS, midi_last_port < NPORTS ? PORT[midi_last_port] : "", C_HI);
-        cv_text(82, 48, &FONT_XS, h, C_WHITE);
-    }
-    cv_text(178, 36, &FONT_XS, "VOL", C_GRAY);
-    int_text((int32_t)pct, t);
-    text_cat(t, "%");
-    cv_text(204, 36, &FONT_XS, t, C_HI);
-    cv_blit(0, 180);
 }
 
 void app_ui_init(void)
 {
-    touch_on(1);                             /* velocity and pressure: the keys' readings on */
-    lcd_fill(0, 0, 240, 240, C_BLACK);
-    ui.redraw = 1;
+    lcd_fill(0, 0, 240, 240, 0);
+    last_ms = plat_ms();
+    sign_show();
 }
 
 void app_frame(void)
 {
-    static uint32_t last_pct, lit_until, last_ble, last_midi;
-    uint32_t i, now = plat_ms(), pct = plat_master() * 100u / 4096u;
+    uint32_t now = plat_ms(), s;
+    float dt = (float)(now - last_ms) * 0.001f;
+    ZParams p = P;
+    last_ms = now;
+    if (dt > 0.1f)
+        dt = 0.1f;
     input();
+    sign_show();
     speak();
-    for (i = 0; i < NE; i++)                 /* an encoder's light goes out */
-        if (ui.turned_at[i] && now - ui.turned_at[i] < 400u && now > lit_until)
-            lit_until = ui.turned_at[i] + 300u;
-    if (lit_until && now >= lit_until) {
-        lit_until = 0;
-        ui.redraw = 1;
+    for (s = pic_strikes; pic_done != s; pic_done++) {
+        Z->strike();
+        strikes_seen++;
     }
-    if (FM1B_BLE_CENTRAL) {                  /* looking: a device found is named at once (REC connects to it) */
-        static int found;
-        int n = ui.looking ? btdev_count() : 0, ev;
-        btdev_page(ui.looking && !set.ble_off);
-        if (n > found && btdev_pick() < n)
-            ble_device_say();
-        found = n;
-        while ((ev = btdev_event()) != BTDEV_NONE)   /* a device connected, given up or lost */
-            if (ev == BTDEV_CONNECTED || ev == BTDEV_NO_ANSWER || ev == BTDEV_LOST)
-                app_say("DEVICE", btdev_word(ev));
-    }
-    if (midi_count != last_midi) {
-        last_midi = midi_count;
-        ui.redraw = 1;
-    }
-    if (pct != last_pct || (uint32_t)(plat_ble_connected() | plat_ble_device() << 1) != last_ble ||
-        (ui.msg_until && now >= ui.msg_until)) {
-        last_pct = pct;
-        last_ble = (uint32_t)(plat_ble_connected() | plat_ble_device() << 1);
-        if (now >= ui.msg_until)
-            ui.msg_until = 0;
-        ui.redraw = 1;
-    }
-    if (ui.redraw) {
-        ui.redraw = 0;
-        draw();
-    }
-}
-
-/* ------------------------------------------------------------ companion --- */
-/* the computer's side (fm1.toml companion = true: docs/COMPANION.md): the saved settings are a file a page can
- * download and send back (app.h APP_FILE_OBJS); the platform checks a file whole before it saves it */
-int app_file_busy(void) { return 0; }   /* (nothing plays on its own here: a file may come at any time) */
-void app_file_changed(uint32_t obj)      /* the computer replaced the settings: use them */
-{
-    if (obj != OBJ_SETTINGS)
-        return;
-    settings_load();
-    set_dirty = 0;
-    ui.redraw = 1;
+    Z->frame(dt, &p);
+    draw();
 }
 
 #ifdef PLAT_HOST
 int app_expect(const char *what, int *got)
 {
-    if (!strcmp(what, "octave"))
-        *got = set.octave;
-    else if (!strcmp(what, "wave"))
-        *got = set.wave;
-    else if (!strcmp(what, "note"))
-        *got = voice_note;
+    if (!strcmp(what, "sign"))
+        *got = pic_sign;
+    else if (!strcmp(what, "playing"))   /* the piece the interrupt is on */
+        *got = mu_sign;
     else if (!strcmp(what, "dirty"))
         *got = set_dirty;
-    else if (!strcmp(what, "vel"))           /* the last key's velocity and pressure */
-        *got = ui.vel[ui.last_key];
-    else if (!strcmp(what, "prs"))
-        *got = ui.prs[ui.last_key];
-    else if (!strncmp(what, "turns", 5))    /* turnsN: encoder N's count (plat.h EN_*) */
-        *got = ui.turns[atoi(what + 5) % NE];
+    else if (!strcmp(what, "strikes"))   /* strikes the picture has had */
+        *got = (int)strikes_seen;
+    else if (!strcmp(what, "heat"))
+        *got = set.p[0];
+    else if (!strcmp(what, "echo"))
+        *got = set.p[1];
+    else if (!strcmp(what, "mist"))
+        *got = set.p[2];
+    else if (!strcmp(what, "light"))
+        *got = set.p[3];
     else
         return 0;
     return 1;

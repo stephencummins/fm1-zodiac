@@ -8,7 +8,7 @@ enum { K_CREAM, K_GOLD, K_SAGE, K_INDIGO };
 
 static struct { Scene s; f32 rustle, age; } V;
 
-void virgo_init(void) { sc_init(&V.s, 71u); V.rustle = 0.0f; V.age = 9.0f; }
+void virgo_init(void) { virgo_pic_load(); sc_init(&V.s, 71u); V.rustle = 0.0f; V.age = 9.0f; }
 void virgo_strike(void) { V.rustle = 1.0f; V.age = 0.0f; }
 
 static void grain(void)

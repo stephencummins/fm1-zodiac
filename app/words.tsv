@@ -1,6 +1,17 @@
 # SPDX-License-Identifier: MPL-2.0
-# The template's words for a screen reader (fm1-reader): the text on the screen <TAB> what to say.
+# Zodiac's words for a screen reader (fm1-reader): the text sent <TAB> what to say.
+# The link below is still the template's: Zodiac has no site yet. Before a release it must be Zodiac's own.
 # url: https://charlesvestal.github.io/fm1-base/words/
-TEMPLATE	template
-K1 OCTAVE	knob 1, octave
-K2 WAVE	knob 2, wave
+ZODIAC	zodiac
+ARIES	aries
+TAURUS	taurus
+GEMINI	gemini
+CANCER	cancer
+LEO	leo
+VIRGO	virgo
+LIBRA	libra
+SCORPIO	scorpio
+SAGITTARIUS	sagittarius
+CAPRICORN	capricorn
+AQUARIUS	aquarius
+PISCES	pisces

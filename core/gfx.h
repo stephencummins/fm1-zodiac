@@ -13,6 +13,13 @@ typedef float f32;
 
 enum { G_MAX, G_PAINT, G_GROUND };                 /* G_MAX: the brighter ink wins (line art). G_PAINT: covers what is under it */
 
+/* the FM-1's build (Z_FM1) keeps the big buffers in the platform's pool */
+#if defined(Z_FM1) && !defined(PLAT_HOST)
+#define Z_BIG __attribute__((section(".pool")))
+#else
+#define Z_BIG
+#endif
+
 extern uint8_t g_fb[GW * GH];
 
 void g_clear(void);
@@ -36,6 +43,10 @@ void g_palette_on(const uint32_t rgb[G_INKS], f32 light, uint32_t ground, uint16
 
 /* a working copy of a picture, so that parts of it can move before it is laid on with g_blit(g_work, ...) */
 extern uint8_t g_work[GW * GH];
+extern uint8_t g_spare[GW * GH];                   /* a second one, for the sign that is showing to use as it likes */
+/* a packed picture (LZ4, one block: tools/img2pic.py) unpacked into z_pic, for the sign that is starting. Built with Z_PACKED */
+extern uint8_t z_pic[GW * GH];
+void z_unpack(const uint8_t *lz, int n);
 void p_begin(const uint8_t *pic);
 void p_move(const uint8_t *pic, int x0, int y0, int w, int h, int dx, int dy);      /* a rectangle of pic, set down moved */
 void p_fill(int x0, int y0, int w, int h, uint8_t v);

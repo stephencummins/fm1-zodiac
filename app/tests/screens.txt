@@ -1,16 +1,36 @@
-# The manual's screenshots (template/docs/img): tools/build.py template --host, then
-#   template/build/host/template_host template/tests/screens.txt template/docs/img
-wait 900
-shot screen-ready.png
-key 7 down 90 50
-press FX
-turn K3 3
-wait 1400
-shot screen-playing.png
-release FX
-key 7 up
-tap OCT+
-wait 30
+# Every sign's picture after a few seconds: app/build/host/zodiac_host app/tests/screens.txt <folder>
+wait 4000
+shot 01-aries.png
 turn PRESET 1
-wait 30
-shot screen-settings.png
+wait 4000
+shot 02-taurus.png
+turn PRESET 1
+wait 4000
+shot 03-gemini.png
+turn PRESET 1
+wait 4000
+shot 04-cancer.png
+turn PRESET 1
+wait 4000
+shot 05-leo.png
+turn PRESET 1
+wait 4000
+shot 06-virgo.png
+turn PRESET 1
+wait 4000
+shot 07-libra.png
+turn PRESET 1
+wait 4000
+shot 08-scorpio.png
+turn PRESET 1
+wait 4000
+shot 09-sagittarius.png
+turn PRESET 1
+wait 4000
+shot 10-capricorn.png
+turn PRESET 1
+wait 4000
+shot 11-aquarius.png
+turn PRESET 1
+wait 4000
+shot 12-pisces.png

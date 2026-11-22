@@ -29,6 +29,7 @@ static f32 rnd(void) { return hash01(A.seed++); }
 
 void aries_init(void)
 {
+    aries_pic_load();
     A.t = 0.0f; A.seed = 7u; A.spawn = 0.0f; A.blink = 0.0f; A.next_blink = 3.0f;
     A.roar = 0.0f; A.roar_t = -1.0f; A.next_roar = 5.0f; A.burst = 0;
     A.p.heat = 0.5f; A.p.echo = 0.0f; A.p.mist = 0.2f; A.p.light = 0.7f;

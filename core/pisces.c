@@ -8,7 +8,7 @@ enum { K_PEARL, K_GREEN, K_INDIGO, K_CORAL };
 
 static struct { Scene s; f32 dart, age; } P;
 
-void pisces_init(void) { sc_init(&P.s, 139u); P.dart = 0.0f; P.age = 9.0f; }
+void pisces_init(void) { pisces_pic_load(); sc_init(&P.s, 139u); P.dart = 0.0f; P.age = 9.0f; }
 void pisces_strike(void) { P.dart = 1.0f; P.age = 0.0f; }
 
 static void bubbles(void)

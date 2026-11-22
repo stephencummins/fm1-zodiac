@@ -3,11 +3,14 @@ name = "zodiac"              # APP_NAME is in app.h; this names the build's file
 id_prefix = "FM-1_355"          # package identity (each firmware its own): dev FM-1_1100, releases FM-1_11XXYYZZ
 usb_manufacturer = "zodiac"
 usb_product = "ZODIAC FM-1"
-o2 = []                        # separate units compiled at -O2 (an app's DSP)
+o2 = ["core/*.c"]              # the core (app/core is a link to ../core): pictures and music, no hardware in it
+o2_cflags = ["-DZ_FM1", "-DZ_PACKED", "-DZ_ECHO16"]   # big buffers in the pool, pictures packed, a 16-bit echo line
+include = ["core"]
+ram_layout = "packed"          # one SRAM budget: the core's buffers need more than the fixed pool gives
 words = "words.tsv"
 ble = false                     # Bluetooth MIDI (--no-ble builds without it)
 ble_central = false             # and the FM-1 connects to Bluetooth MIDI devices too
-companion = true               # the companion services: the saved settings as a file for a page (app.h APP_FILE_OBJS)
+companion = false              # the companion services: the saved settings as a file for a page (app.h APP_FILE_OBJS)
 # the site (tools/make_site.py, tools/publish_site.sh)
 tagline = "Twelve signs that play themselves"
 repo = ""

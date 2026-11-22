@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds the core for this computer and writes stills of each sign to build/stills/SIGN (PNG, three times size),
 # a sheet for each sign, and build/stills/all.png: each sign at rest and struck.
+# ZFLAGS=-DZ_PACKED builds it the FM-1's way, with the pictures packed: the stills must come out the same.
 set -eu
 cd "$(dirname "$0")/.."
 SIGNS="aries taurus gemini cancer"
@@ -21,7 +22,7 @@ python3 tools/img2pic.py art/pic/capricorn.jpg core/pic_capricorn.h capricorn DC
 python3 tools/img2pic.py art/pic/aquarius.jpg core/pic_aquarius.h aquarius D8F8F4 1478E0 28E4E8 F0E040 >/dev/null
 python3 tools/img2pic.py art/pic/pisces.jpg core/pic_pisces.h pisces E8ECD8 80D0B0 5870A0 E87078 >/dev/null
 mkdir -p build/stills
-cc -std=c99 -O2 -Wall -Wextra -Wno-misleading-indentation -ffp-contract=off $SRC port/host/main.c -o build/zhost
+cc -std=c99 -O2 -Wall -Wextra -Wno-misleading-indentation -ffp-contract=off ${ZFLAGS:-} $SRC port/host/main.c -o build/zhost
 i=0
 for s in $ALL; do rm -rf build/stills/$s; mkdir -p build/stills/$s; build/zhost $i build/stills/$s; i=$((i + 1)); done
 python3 - $ALL <<'PY'

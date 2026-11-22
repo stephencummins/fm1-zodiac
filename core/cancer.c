@@ -21,6 +21,7 @@ static struct {
 
 void cancer_init(void)
 {
+    cancer_pic_load();
     sc_init(&C.s, 37u);
     C.hide = 0.0f; C.hide_t = -1.0f; C.next_start = 19.0f; C.xoff = 0.0f; C.vel = 0.0f; C.yw = 180.0f; C.splash = -1.0f; C.spawn = 0.0f; C.wig = 0.0f;
     for (int i = 0; i < NBUB; i++) C.b[i].life = 0.0f;

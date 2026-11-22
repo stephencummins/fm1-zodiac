@@ -7,9 +7,9 @@
 enum { K_BONE, K_SLATE, K_PINE, K_BRONZE };
 
 static struct { Scene s; f32 age; } C;
-static uint8_t part[GW * GH];
+#define part g_spare
 
-void capricorn_init(void) { sc_init(&C.s, 127u); C.age = 9.0f; }
+void capricorn_init(void) { capricorn_pic_load(); sc_init(&C.s, 127u); C.age = 9.0f; }
 void capricorn_strike(void) { C.age = 0.0f; }
 
 static void snow(f32 w)

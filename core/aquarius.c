@@ -8,7 +8,7 @@ enum { K_ICE, K_BLUE, K_AQUA, K_LEMON };
 
 static struct { Scene s; f32 surge; } Q;
 
-void aquarius_init(void) { sc_init(&Q.s, 131u); Q.surge = 0.0f; }
+void aquarius_init(void) { aquarius_pic_load(); sc_init(&Q.s, 131u); Q.surge = 0.0f; }
 void aquarius_strike(void) { Q.surge = 1.0f; }
 
 /* the water running: bright beads over the two arcs, up from the jar's mouth, over and down */

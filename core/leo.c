@@ -7,9 +7,9 @@
 enum { K_CREAM, K_GOLD, K_ORANGE, K_PURPLE };
 
 static struct { Scene s; f32 age, roar; } L;      /* age: seconds since the note; roar: 0 .. 1, how open the mouth */
-static uint8_t head[GW * GH];             /* the head with its mouth open, before it is turned */
+#define head g_spare                      /* the head with its mouth open, before it is turned */
 
-void leo_init(void) { sc_init(&L.s, 53u); L.age = 99.0f; L.roar = 0.0f; }
+void leo_init(void) { leo_pic_load(); sc_init(&L.s, 53u); L.age = 99.0f; L.roar = 0.0f; }
 void leo_strike(void) { L.age = 0.0f; }
 
 static void sun(f32 w)

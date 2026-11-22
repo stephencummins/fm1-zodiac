@@ -1,7 +1,7 @@
 #include "gfx.h"
 #include "mathx.h"
 
-uint8_t g_fb[GW * GH];
+Z_BIG uint8_t g_fb[GW * GH];
 static int ink_bits, mode;
 
 void g_clear(void) { for (int i = 0; i < GW * GH; i++) g_fb[i] = 0; }
@@ -185,7 +185,31 @@ void g_blit(const uint8_t *pic, f32 scale, f32 y0, f32 amp, f32 freq, f32 phase,
     }
 }
 
-uint8_t g_work[GW * GH];
+Z_BIG uint8_t g_work[GW * GH];
+Z_BIG uint8_t g_spare[GW * GH];
+#ifdef Z_PACKED
+Z_BIG uint8_t z_pic[GW * GH];
+void z_unpack(const uint8_t *lz, int n)
+{
+    uint8_t *o = z_pic, *end = z_pic + GW * GH;
+    const uint8_t *p = lz, *pe = lz + n;
+    while (p < pe) {
+        int tok = *p++, len = tok >> 4;
+        if (len == 15) { int b; do { b = *p++; len += b; } while (b == 255 && p < pe); }
+        if (len > end - o) len = (int)(end - o);                  /* a bad block cannot write past the picture */
+        while (len-- > 0) *o++ = *p++;
+        if (p >= pe) break;                                       /* the last run has no match after it */
+        int off = p[0] | p[1] << 8; p += 2;
+        len = tok & 15;
+        if (len == 15) { int b; do { b = *p++; len += b; } while (b == 255 && p < pe); }
+        len += 4;
+        if (!off || off > o - z_pic) break;
+        if (len > end - o) len = (int)(end - o);
+        for (const uint8_t *m = o - off; len-- > 0;) *o++ = *m++;
+    }
+    while (o < end) *o++ = 0;
+}
+#endif
 void p_begin(const uint8_t *pic) { for (int i = 0; i < GW * GH; i++) g_work[i] = pic[i]; }
 void p_move(const uint8_t *pic, int x0, int y0, int w, int h, int dx, int dy)
 {

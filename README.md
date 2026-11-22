@@ -47,12 +47,26 @@ alone, each piece does this by itself now and then.
 
 In the page, the `Sound` button starts the music.
 
+## On the FM-1 (so far only in the simulator)
+
+`app/` is the FM-1 firmware: fm1-base's platform around the core (`app/core` is a link to `core/`).
+PRESET or SELECT steps through the signs, any key or MIDI note strikes, K1 to K4 are the sign's own knob,
+echo, mist and light, a MIDI program change 0 to 11 chooses a sign, and SAVE keeps the sign and the knobs.
+
+    ./build.sh --host
+    app/build/host/zodiac_host app/tests/basic.txt app/build/host
+
+For the FM-1 the core is built with three switches (`app/fm1.toml`): `Z_PACKED` (the pictures packed, 691 KB
+down to 286 KB, unpacked one at a time), `Z_ECHO16` (the echo line as 16-bit numbers) and `Z_FM1` (the big
+buffers in the platform's pool). The computer and browser builds do not use them and sound as before.
+
 ## Not done yet
 
-- The FM-1 itself: the app in `app/` is the template, and the build for the device has not been set up.
-- The music's room and echo use about 260 KB of memory, more than the FM-1 can give them as written.
+- The build for the FM-1 itself has never been run: it needs JieLi's toolchain. So the sizes are estimates
+  (about 476 KB of the 581 KB of flash, about 430 KB of the 464 KB of memory), and nothing has been on an FM-1.
 - How much of the FM-1's processor the pictures and the music need has not been measured.
-- `tests/` and `app/tests/` are the template's.
+- The 16-bit echo measures about 95 dB below the float one, but has not been listened to.
+- `app/words.tsv` still carries the template's link for the screen reader's words; `tests/` is the template's.
 
 ## Licence and credits
 

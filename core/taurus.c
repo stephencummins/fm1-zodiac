@@ -25,6 +25,7 @@ static struct {
 
 void taurus_init(void)
 {
+    taurus_pic_load();
     sc_init(&T.s, 11u);
     T.temper = 0.0f; T.stamp = 0.0f; T.stamp_t = -1.0f; T.swing = 0.0f; T.next_snort = 8.0f; T.chew = 0.0f; T.chewing = 1.0f;
     T.spawn = 0.0f; T.dust = 0; T.flare = 0.0f; T.steam = 0.0f; T.hy = 0.0f;

@@ -8,7 +8,7 @@ enum { K_CREAM, K_ROSE, K_TEAL, K_LAV };
 
 static struct { Scene s; f32 age, side, ting; } B;
 
-void libra_init(void) { sc_init(&B.s, 83u); B.age = 99.0f; B.side = 1.0f; B.ting = 0.0f; }
+void libra_init(void) { libra_pic_load(); sc_init(&B.s, 83u); B.age = 99.0f; B.side = 1.0f; B.ting = 0.0f; }
 void libra_strike(void) { B.age = 0.0f; B.side = -B.side; B.ting = 1.0f; }      /* each note tips it the other way first */
 
 static void wind(void)

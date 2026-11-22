@@ -8,7 +8,7 @@ enum { K_BONE, K_CRIMSON, K_VIOLET, K_TEAL };
 
 static struct { Scene s; f32 snap, age; } S;
 
-void scorpio_init(void) { sc_init(&S.s, 97u); S.snap = 0.0f; S.age = 9.0f; }
+void scorpio_init(void) { scorpio_pic_load(); sc_init(&S.s, 97u); S.snap = 0.0f; S.age = 9.0f; }
 void scorpio_strike(void) { S.snap = 1.0f; S.age = 0.0f; }
 
 static void deep(void)

@@ -23,6 +23,7 @@ static struct {
 
 void gemini_init(void)
 {
+    gemini_pic_load();
     sc_init(&G.s, 23u);
     G.speaker = 0; G.next_turn = 2.5f; G.env[0] = G.env[1] = 0.0f; G.open = 0.0f;
     G.flip = -1.0f; G.swapped = 0; G.next_flip = 14.0f; G.blink2 = 0.0f; G.next_blink2 = 4.4f; G.spawn = 0.0f;

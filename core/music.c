@@ -24,14 +24,26 @@ f32 m_hz(f32 midi)
     return hz;
 }
 
-/* a small room: four combs and two all-passes a side. Sized for 48 kHz. (For the FM-1 these want halving.) */
+/* a small room: four combs and two all-passes a side. Sized for 48 kHz.
+ * Z_ECHO16 (the FM-1, short of memory): the echo's line is kept as 16-bit numbers, half the size, good for -2 .. 2
+ * in steps of 1/16384. The room stays as it is. */
 #define NCOMB 4
 #define COMBMAX 1800
 #define APMAX 640
 #define ECHOMAX 48000
 static const int comb_len[NCOMB] = {1557, 1617, 1491, 1422}, ap_len[2] = {556, 225};
-static struct {
-    f32 comb[2][NCOMB][COMBMAX], lp[2][NCOMB], ap[2][2][APMAX], echo[ECHOMAX], echo_lp, sr;
+#ifdef Z_ECHO16
+typedef int16_t echo_t;
+static inline echo_t echo_in(f32 x) { x *= 16384.0f; return (echo_t)(x > 32767.0f ? 32767 : x < -32767.0f ? -32767 : (int)(x + (x < 0.0f ? -0.5f : 0.5f))); }
+static inline f32 echo_out(echo_t v) { return (f32)v * (1.0f / 16384.0f); }
+#else
+typedef f32 echo_t;
+static inline echo_t echo_in(f32 x) { return x; }
+static inline f32 echo_out(echo_t v) { return v; }
+#endif
+static Z_BIG struct {
+    f32 comb[2][NCOMB][COMBMAX], lp[2][NCOMB], ap[2][2][APMAX], echo_lp, sr;
+    echo_t echo[ECHOMAX];
     int clen[2][NCOMB], ci[2][NCOMB], alen[2][2], ai[2][2], ei;
 } F;
 MFx m_fx;
@@ -52,9 +64,9 @@ void m_fx_tick(f32 *l, f32 *r, f32 to_room, f32 to_echo)
     /* the echo: one line, darker each time round */
     int len = (int)(m_fx.echo_secs * F.sr); if (len < 1) len = 1; if (len > ECHOMAX - 1) len = ECHOMAX - 1;
     int rd = F.ei - len; if (rd < 0) rd += ECHOMAX;
-    f32 e = F.echo[rd];
+    f32 e = echo_out(F.echo[rd]);
     F.echo_lp += (e - F.echo_lp) * 0.25f;
-    F.echo[F.ei] = to_echo + F.echo_lp * m_fx.echo_fb;
+    F.echo[F.ei] = echo_in(to_echo + F.echo_lp * m_fx.echo_fb);
     if (++F.ei >= ECHOMAX) F.ei = 0;
     f32 ew = e * m_fx.echo_wet;
     f32 in = (to_room + ew * 0.6f) * 0.25f, fb = 0.72f + 0.25f * m_fx.room, d = 0.15f + 0.7f * m_fx.damp, out[2];

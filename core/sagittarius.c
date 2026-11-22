@@ -8,7 +8,7 @@ enum { K_IVORY, K_FLAME, K_RED, K_INDIGO };
 
 static struct { Scene s; f32 age, flash; } A;
 
-void sagittarius_init(void) { sc_init(&A.s, 113u); A.age = 9.0f; A.flash = 0.0f; }
+void sagittarius_init(void) { sagittarius_pic_load(); sc_init(&A.s, 113u); A.age = 9.0f; A.flash = 0.0f; }
 void sagittarius_strike(void) { if (A.age > 0.8f) A.age = 0.0f; }      /* not while one is still on its way */
 
 static void sparks(void)

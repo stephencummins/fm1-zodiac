@@ -9,7 +9,7 @@
   "hardware": {
     "models": ["FM-1"],
     "flash": ["856014", "B36014"],
-    "features": ["usb-audio-in", "usb-audio-out", "velocity", "pressure", "screen-reader", "companion"]
+    "features": ["usb-audio-in", "usb-audio-out", "screen-reader"]
   },
   "credits": "Zodiac is built on fm1-base by Charles Vestal and felucca-bsp, which come from Felucca by Leo Kuroshita, Hügelton Instruments."
 }

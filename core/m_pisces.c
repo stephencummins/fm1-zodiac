@@ -72,7 +72,7 @@ static void pisces_m_render(f32 *lr, int n, const ZParams *p)
         f32 l = w[0] + bb * 0.14f + sp * 0.8f, r = w[1] + bb * 0.18f + sp * 1.2f, ps = 0.0f;
         for (int k = 0; k < 3; k++) { f32 x = m_horn(&M.pad[k], dt, up, up, bend, 0.1f, 0.3f, 0.004f) * pad; l += x * (1.0f - M.pad[k].pan) * 2.0f; r += x * M.pad[k].pan * 2.0f; ps += x; }
         m_fx_tick(&l, &r, ps * 2.5f + bb * 0.3f + sp * 0.6f + (w[0] + w[1]) * 0.15f, bb * 0.2f + sp * 0.4f + ps);
-        lr[2 * i] = m_clip(l * 0.85f); lr[2 * i + 1] = m_clip(r * 0.85f);
+        lr[2 * i] = m_clip(l * 0.478f); lr[2 * i + 1] = m_clip(r * 0.478f);
     }
 }
 

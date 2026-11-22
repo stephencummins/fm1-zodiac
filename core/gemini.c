@@ -1,9 +1,10 @@
 /* GEMINI: the twins, air. Quick, curious, talkative, never the same for long: two faces that talk in turn, glance
  * about, and whose words fly between them on the wind. A strike turns them over like cards and they change colours.
- * The faces are art/gemini.svg; the hair, the words, the stars and the wind are drawn here. */
+ * The picture is art/pic/gemini.jpg, brought in whole; the words, the wind and its sway are drawn here.
+ * (The first, drawn twins are in art/gemini.svg and this file's history.) */
 #include "scene.h"
 #include "sign.h"
-#include "art_gemini.h"
+#include "pic_gemini.h"
 
 enum { K_LINE, K_ROSE, K_SUN, K_SKY };
 
@@ -33,16 +34,6 @@ void gemini_strike(void)
     G.speaker ^= 1; G.next_turn = 1.5f + sc_rnd(&G.s) * 2.0f;
 }
 
-/* one twin's place: leaning in to speak, back to listen, and turned over on a flip */
-static void twin_xf(int right, f32 *xy, int n)
-{
-    f32 sg = right ? -1.0f : 1.0f;
-    f32 lean = 0.006f * sin_turns(G.s.t * 0.05f + (f32)right * 0.3f) + 0.016f * G.env[right] - 0.008f * G.env[!right];
-    sc_rot(xy, n, right ? 163.0f : 77.0f, 172.0f, sg * lean);
-    if (G.flip >= 0.0f) sc_squashx(xy, n, right ? 156.0f : 84.0f, absf(cos_turns(G.flip * 0.5f)));
-    for (int k = 0; k < n; k++) { xy[2 * k] = CX + (xy[2 * k] - CX) * SCALE; xy[2 * k + 1] = 134.0f + (xy[2 * k + 1] - 134.0f) * SCALE; }
-}
-
 static void wind(void)
 {
     f32 wv = G.s.p.heat, t = G.s.t;
@@ -66,37 +57,6 @@ static void wind(void)
     }
 }
 
-static void star(f32 x, f32 y, f32 r, f32 a)
-{
-    f32 p[16];
-    for (int k = 0; k < 8; k++) {
-        f32 rr = (k & 1) ? r * 0.30f : r, th = (f32)k / 8.0f;
-        p[2 * k] = x + cos_turns(th) * rr; p[2 * k + 1] = y + sin_turns(th) * rr;
-    }
-    g_mode(G_MAX); g_ink(K_LINE); g_fill(p, 8, a);
-}
-
-static void hair(int right)
-{
-    static const f32 root[7][2] = {{86, 82}, {76, 86}, {67, 93}, {61, 104}, {58, 118}, {58, 133}, {61, 148}};
-    f32 wv = G.s.p.heat, t = G.s.t;
-    enum { N = 8 };
-    g_mode(G_MAX);
-    for (int j = 0; j < 7; j++) {
-        f32 xy[N * 2], len = (16.0f + 20.0f * wv) * (0.75f + 0.5f * hash01((uint32_t)(j * 3 + right * 40)));
-        for (int k = 0; k < N; k++) {
-            f32 u = (f32)k / (f32)(N - 1);
-            f32 wave = sin_turns(u * 1.3f - t * (0.5f + 1.6f * wv) + (f32)j * 0.23f + (f32)right * 0.4f) * (2.0f + 4.0f * wv) * u;
-            f32 x = root[j][0] - len * u * (0.55f + 0.45f * wv);
-            f32 y = root[j][1] + len * u * u * (0.75f - 0.75f * wv) - len * 0.25f * u * (1.0f - (f32)j / 6.0f) + wave;
-            xy[2 * k] = right ? 240.0f - x : x; xy[2 * k + 1] = y;
-        }
-        twin_xf(right, xy, N);
-        g_ink(j & 1 ? K_ROSE : (right ? K_SKY : K_SUN));
-        g_poly(xy, N, 0, 1.4f, 0.80f);
-    }
-}
-
 /* what they say: small marks that leave the speaker's mouth and cross to the other */
 static void words(f32 dt)
 {
@@ -108,8 +68,7 @@ static void words(f32 dt)
         if (w->life <= 0.0f) {
             if (G.spawn < 1.0f) continue;
             G.spawn -= 1.0f;
-            f32 m[2] = {G.speaker ? 131.0f : 109.0f, 141.0f};
-            twin_xf(G.speaker, m, 1);
+            f32 m[2] = {G.speaker ? 128.0f : 112.0f, 139.0f};
             w->x = m[0]; w->y = m[1] + (sc_rnd(&G.s) - 0.5f) * 3.0f;
             w->vx = (G.speaker ? -1.0f : 1.0f) * (16.0f + 22.0f * wv + sc_rnd(&G.s) * 10.0f);
             w->age = 0.0f; w->life = 1.3f + sc_rnd(&G.s) * 1.3f; w->ink = G.speaker ? K_SKY : K_SUN; w->kind = (int)(sc_rnd(&G.s) * 3.0f);
@@ -126,29 +85,6 @@ static void words(f32 dt)
         else if (w->kind == 1) g_line(w->x - 2.2f, w->y + 0.8f, w->x + 2.2f, w->y - 0.8f, 1.2f, a);
         else g_ring(w->x, w->y, 2.0f, 0.9f, a);
     }
-}
-
-static void twin_move(int g, f32 *xy, int n, f32 *gain, void *ctx)
-{
-    (void)ctx;
-    int right = g >= GEMINI_G_NECKR;
-    f32 t = G.s.t, sg = right ? -1.0f : 1.0f;
-    switch (g) {
-    case GEMINI_G_JAWL: case GEMINI_G_JAWR:
-        if (right == G.speaker) sc_rot(xy, n, right ? 160.0f : 80.0f, 146.0f, sg * 0.040f * G.open);
-        break;
-    case GEMINI_G_EYEL: case GEMINI_G_EYER:
-        sc_squash(xy, n, 112.5f, 1.0f - 0.9f * (right ? G.blink2 : G.s.blink));
-        *gain = 0.75f + 0.35f * G.env[right];
-        break;
-    case GEMINI_G_PUPILL: case GEMINI_G_PUPILR: {
-        f32 look = noise1(t * 0.45f + (f32)right * 7.0f, 51u);
-        sc_shift(xy, n, sg * (look > 0.7f ? -3.0f : look < 0.2f ? 1.2f : 0.0f), look > 0.85f ? -1.0f : 0.0f);
-        sc_squash(xy, n, 112.5f, 1.0f - 0.9f * (right ? G.blink2 : G.s.blink));
-        break; }
-    case GEMINI_G_HEADL: case GEMINI_G_HEADR: *gain = 0.85f + 0.30f * G.env[right]; break;
-    }
-    twin_xf(right, xy, n);
 }
 
 void gemini_frame(f32 dt, const ZParams *want)
@@ -175,22 +111,17 @@ void gemini_frame(f32 dt, const ZParams *want)
 
     sc_begin(&G.s);
     wind();
-    sc_frame_back(1.0f + 0.008f * sin_turns(t * 0.2f), K_SKY, 0.14f + 0.10f * wv);
-    sc_frame_line(1.0f + 0.008f * sin_turns(t * 0.2f), 0.06f);
     sc_mist(&G.s, K_SKY);
-    for (int r = 0; r < 2; r++) {
-        f32 p[2] = {r ? 154.0f : 86.0f, 66.0f};
-        twin_xf(r, p, 1);
-        star(p[0], p[1] + 4.0f, 4.5f + 2.5f * G.env[r] + 0.8f * sin_turns(t * 0.7f + (f32)r * 0.5f), 0.45f + 0.5f * G.env[r]);
-        hair(r);
-    }
-    sign_draw(&gemini_art, twin_move, 0);
+    /* the picture breathes, sways in the wind from the neck up to the curls, and narrows to nothing on a flip */
+    f32 fl = G.flip >= 0.0f ? 1.0f - absf(cos_turns(G.flip * 0.5f)) : 0.0f;
+    g_blit(gemini_pic, 1.0f + 0.010f * sin_turns(t * 0.11f) - 0.10f * fl, -400.0f,
+           (0.6f + 3.2f * wv) * (1.0f + 2.0f * fl), 0.004f, t * (0.10f + 0.35f * wv), 0.92f + 0.10f * G.open + 0.3f * fl);
     words(dt);
 }
 
 void gemini_palette(uint16_t pal[256])
 {
-    uint32_t inks[G_INKS] = {0xF2EAD2u, 0xCC4E7Cu, 0xF4D048u, 0x4AA8ECu};
+    uint32_t inks[G_INKS] = {0xF6EDC4u, 0xC8409Cu, 0xF2C230u, 0x58B0E8u};
     if (G.swapped) { uint32_t x = inks[K_SUN]; inks[K_SUN] = inks[K_SKY]; inks[K_SKY] = x; }
     f32 fl = G.flip >= 0.0f ? 1.0f - absf(cos_turns(G.flip * 0.5f)) : 0.0f;
     /* Wind sky blue, Echo magenta, Mist lilac, Light yellow */

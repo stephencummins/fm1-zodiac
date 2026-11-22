@@ -4,6 +4,8 @@ set -eu
 cd "$(dirname "$0")/.."
 SRC="core/gfx.c core/sign.c core/scene.c core/signs.c"
 for s in aries taurus gemini cancer; do python3 tools/svg2sign.py art/$s.svg core/art_$s.h $s >/dev/null; SRC="$SRC core/$s.c"; done
+python3 tools/img2pic.py art/pic/gemini.jpg core/pic_gemini.h gemini F6EDC4 C8409C F2C230 58B0E8 >/dev/null
+python3 tools/img2pic.py art/pic/cancer.jpg core/pic_cancer.h cancer DCE0E8 EC5C4C 189C98 245C90 >/dev/null
 mkdir -p build
 emcc -O2 -std=c99 $SRC port/web/main.c -o build/zodiac.html \
   --shell-file port/web/shell.html -sSINGLE_FILE=1 -sENVIRONMENT=web -sEXPORTED_RUNTIME_METHODS=HEAPU8

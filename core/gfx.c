@@ -163,3 +163,24 @@ void g_palette_on(const uint32_t rgb[G_INKS], f32 light, uint32_t ground, uint16
         }
     }
 }
+
+void g_blit(const uint8_t *pic, f32 scale, f32 y0, f32 amp, f32 freq, f32 phase, f32 gain)
+{
+    f32 inv = 1.0f / scale;
+    int g = (int)(gain * 256.0f);
+    for (int y = 0; y < GH; y++) {
+        f32 sy = 120.0f + ((f32)y + 0.5f - 120.0f) * inv;
+        if (sy < 0.0f || sy >= (f32)GH) continue;
+        f32 d = (sy - y0) * (1.0f / 24.0f), sh = d <= 0.0f ? 0.0f : (d > 1.0f ? 1.0f : d) * amp * sin_turns(sy * freq + phase);
+        const uint8_t *row = pic + (int)sy * GW;
+        uint8_t *p = &g_fb[y * GW];
+        for (int x = 0; x < GW; x++, p++) {
+            f32 sx = 120.0f + ((f32)x + 0.5f - 120.0f) * inv + sh;
+            if (sx < 0.0f || sx >= (f32)GW) continue;
+            uint8_t v = row[(int)sx];
+            int lv = ((v & 63) * g) >> 8;
+            if (lv > 63) lv = 63;
+            if (lv > (*p & 63)) *p = (uint8_t)((v & 0xC0) | lv);
+        }
+    }
+}

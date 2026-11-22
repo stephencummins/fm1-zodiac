@@ -26,6 +26,9 @@ void g_ring(f32 x, f32 y, f32 r, f32 w, f32 a);
 void g_fill(const f32 *xy, int n, f32 a);          /* a filled polygon, up to 96 points */
 void g_glow(f32 x, f32 y, f32 r, f32 a);           /* a soft light, dithered */
 void g_dot(f32 x, f32 y, f32 a);                   /* one grain */
+/* a finished 240 x 240 picture laid on, the brighter ink winning: grown by scale about the middle, its rows
+ * below y0 swaying sideways by amp pixels (freq turns a row, at phase), all of it lit by gain */
+void g_blit(const uint8_t *pic, f32 scale, f32 y0, f32 amp, f32 freq, f32 phase, f32 gain);
 
 /* the palette: four ink colours (0xRRGGBB) into 256 RGB565 entries */
 void g_palette(const uint32_t rgb[G_INKS], f32 light, uint16_t out[256]);

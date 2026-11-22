@@ -21,3 +21,4 @@ extern const int z_nsigns;
 #define Z_SIGN(n) void n##_init(void); void n##_frame(f32 dt, const ZParams *want); void n##_strike(void); void n##_palette(uint16_t pal[256]);
 Z_SIGN(aries) Z_SIGN(taurus) Z_SIGN(gemini) Z_SIGN(cancer)
 Z_SIGN(leo) Z_SIGN(virgo) Z_SIGN(libra) Z_SIGN(scorpio)
+Z_SIGN(sagittarius) Z_SIGN(capricorn) Z_SIGN(aquarius) Z_SIGN(pisces)

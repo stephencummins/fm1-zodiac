@@ -10,5 +10,9 @@ const ZSign z_signs[] = {
     {"VIRGO",  "earth", "Harvest", virgo_init, virgo_frame,  virgo_strike,  virgo_palette},
     {"LIBRA",  "air",   "Breeze", libra_init,  libra_frame,  libra_strike,  libra_palette},
     {"SCORPIO", "water", "Depth", scorpio_init, scorpio_frame, scorpio_strike, scorpio_palette},
+    {"SAGITTARIUS", "fire", "Flight", sagittarius_init, sagittarius_frame, sagittarius_strike, sagittarius_palette},
+    {"CAPRICORN", "earth", "Climb", capricorn_init, capricorn_frame, capricorn_strike, capricorn_palette},
+    {"AQUARIUS", "air", "Flow", aquarius_init, aquarius_frame, aquarius_strike, aquarius_palette},
+    {"PISCES", "water", "Dream", pisces_init, pisces_frame, pisces_strike, pisces_palette},
 };
 const int z_nsigns = sizeof z_signs / sizeof z_signs[0];

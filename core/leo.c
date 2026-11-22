@@ -33,6 +33,30 @@ static void sun(f32 w)
     }
 }
 
+/* the open mouth, from row y0 down to y1, hw pixels to each side of the middle: dark lips round a dark throat,
+ * a tongue lying in the lower half, the four canines showing */
+static void mouth(int y0, int y1, f32 hw)
+{
+    int H = y1 - y0;
+    f32 cr = minf(7.0f, (f32)H * 0.5f);
+    for (int y = y0; y <= y1; y++)
+        for (int x = 96; x <= 144; x++) {
+            f32 ax = absf((f32)x - 119.5f), fy = (f32)(y - y0), by = (f32)(y1 - y), half = hw;
+            f32 ex = ax - (half - cr), ey = (fy < cr ? cr - fy : by < cr ? cr - by : 0.0f), d;
+            if (ex > 0.0f && ey > 0.0f) d = cr - sqrtf_(ex * ex + ey * ey); else { d = half - ax; if (fy < d) d = fy; if (by < d) d = by; }
+            if (d < 0.0f) continue;                                  /* d: how far inside the edge */
+            uint8_t v = d < 2.0f ? (0xC0 | 46) : (0xC0 | 9);
+            f32 tx = ax / 11.0f, ty = ((f32)y - ((f32)y1 - 7.0f)) / 6.0f;
+            if (H > 10 && d >= 2.0f && tx * tx + ty * ty < 1.0f) v = ax < 1.0f && ty < 0.3f ? (0x80 | 36) : (0x80 | 63);
+            if (H > 14 && d >= 1.0f) {
+                f32 up = absf(ax - (half - 5.5f)), lo = absf(ax - (half - 7.5f));
+                if (fy < 7.0f && up < 1.8f - fy * 0.22f) v = 0x00 | 63;                  /* upper canines */
+                if (by < 5.0f && lo < 1.5f - by * 0.25f) v = 0x00 | 58;                  /* lower canines */
+            }
+            g_work[y * GW + x] = v;
+        }
+}
+
 void leo_frame(f32 dt, const ZParams *want)
 {
     sc_step(&L.s, dt, want);
@@ -44,25 +68,27 @@ void leo_frame(f32 dt, const ZParams *want)
     sc_begin(&L.s);
     sun(w);
     sc_mist(&L.s, K_ORANGE);
-    /* the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
-    int jaw = (int)(w * (16.0f + 1.6f * sin_turns(t * 10.0f)) + 0.5f);
+    /* the jaw drops and trembles; the open mouth is drawn behind it */
+    int jaw = (int)(w * (21.0f + 1.6f * sin_turns(t * 10.0f)) + 0.5f);
     p_begin(leo_pic);
-    /* the eyes: gold, looking straight at you from under a lowered brow. A slow blink now and then; shut tight in the roar */
-    int lid = (int)(maxf(L.s.blink, minf(1.0f, w * 1.6f)) * 7.0f + 0.5f);
+    /* the eyes: gold, looking straight at you from under a lowered brow, and they stay on you through the roar */
+    int lid = (int)(L.s.blink * (1.0f - w) * 7.0f + 0.5f);
     for (int e = 0; e < 2; e++) {
         int ex = e ? 133 : 99, in = e ? ex : ex + 4;          /* in: the half of the eye nearer the nose */
         p_fill(ex, 110, 8, 7, 0x40 | 63);
         p_fill(ex + 2, 112, 4, 4, 0xC0 | 10);
         p_fill(ex + 2, 112, 1, 1, 0x00 | 63);
-        { p_fill(ex, 110, 8, 1, 0xC0 | 63); p_fill(in, 111, 4, 1, 0xC0 | 63); p_fill(e ? ex : ex + 6, 112, 2, 1, 0xC0 | 63); }
+        p_fill(ex, 110, 8, 1, 0xC0 | 63); p_fill(in, 111, 4, 1, 0xC0 | 63); p_fill(e ? ex : ex + 6, 112, 2, 1, 0xC0 | 63);
+        if (w > 0.5f) p_fill(ex, 116, 8, 1, 0xC0 | 63);       /* narrowed from below as the cheeks push up */
         if (lid > 0) p_fill(ex, 110, 8, lid, 0xC0 | 63);
     }
     if (jaw > 0) {
-        p_fill(102, 156, 36, jaw, 0xC0 | 63);
-        p_fill(105, 157, 30, jaw, 0xC0 | 20);
-        if (jaw > 6) { p_fill(110, 157 + jaw - 6, 20, 6, 0x80 | 63); p_fill(119, 157 + jaw - 6, 2, 4, 0x80 | 40); }
-        p_move(leo_pic, 100, 156, 40, 22, 0, jaw);
+        p_move(leo_pic, 100, 156, 40, 22, 0, jaw);            /* the chin goes down with the jaw */
+        mouth(151 - (jaw > 6 ? 2 : 0), 158 + jaw, 15.0f + 0.2f * (f32)jaw);
     }
+    /* the nose and the upper lip lift */
+    for (int i = 0; i < GW * GH; i++) head[i] = g_work[i];
+    p_warp(head, 120.0f, 142.0f, 24.0f, 13.0f, 0.0f, 0.0f, 0.0f, -3.0f * w, 0);
     /* then the whole head, mouth and all, is raised */
     for (int i = 0; i < GW * GH; i++) head[i] = g_work[i];
     p_warp(head, 120.0f, 126.0f, 86.0f, 86.0f, 0.05f * w + 0.006f * sin_turns(t * 0.09f),

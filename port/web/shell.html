@@ -28,7 +28,8 @@
 var Module = { onRuntimeInitialized: function () {
   var ctx = document.getElementById('c').getContext('2d'), img = ctx.createImageData(240, 240);
   var v = function (id) { return +document.getElementById(id).value; };
-  var S = [['Aries', 'fire', 'Heat'], ['Taurus', 'earth', 'Growth'], ['Gemini', 'air', 'Wind'], ['Cancer', 'water', 'Tide']];
+  var S = [['Aries', 'fire', 'Heat'], ['Taurus', 'earth', 'Growth'], ['Gemini', 'air', 'Wind'], ['Cancer', 'water', 'Tide'],
+    ['Leo', 'fire', 'Blaze'], ['Virgo', 'earth', 'Harvest'], ['Libra', 'air', 'Breeze'], ['Scorpio', 'water', 'Depth']];
   var pick = function (i) {
     Module._z_init(i);
     document.getElementById('name').textContent = S[i][0].toUpperCase() + ' \u00b7 ' + S[i][1];

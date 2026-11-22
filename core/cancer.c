@@ -14,6 +14,7 @@ static struct {
     Scene s;
     f32 hide, hide_t, next_start;
     f32 xoff, vel, yw;           /* where it has sidled to, how fast, and the water's level */
+    f32 wig;                     /* 1 just after a note, falling: how hard the claws and legs wiggle */
     f32 splash;                  /* 0 .. 1 a ring running out; < 0 none */
     Bub b[NBUB]; f32 spawn;
 } C;
@@ -21,11 +22,11 @@ static struct {
 void cancer_init(void)
 {
     sc_init(&C.s, 37u);
-    C.hide = 0.0f; C.hide_t = -1.0f; C.next_start = 19.0f; C.xoff = 0.0f; C.vel = 0.0f; C.yw = 180.0f; C.splash = -1.0f; C.spawn = 0.0f;
+    C.hide = 0.0f; C.hide_t = -1.0f; C.next_start = 19.0f; C.xoff = 0.0f; C.vel = 0.0f; C.yw = 180.0f; C.splash = -1.0f; C.spawn = 0.0f; C.wig = 0.0f;
     for (int i = 0; i < NBUB; i++) C.b[i].life = 0.0f;
 }
 
-void cancer_strike(void) { C.hide_t = 0.0f; C.splash = 0.0f; }
+void cancer_strike(void) { C.wig = 1.0f; C.splash = 0.0f; }
 
 static f32 hex_r(f32 th)                 /* the frame's radius in direction th, as a part of its corner radius */
 {
@@ -92,9 +93,22 @@ void cancer_frame(f32 dt, const ZParams *want)
     sc_begin(&C.s);
     ripples();
     sc_mist(&C.s, K_BLUE);
+    /* a note sets the claws and the legs wiggling; at rest they only stir. The frame's pale line stays put */
+    C.wig = maxf(0.0f, C.wig - dt * 0.8f);
+    f32 w = C.wig * C.wig * (3.0f - 2.0f * C.wig), idle = 0.006f;
+    f32 cl = idle * sin_turns(t * 0.31f) + 0.035f * w * sin_turns(t * 4.6f), cr = idle * sin_turns(t * 0.27f + 0.4f) + 0.035f * w * sin_turns(t * 4.6f + 0.5f);
+    p_begin(cancer_pic);
+    p_warp(cancer_pic, 72.0f, 66.0f, 34.0f, 34.0f, 0.10f * w * sin_turns(t * 2.3f), cl, 0.0f, 0.0f, 1);
+    p_warp(cancer_pic, 168.0f, 66.0f, 34.0f, 34.0f, 0.10f * w * sin_turns(t * 2.3f + 0.5f), -cr, 0.0f, 0.0f, 1);
+    for (int i = 0; i < 4; i++) {
+        static const f32 at[4][4] = {{66, 172, 30, 24}, {174, 172, 30, 24}, {43, 128, 15, 22}, {197, 128, 15, 22}};
+        f32 ph = t * 6.2f + 0.27f * (f32)i;
+        p_warp(cancer_pic, at[i][0], at[i][1], at[i][2], at[i][3], 0.0f, (i & 1 ? -1.0f : 1.0f) * 0.022f * w * sin_turns(ph),
+               2.2f * w * sin_turns(ph + 0.25f), 1.4f * w * sin_turns(ph * 2.0f), 1);
+    }
     /* the picture breathes with the tide and wavers as if seen through water; startled, it shrinks back */
     f32 tide = C.s.p.heat;
-    g_blit(cancer_pic, 1.0f + 0.012f * sin_turns(t * 0.07f) - 0.07f * C.hide, 60.0f,
+    g_blit(g_work, 1.0f + 0.012f * sin_turns(t * 0.07f) - 0.07f * C.hide, 60.0f,
            0.5f + 3.0f * tide, 0.022f, t * (0.12f + 0.25f * tide), 0.95f);
     bubbles(dt);
 }

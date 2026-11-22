@@ -19,6 +19,7 @@ static struct {
     f32 next_snort, chew, chewing;
     Bit bit[NBIT]; f32 spawn; int dust;
     Bit puff[NPUFF];
+    int jet;
     f32 flare, steam, hy;        /* how wide the nostrils are; steam owed; how far the head has dropped */
 } T;
 
@@ -38,8 +39,8 @@ static void snort(f32 hard)
         Bit *b = &T.puff[i];
         if (b->life > 0.0f) continue;
         f32 sg = made ? 1.0f : -1.0f;
-        b->x = CX + sg * 8.5f; b->y = 187.0f + T.hy; b->vx = sg * (16.0f + 22.0f * hard); b->vy = 20.0f + 14.0f * hard;
-        b->age = 0.0f; b->life = 2.2f + 1.4f * hard;
+        b->x = CX + sg * 13.5f; b->y = 169.0f; b->vx = sg * (18.0f + 62.0f * hard); b->vy = 22.0f + 70.0f * hard;
+        b->age = 0.0f; b->life = 1.6f + 1.2f * hard;
         made++;
     }
 }
@@ -48,7 +49,7 @@ void taurus_strike(void)
 {
     T.temper = minf(1.0f, T.temper + 0.30f);
     T.stamp_t = 0.0f; T.swing = 0.07f; T.dust = 12;
-    snort(1.0f);
+    snort(1.0f); T.jet = 11;                  /* and steam shoots from the nostrils for a few frames more */
 }
 
 /* stems, leaves and flowers from behind the frame: more of them, further, the higher the first knob */
@@ -131,7 +132,9 @@ static void bits(f32 dt)
         b->vx *= 1.0f - dt * 1.5f; b->vy = b->vy * (1.0f - dt * 1.5f) - 22.0f * dt;      /* out and down, then it rises */
         b->x += (b->vx + sin_turns(b->age * 0.35f + (f32)i * 0.3f) * 5.0f) * dt; b->y += b->vy * dt;
         f32 u = b->age / b->life;
-        g_glow(b->x, b->y, 5.0f + 26.0f * u, (u < 0.08f ? u * 12.0f : 1.0f) * 0.95f * (1.0f - u * u));
+        /* solid little clouds, over the picture: they swell, then thin and shrink away */
+        g_mode(G_PAINT); g_disc(b->x, b->y, (2.5f + 9.0f * u) * (1.0f - u * u * u), u < 0.5f ? 1.0f : 1.0f - 0.9f * (u - 0.5f));
+        g_disc(b->x + 3.0f * sin_turns((f32)i * 0.37f), b->y - 2.0f, (1.5f + 6.0f * u) * (1.0f - u * u), u < 0.5f ? 0.9f : 0.9f - 0.9f * (u - 0.5f));
     }
 }
 
@@ -144,8 +147,9 @@ void taurus_frame(f32 dt, const ZParams *want)
     T.stamp = sc_follow(T.stamp, T.stamp_t >= 0.0f && T.stamp_t < 0.10f ? 1.0f : 0.0f, dt, 40.0f, 6.0f);
     /* Echo is its breath: the more of it, the wider the nostrils flare on each breath out and the more steam */
     f32 out = maxf(0.0f, sin_turns(T.s.t * (0.16f + 0.16f * T.s.p.echo)));
-    T.flare = sc_follow(T.flare, sat(T.s.p.echo * (0.25f + 0.75f * out) + (T.stamp_t >= 0.0f ? 0.8f : 0.0f) + 0.3f * T.temper), dt, 14.0f, 4.0f);
+    T.flare = sc_follow(T.flare, sat(T.s.p.echo * (0.25f + 0.75f * out) + (T.stamp_t >= 0.0f ? 1.0f : 0.0f) + 0.3f * T.temper), dt, 14.0f, 4.0f);
     T.steam += dt * T.s.p.echo * out * 22.0f;
+    if (T.jet > 0) { T.jet--; snort(0.75f + 0.25f * sc_rnd(&T.s)); }
     if (T.steam >= 1.0f) { T.steam -= 1.0f; snort(0.25f + 0.6f * T.s.p.echo); }
     T.next_snort -= dt;
     if (T.next_snort < 0.0f) { T.next_snort = 9.0f + sc_rnd(&T.s) * 9.0f; snort(0.3f); }
@@ -157,8 +161,11 @@ void taurus_frame(f32 dt, const ZParams *want)
     sc_begin(&T.s);
     growth();
     sc_mist(&T.s, K_GREEN);
-    /* the picture hardly moves: a slow breath, and a jolt when it stamps */
-    g_blit(taurus_pic, 1.06f + 0.008f * sin_turns(T.s.t * 0.085f) + 0.035f * T.stamp, -400.0f, 0.0f, 0.0f, 0.0f, 0.95f + 0.2f * T.stamp);
+    /* the picture hardly moves: a slow breath, a jolt when it stamps, and the nostrils swelling as it blows */
+    p_begin(taurus_pic);
+    p_warp(taurus_pic, 107.5f, 164.0f, 10.0f, 9.0f, 1.1f * T.flare, 0.0f, 0.0f, 0.0f, 0);
+    p_warp(taurus_pic, 131.5f, 164.0f, 10.0f, 9.0f, 1.1f * T.flare, 0.0f, 0.0f, 0.0f, 0);
+    g_blit(g_work, 1.06f + 0.008f * sin_turns(T.s.t * 0.085f) + 0.035f * T.stamp, -400.0f, 0.0f, 0.0f, 0.0f, 0.95f + 0.2f * T.stamp);
     bits(dt);
 }
 

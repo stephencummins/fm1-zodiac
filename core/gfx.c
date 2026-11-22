@@ -184,3 +184,38 @@ void g_blit(const uint8_t *pic, f32 scale, f32 y0, f32 amp, f32 freq, f32 phase,
         }
     }
 }
+
+uint8_t g_work[GW * GH];
+void p_begin(const uint8_t *pic) { for (int i = 0; i < GW * GH; i++) g_work[i] = pic[i]; }
+void p_move(const uint8_t *pic, int x0, int y0, int w, int h, int dx, int dy)
+{
+    for (int y = y0; y < y0 + h; y++)
+        for (int x = x0; x < x0 + w; x++) {
+            int X = x + dx, Y = y + dy;
+            if (X >= 0 && X < GW && Y >= 0 && Y < GH) g_work[Y * GW + X] = pic[y * GW + x];
+        }
+}
+void p_fill(int x0, int y0, int w, int h, uint8_t v)
+{
+    for (int y = y0; y < y0 + h; y++)
+        for (int x = x0; x < x0 + w; x++)
+            if (x >= 0 && x < GW && y >= 0 && y < GH) g_work[y * GW + x] = v;
+}
+void p_warp(const uint8_t *pic, f32 cx, f32 cy, f32 rx, f32 ry, f32 zoom, f32 turns, f32 dx, f32 dy, int keep)
+{
+    f32 sn = sin_turns(turns);
+    int xa = (int)(cx - rx), xb = (int)(cx + rx) + 1, ya = (int)(cy - ry), yb = (int)(cy + ry) + 1;
+    if (xa < 0) xa = 0; if (ya < 0) ya = 0; if (xb > GW - 1) xb = GW - 1; if (yb > GH - 1) yb = GH - 1;
+    for (int y = ya; y <= yb; y++)
+        for (int x = xa; x <= xb; x++) {
+            f32 px = (f32)x + 0.5f - cx, py = (f32)y + 0.5f - cy, u = px / rx, v = py / ry, w = (1.0f - u * u - v * v) * 2.5f;
+            if (w <= 0.0f) continue;
+            if (w > 1.0f) w = 1.0f;
+            f32 s = sn * w, c = 1.0f - 0.5f * s * s, k = 1.0f / (1.0f + zoom * w);
+            f32 sx = cx + (c * px + s * py) * k - dx * w, sy = cy + (c * py - s * px) * k - dy * w;
+            if (sx < 0.0f || sx >= (f32)GW || sy < 0.0f || sy >= (f32)GH) continue;
+            uint8_t from = pic[(int)sy * GW + (int)sx], was = pic[y * GW + x];
+            if (keep && (((was && (keep >> (was >> 6)) & 1)) || (from && ((keep >> (from >> 6)) & 1)))) continue;
+            g_work[y * GW + x] = from;
+        }
+}

@@ -17,6 +17,7 @@ static struct {
     int speaker; f32 next_turn, env[2], open;
     f32 flip; int swapped; f32 next_flip;
     f32 blink2, next_blink2;
+    f32 wink_t, wink, smile; int winker;      /* a note: one of them winks, both smile */
     Word w[NWORD]; f32 spawn;
 } G;
 
@@ -25,13 +26,40 @@ void gemini_init(void)
     sc_init(&G.s, 23u);
     G.speaker = 0; G.next_turn = 2.5f; G.env[0] = G.env[1] = 0.0f; G.open = 0.0f;
     G.flip = -1.0f; G.swapped = 0; G.next_flip = 14.0f; G.blink2 = 0.0f; G.next_blink2 = 4.4f; G.spawn = 0.0f;
+    G.wink_t = -1.0f; G.wink = 0.0f; G.smile = 0.0f; G.winker = 1;
     for (int i = 0; i < NWORD; i++) G.w[i].life = 0.0f;
 }
 
-void gemini_strike(void)
+static void turn_over(void)
 {
     if (G.flip < 0.0f) G.flip = 0.0f;
     G.speaker ^= 1; G.next_turn = 1.5f + sc_rnd(&G.s) * 2.0f;
+}
+
+/* a note: the twins take it in turns to wink, and both smile */
+void gemini_strike(void) { G.winker ^= 1; G.wink_t = 0.0f; }
+
+/* the faces' moving parts, put into the working picture: an eye shut to a curve, the mouths' corners lifted */
+static void faces(void)
+{
+    p_begin(gemini_pic);
+    uint8_t rose = gemini_pic[130 * GW + 92], sky = gemini_pic[135 * GW + 150];
+    if (G.wink > 0.5f) {
+        if (G.winker == 0) {
+            p_fill(93, 116, 12, 10, rose);
+            p_fill(95, 122, 7, 1, 0); p_fill(94, 121, 1, 1, 0); p_fill(102, 121, 1, 1, 0);
+        } else {
+            p_fill(135, 115, 14, 11, sky);
+            p_fill(138, 122, 8, 1, 0); p_fill(137, 121, 1, 1, 0); p_fill(146, 121, 1, 1, 0);
+        }
+    }
+    int n = (int)(G.smile * 4.0f + 0.5f);
+    uint8_t dr = (uint8_t)(0x40 | 16), ds = (uint8_t)(0xC0 | 16);
+    for (int k = 1; k <= n; k++) {
+        int up = k < 3 ? k - 1 : k;                    /* the corner runs back, then turns up */
+        p_fill(100 - k, 143 - up, 1, 1, dr); p_fill(139 + k, 143 - up, 1, 1, ds);
+    }
+    if (n >= 3) { p_fill(95, 139, 1, 1, dr); p_fill(144, 139, 1, 1, ds); }            /* and dimples the cheek */
 }
 
 static void wind(void)
@@ -101,7 +129,10 @@ void gemini_frame(f32 dt, const ZParams *want)
     if (G.next_blink2 < 0.0f) G.next_blink2 = 2.5f + sc_rnd(&G.s) * 6.0f;
     G.blink2 = sc_follow(G.blink2, G.next_blink2 < 0.16f ? 1.0f : 0.0f, dt, 30.0f, 30.0f);
     G.next_flip -= dt;
-    if (G.next_flip < 0.0f) { G.next_flip = (14.0f + sc_rnd(&G.s) * 14.0f) * (1.3f - 0.8f * wv); gemini_strike(); }
+    if (G.next_flip < 0.0f) { G.next_flip = (14.0f + sc_rnd(&G.s) * 14.0f) * (1.3f - 0.8f * wv); turn_over(); }
+    if (G.wink_t >= 0.0f) { G.wink_t += dt; if (G.wink_t > 1.6f) G.wink_t = -1.0f; }
+    G.wink = sc_follow(G.wink, G.wink_t >= 0.0f && G.wink_t < 0.5f ? 1.0f : 0.0f, dt, 40.0f, 25.0f);
+    G.smile = sc_follow(G.smile, G.wink_t >= 0.0f && G.wink_t < 1.1f ? 1.0f : 0.0f, dt, 18.0f, 4.0f);
     if (G.flip >= 0.0f) {
         f32 was = G.flip;
         G.flip += dt / 0.55f;
@@ -114,7 +145,8 @@ void gemini_frame(f32 dt, const ZParams *want)
     sc_mist(&G.s, K_SKY);
     /* the picture breathes, sways in the wind from the neck up to the curls, and narrows to nothing on a flip */
     f32 fl = G.flip >= 0.0f ? 1.0f - absf(cos_turns(G.flip * 0.5f)) : 0.0f;
-    g_blit(gemini_pic, 1.0f + 0.010f * sin_turns(t * 0.11f) - 0.10f * fl, -400.0f,
+    faces();
+    g_blit(g_work, 1.0f + 0.010f * sin_turns(t * 0.11f) - 0.10f * fl, -400.0f,
            (0.6f + 3.2f * wv) * (1.0f + 2.0f * fl), 0.004f, t * (0.10f + 0.35f * wv), 0.92f + 0.10f * G.open + 0.3f * fl);
     words(dt);
 }

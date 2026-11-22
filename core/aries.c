@@ -33,7 +33,7 @@ void aries_init(void)
     for (int i = 0; i < NEMBER; i++) A.em[i].life = 0.0f;
 }
 
-void aries_strike(void) { A.roar_t = 0.0f; A.burst = 22; }
+void aries_strike(void) { A.roar_t = 0.0f; A.burst = 8; }
 
 /* one tongue of flame: rooted at (bx, by), reaching h along (dx, dy), half as wide as b at the root */
 static void tongue(int i, f32 bx, f32 by, f32 dx, f32 dy, f32 h, f32 b, int ink, f32 a, f32 edge)
@@ -164,17 +164,27 @@ void aries_frame(f32 dt, const ZParams *want)
     f32 aim = 0.0f;
     if (A.roar_t >= 0.0f) {
         A.roar_t += dt;
-        aim = A.roar_t < 1.1f ? 1.0f : 0.0f;
-        if (A.roar_t > 2.6f) A.roar_t = -1.0f;
+        aim = A.roar_t < 0.7f ? 1.0f : 0.0f;
+        if (A.roar_t > 1.6f) A.roar_t = -1.0f;
     }
-    A.roar += (aim - A.roar) * (1.0f - 1.0f / (1.0f + dt * (aim > A.roar ? 16.0f : 3.2f)));
+    A.roar += (aim - A.roar) * (1.0f - 1.0f / (1.0f + dt * (aim > A.roar ? 22.0f : 7.0f)));
 
     if (A.p.echo > 0.02f) g_fade((int)(256.0f * (0.62f + 0.36f * A.p.echo))); else g_clear();
     fire();
     mist();
-    /* the picture shimmers in the heat and swells with a roar */
-    g_blit(aries_pic, 1.0f + 0.008f * sin_turns(A.t * 0.13f) + 0.07f * A.roar, -400.0f,
-           0.3f + 1.6f * A.p.heat, 0.035f, A.t * (0.5f + 0.9f * A.p.heat), 0.92f + 0.3f * A.roar);
+    /* a bleat: the jaw drops and trembles, the mouth dark behind it */
+    p_begin(aries_pic);
+    int jaw = (int)(A.roar * (4.6f + 1.9f * sin_turns(A.t * 11.0f)) + 0.5f);
+    if (jaw > 0) {
+        uint8_t blue = aries_pic[175 * GW + 120];
+        p_fill(108, 171, 24, jaw, blue);
+        p_fill(111, 171, 18, jaw, (uint8_t)(0x40 | 20));
+        if (jaw > 2) p_fill(115, 171 + jaw - 2, 10, 2, (uint8_t)(0x40 | 50));          /* the tongue */
+        p_move(aries_pic, 108, 171, 24, 6, 0, jaw);
+    }
+    /* the picture shimmers in the heat and lifts a little with the bleat */
+    g_blit(g_work, 1.0f + 0.008f * sin_turns(A.t * 0.13f) + 0.025f * A.roar, -400.0f,
+           0.3f + 1.6f * A.p.heat, 0.035f, A.t * (0.5f + 0.9f * A.p.heat), 0.92f + 0.2f * A.roar);
     embers(dt);
 }
 

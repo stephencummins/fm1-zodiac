@@ -62,8 +62,9 @@ buffers in the platform's pool). The computer and browser builds do not use them
 
 ## Not done yet
 
-- The build for the FM-1 itself has never been run: it needs JieLi's toolchain. So the sizes are estimates
-  (about 476 KB of the 581 KB of flash, about 430 KB of the 464 KB of memory), and nothing has been on an FM-1.
+- Built for the FM-1 once (22 November 2026, in a container on another Mac; this one has no container runtime):
+  the image is 457,352 bytes of the 581 KB slot, and memory 462,476 of 475,136 bytes, 12,660 free where 8,192
+  must stay spare. It fits, with little memory left over. Nothing has been on an FM-1.
 - How much of the FM-1's processor the pictures and the music need has not been measured.
 - The 16-bit echo measures about 95 dB below the float one, but has not been listened to.
 - `app/words.tsv` still carries the template's link for the screen reader's words; `tests/` is the template's.

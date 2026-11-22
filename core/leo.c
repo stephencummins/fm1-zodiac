@@ -47,15 +47,14 @@ void leo_frame(f32 dt, const ZParams *want)
     /* the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
     int jaw = (int)(w * (16.0f + 1.6f * sin_turns(t * 10.0f)) + 0.5f);
     p_begin(leo_pic);
-    /* living eyes: gold, a pupil that looks about, a glint; they blink, and narrow while it roars */
-    int gx = (int)((noise1(t * 0.22f, 5u) - 0.5f) * 6.0f); if (gx > 2) gx = 2; if (gx < -2) gx = -2;
-    if (w > 0.2f) gx = 0;
-    int lid = (int)(maxf(L.s.blink, 0.45f * w) * 6.0f + 0.5f);
+    /* the eyes: gold, looking straight at you from under a lowered brow. A slow blink now and then; wide in the roar */
+    int lid = (int)(L.s.blink * (1.0f - w) * 7.0f + 0.5f);
     for (int e = 0; e < 2; e++) {
-        int ex = e ? 133 : 99;
-        p_fill(ex, 110, 8, 6, 0x40 | 63);
-        p_fill(ex + 3 + gx, 111, 3, 4, 0xC0 | 12);
-        p_fill(ex + 3 + gx, 111, 1, 1, 0x00 | 63);
+        int ex = e ? 133 : 99, in = e ? ex : ex + 4;          /* in: the half of the eye nearer the nose */
+        p_fill(ex, 110, 8, 7, 0x40 | 63);
+        p_fill(ex + 2, 112, 4, 4, 0xC0 | 10);
+        p_fill(ex + 2, 112, 1, 1, 0x00 | 63);
+        if (w < 0.5f) { p_fill(ex, 110, 8, 1, 0xC0 | 63); p_fill(in, 111, 4, 1, 0xC0 | 63); p_fill(e ? ex : ex + 6, 112, 2, 1, 0xC0 | 63); }
         if (lid > 0) p_fill(ex, 110, 8, lid, 0xC0 | 63);
     }
     if (jaw > 0) {

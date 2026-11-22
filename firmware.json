@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "id": "zodiac",
+  "name": "zodiac",
+  "author": "Stephen Cummins",
+  "tagline": "Twelve signs that play themselves",
+  "description": "Twelve signs of the zodiac, each a picture and a piece of music that plays itself.",
+  "tags": ["synth", "experimental"],
+  "hardware": {
+    "models": ["FM-1"],
+    "flash": ["856014", "B36014"],
+    "features": ["usb-audio-in", "usb-audio-out", "velocity", "pressure", "screen-reader", "companion"]
+  },
+  "credits": "Zodiac is built on fm1-base by Charles Vestal and felucca-bsp, which come from Felucca by Leo Kuroshita, Hügelton Instruments."
+}

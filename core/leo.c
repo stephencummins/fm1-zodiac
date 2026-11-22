@@ -1,16 +1,16 @@
 /* LEO: the lion, fire. Warm, proud, generous, ruled by the Sun: it sits crowned in its own light.
- * At a note it roars, shakes out its mane and swells, and the sun behind it flares.
+ * At a note it roars, up to the left and then up to the right, and the sun behind it flares.
  * The lion is art/pic/leo.jpg; the rays and the sparks are drawn here. */
 #include "scene.h"
 #include "pic_leo.h"
 
 enum { K_CREAM, K_GOLD, K_ORANGE, K_PURPLE };
 
-static struct { Scene s; f32 shake; } L;
-static uint8_t head[GW * GH];             /* the head with its mouth open, before it is shaken */
+static struct { Scene s; f32 age, roar; } L;      /* age: seconds since the note; roar: 0 .. 1, how open the mouth */
+static uint8_t head[GW * GH];             /* the head with its mouth open, before it is turned */
 
-void leo_init(void) { sc_init(&L.s, 53u); L.shake = 0.0f; }
-void leo_strike(void) { L.shake = 1.0f; }
+void leo_init(void) { sc_init(&L.s, 53u); L.age = 99.0f; L.roar = 0.0f; }
+void leo_strike(void) { L.age = 0.0f; }
 
 static void sun(f32 w)
 {
@@ -37,12 +37,14 @@ void leo_frame(f32 dt, const ZParams *want)
 {
     sc_step(&L.s, dt, want);
     f32 t = L.s.t;
-    L.shake = maxf(0.0f, L.shake - dt * 0.6f);
-    f32 w = L.shake * L.shake * (3.0f - 2.0f * L.shake);
+    /* a roar in two parts, like the lion at the start of a film: up to the left, then up to the right */
+    L.age += dt;
+    f32 lean = L.age < 2.4f ? -sin_turns(L.age / 2.4f) : 0.0f, w = absf(lean);
+    w = w * (2.0f - w); L.roar = w;
     sc_begin(&L.s);
     sun(w);
     sc_mist(&L.s, K_ORANGE);
-    /* it roars: the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
+    /* the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
     int jaw = (int)(w * (10.0f + 1.5f * sin_turns(t * 10.0f)) + 0.5f);
     p_begin(leo_pic);
     if (jaw > 0) {
@@ -51,10 +53,10 @@ void leo_frame(f32 dt, const ZParams *want)
         if (jaw > 4) p_fill(112, 157 + jaw - 4, 16, 4, 0x80 | 63);
         p_move(leo_pic, 100, 156, 40, 22, 0, jaw);
     }
-    /* then the whole head, mouth and all: the mane shakes from side to side and fluffs out */
+    /* then the whole head, mouth and all, lifts and turns to that side */
     for (int i = 0; i < GW * GH; i++) head[i] = g_work[i];
-    p_warp(head, 120.0f, 126.0f, 86.0f, 86.0f, 0.085f * w + 0.006f * sin_turns(t * 0.09f),
-           0.022f * w * sin_turns(t * 4.2f) + 0.003f * sin_turns(t * 0.05f), 0.0f, -3.0f * w, 0);
+    p_warp(head, 120.0f, 126.0f, 86.0f, 86.0f, 0.05f * w + 0.006f * sin_turns(t * 0.09f),
+           0.024f * lean + 0.003f * sin_turns(t * 0.05f), 7.0f * lean, -5.0f * w, 0);
     g_blit(g_work, 1.0f + 0.008f * sin_turns(t * 0.08f), 0.0f, 0.3f + 1.3f * L.s.p.heat, 0.03f, t * 0.6f, 0.95f + 0.25f * w);
 }
 
@@ -63,5 +65,5 @@ void leo_palette(uint16_t pal[256])
     static const uint32_t inks[G_INKS] = {0xF4E8C8u, 0xF2B830u, 0xD87020u, 0x4A2890u};
     /* Blaze deep orange, Echo royal purple, Mist rose, Light gold */
     static const f32 tint[4][3] = {{150, 50, 6}, {70, 20, 120}, {120, 40, 60}, {150, 110, 20}};
-    sc_palette_tint(&L.s, inks, 0.25f * L.shake, tint, L.shake, pal);
+    sc_palette_tint(&L.s, inks, 0.25f * L.roar, tint, L.roar, pal);
 }

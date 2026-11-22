@@ -193,5 +193,7 @@ void gemini_palette(uint16_t pal[256])
     uint32_t inks[G_INKS] = {0xF2EAD2u, 0xCC4E7Cu, 0xF4D048u, 0x4AA8ECu};
     if (G.swapped) { uint32_t x = inks[K_SUN]; inks[K_SUN] = inks[K_SKY]; inks[K_SKY] = x; }
     f32 fl = G.flip >= 0.0f ? 1.0f - absf(cos_turns(G.flip * 0.5f)) : 0.0f;
-    sc_palette(&G.s, inks, 0.25f * fl, pal);
+    /* Wind sky blue, Echo magenta, Mist lilac, Light yellow */
+    static const f32 tint[4][3] = {{20, 90, 160}, {140, 24, 96}, {70, 50, 150}, {150, 128, 20}};
+    sc_palette_tint(&G.s, inks, 0.25f * fl, tint, fl, pal);
 }

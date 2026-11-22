@@ -24,6 +24,7 @@ void sc_frame_back(f32 beat, int ink, f32 glow);                 /* the frame hi
 void sc_frame_line(f32 beat, f32 rays);
 f32 sc_follow(f32 v, f32 aim, f32 dt, f32 up, f32 down);         /* v towards aim, at one rate rising, another falling */
 void sc_palette(const Scene *s, const uint32_t inks[G_INKS], f32 boost, uint16_t pal[256]);
+void sc_palette_tint(const Scene *s, const uint32_t inks[G_INKS], f32 boost, const f32 tint[4][3], f32 flash, uint16_t pal[256]);
 
 void sc_rot(f32 *xy, int n, f32 cx, f32 cy, f32 turns);
 void sc_squash(f32 *xy, int n, f32 y0, f32 by);

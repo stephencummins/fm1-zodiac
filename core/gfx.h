@@ -11,7 +11,7 @@
 
 typedef float f32;
 
-enum { G_MAX, G_PAINT };                 /* G_MAX: the brighter ink wins (line art). G_PAINT: covers what is under it */
+enum { G_MAX, G_PAINT, G_GROUND };                 /* G_MAX: the brighter ink wins (line art). G_PAINT: covers what is under it */
 
 extern uint8_t g_fb[GW * GH];
 

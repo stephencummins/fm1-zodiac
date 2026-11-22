@@ -24,6 +24,7 @@ static inline void put(int x, int y, f32 c, f32 a)
     if ((unsigned)x >= GW || (unsigned)y >= GH || c <= 0.0f) return;
     uint8_t *p = &g_fb[y * GW + x];
     if (c > 1.0f) c = 1.0f;
+    if (mode == G_GROUND) { if (c >= 0.5f) *p = 0; return; }   /* back to the bare ground */
     if (mode == G_MAX) {
         int lv = (int)(c * a * 63.0f + 0.5f);
         if (lv > (*p & 63)) *p = (uint8_t)(ink_bits | lv);

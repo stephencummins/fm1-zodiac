@@ -79,7 +79,7 @@ static void fire(void)
         hx[2 * k] = CX + cos_turns(th) * HEXR * beat; hx[2 * k + 1] = CY + sin_turns(th) * HEXR * beat;
         in[2 * k] = CX + cos_turns(th) * (HEXR - 6.0f) * beat; in[2 * k + 1] = CY + sin_turns(th) * (HEXR - 6.0f) * beat;
     }
-    g_mode(G_PAINT); g_ink(INK_RED); g_fill(hx, 6, 0.0f);                    /* the frame hides the flames' roots */
+    g_mode(G_GROUND); g_fill(hx, 6, 1.0f);                    /* the frame hides the flames' roots */
     g_mode(G_MAX);
     g_glow(CX, CY + 10.0f, 70.0f, 0.22f + 0.30f * heat + 0.3f * A.roar);
     g_ink(INK_AMBER); g_fill(hx, 6, 0.03f + 0.05f * heat + 0.12f * A.roar);

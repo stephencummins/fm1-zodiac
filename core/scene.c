@@ -61,7 +61,7 @@ void sc_frame_back(f32 beat, int ink, f32 glow)
 {
     f32 hx[12];
     sc_hex(HEXR * beat, hx);
-    g_mode(G_PAINT); g_ink(ink); g_fill(hx, 6, 0.0f);
+    (void)ink; g_mode(G_GROUND); g_fill(hx, 6, 1.0f);
     g_mode(G_MAX);
     if (glow > 0.0f) g_glow(CX, CY + 10.0f, 70.0f, glow);
 }
@@ -92,3 +92,17 @@ void sc_rot(f32 *xy, int n, f32 cx, f32 cy, f32 turns)
 void sc_squash(f32 *xy, int n, f32 y0, f32 by) { for (int k = 0; k < n; k++) xy[2 * k + 1] = y0 + (xy[2 * k + 1] - y0) * by; }
 void sc_squashx(f32 *xy, int n, f32 x0, f32 by) { for (int k = 0; k < n; k++) xy[2 * k] = x0 + (xy[2 * k] - x0) * by; }
 void sc_shift(f32 *xy, int n, f32 dx, f32 dy) { for (int k = 0; k < n; k++) { xy[2 * k] += dx; xy[2 * k + 1] += dy; } }
+
+/* the ground behind everything takes its colour from the four settings, so a turn of any knob shows at once.
+ * tint: one colour for each of the sign's knob, Echo, Mist, Light; flash lifts it for a moment (a strike) */
+void sc_palette_tint(const Scene *s, const uint32_t inks[G_INKS], f32 boost, const f32 tint[4][3], f32 flash, uint16_t pal[256])
+{
+    f32 l = s->p.light;
+    f32 wt[4] = {s->p.heat * s->p.heat, s->p.echo, s->p.mist, l * l * 0.8f}, c[3];
+    for (int k = 0; k < 3; k++) {
+        f32 v = 0.0f;
+        for (int j = 0; j < 4; j++) v += tint[j][k] * wt[j];
+        c[k] = minf(170.0f, v * (0.58f + 0.45f * flash));
+    }
+    g_palette_on(inks, 0.30f + 0.85f * l + boost, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
+}

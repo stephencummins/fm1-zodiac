@@ -189,5 +189,8 @@ void cancer_frame(f32 dt, const ZParams *want)
 void cancer_palette(uint16_t pal[256])
 {
     static const uint32_t inks[G_INKS] = {0xDCE8F4u, 0xE4586Cu, 0x34B4A8u, 0x2C54C8u};
-    sc_palette(&C.s, inks, C.splash >= 0.0f ? 0.2f * (1.0f - C.splash) : 0.0f, pal);
+    /* Tide deep blue, Echo sea green, Mist violet, Light moon silver */
+    static const f32 tint[4][3] = {{10, 40, 150}, {8, 110, 110}, {60, 40, 130}, {110, 120, 140}};
+    f32 sp = C.splash >= 0.0f ? 1.0f - C.splash : 0.0f;
+    sc_palette_tint(&C.s, inks, 0.2f * sp, tint, sp, pal);
 }

@@ -220,5 +220,7 @@ void taurus_frame(f32 dt, const ZParams *want)
 void taurus_palette(uint16_t pal[256])
 {
     static const uint32_t inks[G_INKS] = {0xECDFB4u, 0xA4522Cu, 0xE4A93Cu, 0x5C9E3Cu};
-    sc_palette(&T.s, inks, 0.15f * T.stamp, pal);
+    /* Growth green, Echo warm earth, Mist moss, Light ochre */
+    static const f32 tint[4][3] = {{24, 110, 30}, {130, 50, 20}, {14, 80, 90}, {150, 112, 16}};
+    sc_palette_tint(&T.s, inks, 0.15f * T.stamp, tint, T.stamp, pal);
 }

@@ -10,7 +10,7 @@ static const int8_t prog[4][4] = {{0, 3, 0, 4}, {0, 6, 3, 0}, {0, 5, 3, 4}, {0, 
 static struct {
     f32 secs; int beats;
     f32 dt, clock; uint32_t rng;
-    int step, bar, deg, low, pr;
+    int step, bar, deg, low, pr, key, reg;
     MBow lo[3], mel; int mel_idx, mel_wait, mel_off;
     MDrum hoof;
     f32 h_env, h_t, h_low, h_band; int h_on;
@@ -18,12 +18,13 @@ static struct {
 } M;
 
 static f32 rnd(void) { return m_rnd(&M.rng); }
-static f32 note(int idx, int base) { return (f32)(base + m_scale(mixo, idx)); }
+static f32 note(int idx, int base) { return (f32)(base + M.key + m_scale(mixo, idx)); }
 
 static void step(void)
 {
     int s = M.step;
     if (s == 0 && (M.bar & 7) == 0 && M.bar && rnd() < 0.3f) M.beats = 7 - M.beats;      /* the time may change: three, or four */
+    if (s == 0 && (M.bar & 7) == 0) { M.key = m_slow.key; M.reg = m_slow.reg; }
     if (s == 0 && !(M.bar & 1)) {                            /* a chord lasts two bars */
         int unit = (M.bar >> 1) & 3;
         if (unit == 0) M.pr = (int)(rnd() * 4.0f);
@@ -45,10 +46,10 @@ static void step(void)
             if (a == 0 || a == 2 || a == 4) { t -= d; break; }
             if (b == 0 || b == 2 || b == 4) { t += d; break; }
         }
-        if (t < 0) t += 4; if (t > 11) t -= 4;
+        if (t < M.reg) t += 4; if (t > 11 + M.reg) t -= 4;
         f32 r = rnd();
         int dur = r < 0.3f ? 2 : r < 0.6f ? 4 : r < 0.8f ? 3 : r < 0.93f ? 6 : 8;
-        int rest = rnd() < 0.40f - 0.3f * M.growth ? 2 + 2 * (int)(rnd() * 3.0f) : 0;
+        int rest = rnd() < 0.40f - 0.3f * M.growth - 0.2f * m_slow.fill ? 2 + 2 * (int)(rnd() * 3.0f) : 0;
         m_bow_on(&M.mel, note(t, 55), 1);
         M.mel_idx = t; M.mel_off = rest ? dur * STEPS - 1 : 0; M.mel_wait = (dur + rest) * STEPS;
     }
@@ -58,7 +59,7 @@ static void step(void)
 static void taurus_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.dt = 1.0f / sr; M.rng = 0x7A0205u; M.clock = 1.0f; M.beats = 4; M.mel_idx = 4; M.mel_wait = 2 * 4 * STEPS + 1;
+    M.dt = 1.0f / sr; M.rng = m_seeded(0x7A0205u); M.clock = 1.0f; M.beats = 4; M.mel_idx = 4; M.mel_wait = 2 * 4 * STEPS + 1;
     M.lo[0].pan = 0.3f; M.lo[1].pan = 0.7f; M.lo[2].pan = 0.5f; M.lo[1].vib = 0.4f; M.mel.vib = 0.7f;
     m_fx_init(sr);
 }
@@ -75,12 +76,13 @@ static void taurus_m_render(f32 *lr, int n, const ZParams *p)
     f32 cut = sat((450.0f + 1300.0f * light + 500.0f * M.growth) * 6.2832f * dt), bcut = sat(260.0f * 6.2832f * dt);
     f32 hdec = m_k(0.5f, dt), hbend = m_k(0.03f, dt), hup = m_k(0.025f, dt), hdn = m_k(0.20f, dt);
     f32 bpm = BPM * m_drift(M.secs += (f32)n * dt, 12u, 0.14f);
+    f32 v0 = m_slow.v[0], v1 = m_slow.v[1], v2 = m_slow.v[2];
     for (int i = 0; i < n; i++) {
         M.clock += (f32)STEPS * bpm / 60.0f * dt;
         if (M.clock >= 1.0f) { M.clock -= 1.0f; step(); }
-        f32 a = m_bow(&M.lo[0], dt, up, dn, glide, 0.004f, cut), b = m_bow(&M.lo[1], dt, up, dn, glide, 0.004f, cut);
-        f32 c = m_bow(&M.lo[2], dt, up, dn, glide, 0.002f, bcut) * 1.5f;
-        f32 m = m_bow(&M.mel, dt, up, dn, glide, 0.007f, cut) * (0.8f + 0.4f * M.growth);
+        f32 a = m_bow(&M.lo[0], dt, up, dn, glide, 0.004f, cut), b = m_bow(&M.lo[1], dt, up, dn, glide, 0.004f, cut); a *= v0; b *= v0;
+        f32 c = m_bow(&M.lo[2], dt, up, dn, glide, 0.002f, bcut) * 1.5f * (0.4f + 0.6f * v2);
+        f32 m = m_bow(&M.mel, dt, up, dn, glide, 0.007f, cut) * (0.8f + 0.4f * M.growth) * v1;
         f32 hoof = m_drum(&M.hoof, dt, hdec, hbend);
         f32 huff = 0.0f;
         if (M.h_on) {

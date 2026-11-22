@@ -15,7 +15,11 @@ static void start_music(void) { Mu = z_music(which_sign); z_led = rate > 0.0f &&
 EMSCRIPTEN_KEEPALIVE void z_init(int which) { which_sign = which < 0 || which >= z_nsigns ? 0 : which; Z = &z_signs[which_sign]; g_clear(); Z->init(); start_music(); }
 
 /* sound on at this sample rate, or off at 0 */
-EMSCRIPTEN_KEEPALIVE void z_sound(float sr) { rate = sr; start_music(); }
+EMSCRIPTEN_KEEPALIVE void z_sound(float sr)
+{
+    if (sr > 0.0f) z_music_seed(((uint32_t)(emscripten_random() * 16777216.0f) * 2654435761u ^ (uint32_t)emscripten_get_now()) | 1u);      /* no two listens alike */
+    rate = sr; start_music();
+}
 
 /* the next n stereo samples; with the sound on, the music leads and the picture follows it */
 EMSCRIPTEN_KEEPALIVE float *z_audio(int n)

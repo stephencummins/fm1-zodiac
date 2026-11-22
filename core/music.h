@@ -12,6 +12,21 @@ const ZMusic *z_music(int sign);
 void z_music_start(const ZMusic *m, f32 sr);                 /* then z_music_render: the piece, making its own gesture now and then */
 void z_music_render(const ZMusic *m, f32 *lr, int n, const ZParams *p);                            /* 0: this sign has no piece yet */
 
+/* so that no two starts are alike, a port gives a number that differs each time (0, the default: always the same, for measuring) */
+void z_music_seed(uint32_t s);
+extern uint32_t m_seed;                                     /* this start's number */
+static inline uint32_t m_seeded(uint32_t c) { uint32_t s = c ^ m_seed; return s ? s : c; }
+
+/* the slow layer: what changes over minutes. Every piece reads it, none writes it. For the first minute it is at rest. */
+typedef struct {
+    f32 secs;
+    f32 fill;                                               /* -1 thin .. 1 full; 0 is the piece as written */
+    f32 v[4];                                               /* each voice: 1 present, 0 fallen silent. 0 only recedes, and 0 and 1 are never both out */
+    int reg;                                                /* the tune's register: -2 .. 2 steps of the scale */
+    int key;                                                /* semitones from home: a piece moves there at its next phrase */
+} MSlow;
+extern MSlow m_slow;
+
 /* the music leads the picture: when a piece wants the picture to strike it says so here */
 extern int z_led;                                           /* 1 while a piece is playing: pictures don't strike by themselves */
 void m_event(void);
@@ -100,7 +115,7 @@ static inline f32 m_drum(MDrum *d, f32 dt, f32 dec, f32 bend)
 }
 
 /* every piece wanders: its speed drifts a little either way over a minute or so */
-static inline f32 m_drift(f32 secs, uint32_t seed, f32 depth) { return 1.0f + depth * (2.0f * noise1(secs / 41.0f, seed) - 1.0f); }
+static inline f32 m_drift(f32 secs, uint32_t seed, f32 depth) { return 1.0f + depth * (2.0f * noise1(secs / 41.0f, seed + m_seed) - 1.0f); }
 
 /* a small bell, celesta kind */
 typedef struct { f32 ph, mph, hz, env, dec, pan; } MBell;

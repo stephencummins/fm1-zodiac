@@ -6,11 +6,11 @@
 
 #define ROOT 185.0f                                /* the horn's home note */
 static const int8_t minor[9] = {0, 3, 7, 10, 12, 14, 15, 17, 19};   /* its nine notes, low to high: a minor key */
-static f32 horn_hz(int h) { return ROOT * m_hz(69.0f + (f32)minor[h - 4]) / 440.0f; }
+static f32 horn_hz(int h, int key) { return ROOT * m_hz(69.0f + (f32)(minor[h - 4] + key)) / 440.0f; }
 
 static struct {
     f32 dt; uint32_t rng, n;
-    MHorn hn[2]; int h[2], left[2]; f32 wait[2], off[2];
+    MHorn hn[2]; int h[2], left[2], key[2]; f32 wait[2], off[2];
     f32 quake, quake_t, next_quake, r_lp1, r_lp2, r_ph, r_wob, climb;
 } M;
 
@@ -19,16 +19,16 @@ static f32 rnd(void) { return m_rnd(&M.rng); }
 static void call(int k)
 {
     static const int8_t rest[3] = {4, 6, 8};
-    if (M.left[k] == 0) { M.left[k] = 3 + (int)(rnd() * 4.0f); M.h[k] = rest[(int)(rnd() * 3.0f)]; }
+    if (M.left[k] == 0) { M.key[k] = m_slow.key; M.left[k] = 3 + (int)(rnd() * 4.0f); M.h[k] = rest[(int)(rnd() * 3.0f)]; }
     else M.h[k] += (int)(rnd() * 5.0f) - 2 + (rnd() < 0.3f + 0.3f * M.climb);
-    int top = 9 + (int)(3.9f * M.climb);
+    int top = 9 + (int)(3.9f * M.climb) + m_slow.reg; if (top > 12) top = 12; if (top < 7) top = 7;
     if (M.h[k] < 4) M.h[k] = 5; if (M.h[k] > top) M.h[k] = top - 1;
     int last = --M.left[k] == 0;
     if (last) M.h[k] = M.h[k] >= 7 ? 8 : M.h[k] >= 5 ? 6 : 4;
-    M.hn[k].aim = horn_hz(M.h[k]); M.hn[k].hz = M.hn[k].aim * 0.96f; M.hn[k].gate = 1.0f; M.hn[k].age = 0.0f;
+    M.hn[k].aim = horn_hz(M.h[k], M.key[k]); M.hn[k].hz = M.hn[k].aim * 0.96f; M.hn[k].gate = 1.0f; M.hn[k].age = 0.0f;
     f32 dur = last ? 3.0f + 2.5f * rnd() : 0.7f + 1.6f * rnd();
     M.off[k] = dur * (last ? 1.0f : 0.92f);
-    M.wait[k] = last ? dur + 4.0f + 8.0f * rnd() : dur;
+    M.wait[k] = last ? dur + (4.0f + 8.0f * rnd()) * (1.0f - 0.4f * m_slow.fill) : dur;
     if (last && k == 0 && M.wait[1] > 2.0f && M.left[1] == 0) M.wait[1] = dur + 1.0f;        /* the far horn answers */
 }
 
@@ -51,7 +51,7 @@ static void control(f32 dt)
 static void capricorn_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.dt = 1.0f / sr; M.rng = 0xCA9210u; M.quake_t = -1.0f; M.next_quake = 30.0f;
+    M.dt = 1.0f / sr; M.rng = m_seeded(0xCA9210u); M.quake_t = -1.0f; M.next_quake = 30.0f;
     M.wait[0] = 1.0f; M.wait[1] = 14.0f; M.hn[0].pan = 0.45f; M.hn[1].pan = 0.8f;
     m_fx_init(sr);
 }
@@ -66,15 +66,16 @@ static void capricorn_m_render(f32 *lr, int n, const ZParams *p)
     m_fx.echo_secs = 0.95f; m_fx.echo_fb = 0.35f + 0.35f * echo; m_fx.echo_wet = 0.4f + 0.6f * echo;
     f32 up = m_k(0.10f, dt), dn = m_k(0.25f, dt), bend = m_k(0.05f, dt), rk = sat(95.0f * 6.2832f * dt);
     f32 base = 0.5f + 0.5f * light, blown = 1.2f + 1.0f * light;
+    f32 v0 = m_slow.v[0], v1 = m_slow.v[1], v2 = m_slow.v[2];
     for (int i = 0; i < n; i++) {
         if ((M.n++ & 63u) == 0) control(64.0f * dt);
-        f32 a = m_horn(&M.hn[0], dt, up, dn, bend, base, blown, 0.002f) * 0.36f;
-        f32 b = m_horn(&M.hn[1], dt, up, dn, bend, base * 0.7f, blown * 0.6f, 0.002f) * 0.13f;
+        f32 a = m_horn(&M.hn[0], dt, up, dn, bend, base, blown, 0.002f) * 0.36f * v0;
+        f32 b = m_horn(&M.hn[1], dt, up, dn, bend, base * 0.7f, blown * 0.6f, 0.002f) * 0.13f * v1;
         f32 nz = m_noise(&M.rng);
         M.r_lp1 += (nz - M.r_lp1) * rk; M.r_lp2 += (M.r_lp1 - M.r_lp2) * rk;
         M.r_wob += 0.37f * dt; if (M.r_wob >= 1.0f) M.r_wob -= 1.0f;
         M.r_ph += (33.0f + 6.0f * sin_turns(M.r_wob)) * dt; if (M.r_ph >= 1.0f) M.r_ph -= 1.0f;
-        f32 ground = 0.20f + 0.12f * M.climb + 0.6f * M.quake;
+        f32 ground = (0.20f + 0.12f * M.climb) * (0.5f + 0.5f * v2) + 0.6f * M.quake;
         f32 r2 = M.r_ph + M.r_ph; if (r2 >= 1.0f) r2 -= 1.0f;              /* the octave above, so it is heard and not only felt */
         f32 rum = (M.r_lp2 * 9.0f + (sin_turns(M.r_ph) + 0.7f * sin_turns(r2)) * (0.5f + M.r_lp2 * 14.0f)) * ground * 0.45f;
         f32 l = a * (1.0f - M.hn[0].pan) * 2.0f + b * 0.8f + rum, r = a * M.hn[0].pan * 2.0f + b * 1.2f + rum;

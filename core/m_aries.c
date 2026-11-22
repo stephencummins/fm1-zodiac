@@ -13,7 +13,7 @@ typedef MHorn Horn;
 static struct {
     f32 secs; int beats;
     f32 sr, dt, clock; uint32_t rng;
-    int step, bar, key, key_bars, blare_in;
+    int step, bar, key, key_bars, blare_in, shift, reg;
     /* the horns */
     Horn pad[4]; int pad_deg, pad_ahead, pad_rest; f32 pad_lp[2];
     /* the bass */
@@ -31,7 +31,7 @@ static f32 rnd(void) { return m_rnd(&M.rng); }
 static int note_of(int idx, int base)
 {
     int o = idx >= 0 ? idx / 7 : -((6 - idx) / 7), d = idx - 7 * o;
-    return base + M.key + 12 * o + dorian[d];
+    return base + M.key + M.shift + 12 * o + dorian[d];
 }
 
 #define horn_on m_horn_on
@@ -54,7 +54,7 @@ static void bass_on(int idx, f32 vel)
 static void blast(int which)                                 /* 0, 1: short calls; 2: the long one */
 {
     static const int8_t n[3] = {48, 55, 60};
-    for (int v = 0; v < 3; v++) horn_on(&M.bl[v], (f32)(n[v] + M.key) + (which == 2 && v == 2 ? 3.0f : 0.0f) + (rnd() - 0.5f) * 0.12f, 0.90f);
+    for (int v = 0; v < 3; v++) horn_on(&M.bl[v], (f32)(n[v] + M.key + M.shift) + (which == 2 && v == 2 ? 3.0f : 0.0f) + (rnd() - 0.5f) * 0.12f, 0.90f);
     m_event();
 }
 static void blare_start(void) { if (M.bl_pos < 0) { M.bl_pos = 1; blast(0); } }
@@ -85,8 +85,8 @@ static void trumpet_step(void)
     }
     static const int8_t move[10] = {-2, -1, -1, -1, 1, 1, 2, 2, -3, 4};
     M.tp_idx += move[(int)(rnd() * 10.0f)];
-    if (M.tp_idx < 0) M.tp_idx += 3;
-    if (M.tp_idx > 11) M.tp_idx -= 4;
+    if (M.tp_idx < M.reg) M.tp_idx += 3;
+    if (M.tp_idx > 11 + M.reg) M.tp_idx -= 4;
     int last = --M.tp_left == 0, dur;
     if (last) {
         int d = ((M.tp_idx % 7) + 7) % 7; if (d == 1 || d == 5) M.tp_idx--;      /* come to rest on a settled note */
@@ -108,11 +108,12 @@ static void step(void)
     int s = M.step, odd = M.bar & 1, end = M.beats * STEPS;
     if (s == 0) {
         if ((M.bar & 7) == 0) {                              /* every eight bars the ground may shift */
+            M.shift = m_slow.key; M.reg = m_slow.reg;
             if (M.key != 0) { M.key = 0; M.key_bars = 0; }
             else if (M.key_bars >= 16 && rnd() < 0.35f) M.key = 3;
         }
         M.key_bars++;
-        M.busy = sat(0.15f + 0.6f * M.heat + 0.5f * (noise1((f32)M.bar / 12.0f, 77u) - 0.5f));
+        M.busy = sat(0.15f + 0.6f * M.heat + 0.5f * (noise1((f32)M.bar / 12.0f, 77u + m_seed) - 0.5f) + 0.3f * m_slow.fill);
         if (--M.blare_in <= 0) { blare_start(); M.blare_in = 5 + (int)(rnd() * 9.0f * (1.4f - M.heat)); }
     }
     /* the horns: a chord for most of two bars, a breath, the next; sometimes it comes in early, sometimes they sit out */
@@ -143,7 +144,7 @@ static void step(void)
 static void aries_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.sr = sr; M.dt = 1.0f / sr; M.rng = 0xA51E5u; M.clock = 1.0f;
+    M.sr = sr; M.dt = 1.0f / sr; M.rng = m_seeded(0xA51E5u); M.clock = 1.0f;
     M.beats = 4; M.blare_in = 4; M.bl_pos = -1; M.tp_wait = 3 * STEPS * 4; M.tp_idx = 4; M.heat = 0.45f; M.light = 0.7f;
     for (int v = 0; v < 4; v++) { M.pad[v].pan = 0.2f + 0.2f * (f32)v; M.pad[v].vib = 0.13f * (f32)v; }
     for (int v = 0; v < 3; v++) { M.bl[v].pan = 0.3f + 0.2f * (f32)v; M.bl[v].vib = 0.3f * (f32)v; }
@@ -170,6 +171,7 @@ static void aries_m_render(f32 *lr, int n, const ZParams *p)
     f32 k_b = m_k(0.9f, dt), k_bp = m_k(0.07f, dt), k_r = m_k(0.11f + 0.08f * heat, dt);
     f32 tf = sat((1350.0f + 700.0f * light) * 6.2832f * dt), tq = 0.38f;       /* the mute: a narrow, nasal band */
     f32 ride = 0.035f + 0.07f * heat;
+    f32 v0 = m_slow.v[0], v1 = m_slow.v[1], v2 = m_slow.v[2], v3 = m_slow.v[3];
     for (int i = 0; i < n; i++) {
         M.clock += (f32)STEPS * bpm / 60.0f * dt;
         if (M.clock >= 1.0f) { M.clock -= 1.0f; step(); }
@@ -188,25 +190,25 @@ static void aries_m_render(f32 *lr, int n, const ZParams *p)
         }
         M.pad_lp[0] += (pl - M.pad_lp[0]) * k_padlp; M.pad_lp[1] += (pr - M.pad_lp[1]) * k_padlp;
         f32 duck = 1.0f - 0.55f * be;
-        pl = M.pad_lp[0] * 0.30f * duck; pr = M.pad_lp[1] * 0.30f * duck;
+        pl = M.pad_lp[0] * 0.30f * duck * v0; pr = M.pad_lp[1] * 0.30f * duck * v0;
         /* the bass: plucked, round */
         M.b_env += (M.b_gate - M.b_env) * (M.b_gate > M.b_env ? 0.02f : k_b * (M.b_gate > 0.0f ? 1.0f : 6.0f));
         if (M.b_gate > 0.0f) M.b_gate *= 1.0f - k_b;
         M.b_pluck -= M.b_pluck * k_bp;
         M.b_ph += M.b_hz * dt; if (M.b_ph >= 1.0f) M.b_ph -= 1.0f;
         M.b_mph += M.b_hz * 2.0f * dt; if (M.b_mph >= 1.0f) M.b_mph -= 1.0f;
-        f32 bass = sin_turns(M.b_ph + (0.10f + 0.35f * M.b_pluck) * sin_turns(M.b_mph)) * M.b_env * 0.36f;
+        f32 bass = sin_turns(M.b_ph + (0.10f + 0.35f * M.b_pluck) * sin_turns(M.b_mph)) * M.b_env * 0.36f * v2;
         /* the trumpet through its mute */
         f32 t = horn(&M.tp, k_tp_up, k_tp_dn, k_bend, 1.2f, 2.2f, 0.006f) + m_noise(&M.rng) * 0.05f * M.tp.env;
         M.tp_low += tf * M.tp_band;
         f32 hp = t - M.tp_low - tq * M.tp_band;
         M.tp_band += tf * hp;
-        f32 tp = (M.tp_band * 0.9f + hp * 0.25f) * M.tp_vel * 0.20f;
+        f32 tp = (M.tp_band * 0.9f + hp * 0.25f) * M.tp_vel * 0.20f * v1;
         /* the cymbal */
         M.r_env -= M.r_env * k_r;
         f32 nz = m_noise(&M.rng);
         M.r_lp += (nz - M.r_lp) * 0.55f; M.r_lp2 += ((nz - M.r_lp) - M.r_lp2) * 0.5f;
-        f32 cym = ((nz - M.r_lp) - M.r_lp2) * M.r_env * M.r_env * ride;
+        f32 cym = ((nz - M.r_lp) - M.r_lp2) * M.r_env * M.r_env * ride * v3;
         f32 l = pl + bass + tp * 0.8f + cym * 0.9f + bll * 0.20f, r = pr + bass + tp * 1.2f + cym * 1.1f + blr * 0.20f;
         m_fx_tick(&l, &r, (pl + pr) * 0.6f + tp * 1.6f + bl * 0.16f + cym * 0.5f + bass * 0.12f, tp * 0.9f + bl * 0.14f);
         lr[2 * i] = m_clip(l * 0.8f); lr[2 * i + 1] = m_clip(r * 0.8f);

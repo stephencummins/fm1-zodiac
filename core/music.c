@@ -82,9 +82,52 @@ void m_fx_tick(f32 *l, f32 *r, f32 to_room, f32 to_echo)
 
 /* left alone, a piece still huffs, clicks or roars by itself from time to time */
 static f32 own_dt, own_in; static uint32_t own_rng;
-void z_music_start(const ZMusic *m, f32 sr) { m->init(sr); own_dt = 1.0f / sr; own_in = 18.0f; own_rng = 0x0DDBA11u; }
+
+/* the slow layer */
+MSlow m_slow; uint32_t m_seed;
+static uint32_t seed_next, slow_rng; static f32 key_in;
+static uint32_t stir(uint32_t x) { x ^= x >> 16; x *= 0x7FEB352Du; x ^= x >> 15; x *= 0x846CA68Bu; x ^= x >> 16; return x; }
+void z_music_seed(uint32_t s) { seed_next = s ? stir(s) | 1u : 0u; }                  /* stirred: near numbers give far playings */
+static void slow_start(void)
+{
+    m_slow.secs = 0.0f; m_slow.fill = 0.0f; m_slow.reg = 0; m_slow.key = 0;
+    for (int k = 0; k < 4; k++) m_slow.v[k] = 1.0f;
+    slow_rng = m_seeded(0x51A0E5u);
+    key_in = 150.0f + 90.0f * m_rnd(&slow_rng);
+}
+static void slow_run(f32 dt)
+{
+    MSlow *s = &m_slow;
+    f32 t = s->secs += dt, h = sat((t - 60.0f) / 90.0f); h = h * h * (3.0f - 2.0f * h);          /* at rest, then coming in */
+    s->fill = h * (2.0f * sat(0.5f + 1.7f * (noise1(t / 97.0f, m_seed + 1u) - 0.5f)) - 1.0f);
+    f32 lift = h * (2.0f * sat(0.5f + 1.7f * (noise1(t / 131.0f, m_seed + 2u) - 0.5f)) - 1.0f);
+    int reg = lift > 0.6f ? 2 : lift > 0.2f ? 1 : lift < -0.6f ? -2 : lift < -0.2f ? -1 : 0;
+    if ((s->key >= 3 && reg > 0) || (s->key <= -3 && reg < 0)) reg = 0;                           /* a higher key and a higher register don't pile up */
+    s->reg = reg;
+    int on[4];
+    for (int k = 0; k < 4; k++) on[k] = h < 0.5f || noise1(t / 53.0f, m_seed + 10u + (uint32_t)k) > (k == 1 ? 0.18f : 0.26f);
+    if (!on[0] && !on[1]) on[1] = 1;
+    f32 kk = m_k(4.0f, dt);
+    for (int k = 0; k < 4; k++) s->v[k] += ((on[k] ? 1.0f : k == 0 ? 0.3f : 0.0f) - s->v[k]) * kk;      /* the ground only recedes: no piece falls silent */
+    if ((key_in -= dt) < 0.0f) {                             /* to a key near the one it is in, or home */
+        static const int8_t mv[6] = {5, -5, 3, -3, 2, -2};
+        int k = s->key;
+        if (k && m_rnd(&slow_rng) < 0.4f) k = 0;
+        else { k += mv[(int)(m_rnd(&slow_rng) * 6.0f)]; if (k > 6) k -= 12; if (k < -5) k += 12; }
+        s->key = k; key_in = 150.0f + 180.0f * m_rnd(&slow_rng);
+    }
+}
+
+void z_music_start(const ZMusic *m, f32 sr)
+{
+    m_seed = seed_next;
+    if (seed_next) { seed_next = seed_next * 1664525u + 1013904223u; if (!seed_next) seed_next = 1u; }      /* the next start differs again */
+    slow_start();
+    m->init(sr); own_dt = 1.0f / sr; own_in = 18.0f; own_rng = m_seeded(0x0DDBA11u);
+}
 void z_music_render(const ZMusic *m, f32 *lr, int n, const ZParams *p)
 {
+    slow_run((f32)n * own_dt);
     own_in -= (f32)n * own_dt;
     if (own_in < 0.0f) { own_in = 25.0f + 45.0f * m_rnd(&own_rng); m->strike(); }
     m->render(lr, n, p);

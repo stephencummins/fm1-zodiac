@@ -11,7 +11,7 @@ static struct {
     f32 dt, t; uint32_t rng, n;
     f32 lo1, lo2, m_low[2], m_band[2], hi[2], m_f, m_amp, h_amp, lo_amp;
     struct { f32 ph, hz, env; } bub[NBUB]; int bi;
-    MHorn pad[3]; f32 next_set; int set;
+    MHorn pad[3]; f32 next_set; int set, key;
     f32 splash, s_low, s_band, dream;
 } M;
 
@@ -23,17 +23,17 @@ static void control(f32 dt)
     M.t += dt;
     M.m_f = sat((500.0f + 1100.0f * noise1(M.t * 0.6f, 3u)) * 6.2832f * M.dt);
     M.m_amp = 0.6f + 0.4f * noise1(M.t * 0.9f, 4u); M.h_amp = 0.5f + 0.5f * noise1(M.t * 1.3f, 6u); M.lo_amp = 0.7f + 0.3f * noise1(M.t * 0.3f, 8u);
-    if (rnd() < (5.0f + 9.0f * M.dream) * dt) bubble(0.25f + 0.4f * rnd());
+    if (rnd() < (5.0f + 9.0f * M.dream) * (1.0f + 0.6f * m_slow.fill) * dt) bubble(0.25f + 0.4f * rnd());
     if ((M.next_set -= dt) < 0.0f) {
-        M.set = (M.set + 1 + (int)(rnd() * 3.0f)) & 3; M.next_set = 10.0f + 10.0f * rnd();
-        for (int k = 0; k < 3; k++) { M.pad[k].aim = m_hz((f32)sets[M.set][k]); M.pad[k].gate = 1.0f; }
+        M.set = (M.set + 1 + (int)(rnd() * 3.0f)) & 3; M.next_set = (10.0f + 10.0f * rnd()) * (1.0f - 0.3f * m_slow.fill); M.key = m_slow.key;
+        for (int k = 0; k < 3; k++) { M.pad[k].aim = m_hz((f32)(sets[M.set][k] + M.key)); M.pad[k].gate = 1.0f; }
     }
 }
 
 static void pisces_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.dt = 1.0f / sr; M.rng = 0x915CE5u;
+    M.dt = 1.0f / sr; M.rng = m_seeded(0x915CE5u);
     for (int k = 0; k < 3; k++) { M.pad[k].hz = m_hz((f32)sets[0][k]); M.pad[k].pan = 0.25f + 0.25f * (f32)k; M.pad[k].vib = 0.3f * (f32)k; }
     m_fx_init(sr);
 }
@@ -47,7 +47,7 @@ static void pisces_m_render(f32 *lr, int n, const ZParams *p)
     m_fx.room = 0.6f + 0.38f * mist; m_fx.damp = 0.4f + 0.35f * mist - 0.15f * light; m_fx.wet = 0.2f + 0.5f * mist;
     m_fx.echo_secs = 0.45f; m_fx.echo_fb = 0.3f + 0.4f * echo; m_fx.echo_wet = echo;
     f32 klo = sat(170.0f * 6.2832f * dt), khi = sat(2800.0f * 6.2832f * dt), bdec = m_k(0.035f, dt), sdec = m_k(0.22f, dt);
-    f32 up = m_k(2.5f, dt), bend = m_k(1.5f, dt), water = 1.0f - 0.65f * M.dream, pad = 0.07f + 0.16f * M.dream, spray = 0.05f + 0.16f * light;
+    f32 up = m_k(2.5f, dt), bend = m_k(1.5f, dt), water = (1.0f - 0.65f * M.dream) * (0.7f + 0.3f * m_slow.v[2]), pad = (0.07f + 0.16f * M.dream) * m_slow.v[0], spray = 0.05f + 0.16f * light;
     for (int i = 0; i < n; i++) {
         if ((M.n++ & 63u) == 0) control(64.0f * dt);
         f32 nz[2] = {m_noise(&M.rng), m_noise(&M.rng)}, w[2];

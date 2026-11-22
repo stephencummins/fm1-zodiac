@@ -11,19 +11,20 @@ static const int8_t prog[3][4] = {{0, 3, 5, 4}, {0, 5, 3, 0}, {0, 2, 3, 4}};
 static struct {
     f32 secs; int beats;
     f32 dt, clock; uint32_t rng;
-    int step, bar, deg, low, pr, idx, wait, off;
+    int step, bar, deg, low, pr, idx, wait, off, key, reg;
     MHorn pad[2], mel, sixth;
     MDrum deep; MBell bell;
     f32 depth;
 } M;
 
 static f32 rnd(void) { return m_rnd(&M.rng); }
-static f32 note(int idx, int base) { return (f32)(base + m_scale(major, idx)); }
+static f32 note(int idx, int base) { return (f32)(base + M.key + m_scale(major, idx)); }
 
 static void step(void)
 {
     int s = M.step;
     if (s == 0 && (M.bar & 7) == 0 && M.bar && rnd() < 0.3f) M.beats = 7 - M.beats;      /* the time may change: three, or four */
+    if (s == 0 && (M.bar & 7) == 0) { M.key = m_slow.key; M.reg = m_slow.reg; }
     if (s == 0 && !(M.bar & 1)) {
         int u = (M.bar >> 1) & 3;
         if (u == 0) M.pr = (int)(rnd() * 3.0f);
@@ -40,11 +41,11 @@ static void step(void)
             if (a == 0 || a == 2 || a == 4) { t -= d; break; }
             if (b == 0 || b == 2 || b == 4) { t += d; break; }
         }
-        if (t < 0) t += 3; if (t > 9) t -= 3;
+        if (t < M.reg) t += 3; if (t > 9 + M.reg) t -= 3;
         f32 r = rnd();
-        int dur = (r < 0.35f ? 2 : r < 0.7f ? 3 : r < 0.9f ? 4 : 6) * STEPS, rest = rnd() < 0.3f ? 2 * STEPS : 0;
+        int dur = (r < 0.35f ? 2 : r < 0.7f ? 3 : r < 0.9f ? 4 : 6) * STEPS, rest = rnd() < 0.3f - 0.2f * m_slow.fill ? 2 * STEPS : 0;
         m_horn_on(&M.mel, note(t, 49), 0.995f);
-        if (rnd() < 0.25f + 0.5f * M.depth) m_horn_on(&M.sixth, note(t - 5, 49), 0.995f); else M.sixth.gate = 0.0f;
+        if (rnd() < 0.25f + 0.5f * M.depth + 0.2f * m_slow.fill) m_horn_on(&M.sixth, note(t - 5, 49), 0.995f); else M.sixth.gate = 0.0f;
         M.idx = t; M.off = dur - 1; M.wait = dur + rest;
     }
     if (++M.step >= M.beats * STEPS) { M.step = 0; M.bar++; }
@@ -53,7 +54,7 @@ static void step(void)
 static void scorpio_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.dt = 1.0f / sr; M.rng = 0x5C0B10u; M.clock = 1.0f; M.beats = 4; M.idx = 4; M.wait = 4 * STEPS + 1;
+    M.dt = 1.0f / sr; M.rng = m_seeded(0x5C0B10u); M.clock = 1.0f; M.beats = 4; M.idx = 4; M.wait = 4 * STEPS + 1;
     m_fx_init(sr);
 }
 
@@ -74,13 +75,14 @@ static void scorpio_m_render(f32 *lr, int n, const ZParams *p)
     f32 ddec = m_k(1.6f, dt), dbend = m_k(0.06f, dt);
     f32 base = 0.15f + 0.4f * light, blown = 0.4f + 0.8f * light;
     f32 bpm = BPM * m_drift(M.secs += (f32)n * dt, 17u, 0.14f);
+    f32 v0 = m_slow.v[0], v1 = m_slow.v[1];
     for (int i = 0; i < n; i++) {
         M.clock += (f32)STEPS * bpm / 60.0f * dt;
         if (M.clock >= 1.0f) { M.clock -= 1.0f; step(); }
-        f32 a = m_horn(&M.pad[0], dt, pup, pdn, bend, base, blown, 0.0f) * (0.5f + 0.3f * M.depth);
-        f32 b = m_horn(&M.pad[1], dt, pup, pdn, bend, base * 0.6f, blown * 0.5f, 0.002f) * 0.3f;
-        f32 m = m_horn(&M.mel, dt, up, dn, bend, base + 0.2f, blown + 0.3f, 0.004f) * 0.42f;
-        f32 x = m_horn(&M.sixth, dt, up, dn, bend, base, blown, 0.003f) * 0.26f;
+        f32 a = m_horn(&M.pad[0], dt, pup, pdn, bend, base, blown, 0.0f) * (0.5f + 0.3f * M.depth) * v0;
+        f32 b = m_horn(&M.pad[1], dt, pup, pdn, bend, base * 0.6f, blown * 0.5f, 0.002f) * 0.3f * v0;
+        f32 m = m_horn(&M.mel, dt, up, dn, bend, base + 0.2f, blown + 0.3f, 0.004f) * 0.42f * v1;
+        f32 x = m_horn(&M.sixth, dt, up, dn, bend, base, blown, 0.003f) * 0.26f * v1;
         f32 d = m_drum(&M.deep, dt, ddec, dbend) * 0.6f, bl = m_bell(&M.bell, dt, 3.0f, 0.12f) * 0.25f;
         f32 l = a + b * 0.7f + m * 0.9f + x * 1.2f + d + bl * 0.6f, r = a + b * 1.3f + m * 1.1f + x * 0.8f + d + bl * 1.4f;
         m_fx_tick(&l, &r, a * 0.3f + b + m * 1.1f + x + bl * 2.0f + d * 0.3f, m * 0.6f + bl * 1.5f);

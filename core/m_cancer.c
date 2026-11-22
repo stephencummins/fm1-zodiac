@@ -13,7 +13,7 @@ static const int8_t roots[4] = {45, 43, 41, 40};
 static struct {
     f32 secs; int beats;
     f32 dt, clock; uint32_t rng;
-    int step, bar, ci, paso, roll, gi;
+    int step, bar, ci, paso, roll, gi, key, reg;
     MBow vn, pad[2]; int vn_note, vn_wait, vn_off;
     MPluck g[NG];
     f32 c_env[2], c_ph[2], c_pan[2], pz, tide;
@@ -31,7 +31,7 @@ static int snap(int t)
 static void pluck(int midi, f32 vel, f32 pan, f32 secs)
 {
     int k = M.gi; M.gi = (M.gi + 1) % NG;
-    m_pluck_on(&M.g[k], (f32)midi, vel, m_k(secs, M.dt)); M.g[k].pan = pan;
+    m_pluck_on(&M.g[k], (f32)(midi + M.key), vel * (M.paso > 0 ? 1.0f : m_slow.v[2]), m_k(secs, M.dt)); M.g[k].pan = pan;
 }
 /* the castanets walk from the left to the right: the roll in one sweep, then once across in every bar */
 static void clack(int which, f32 vel)
@@ -44,9 +44,10 @@ static void step(void)
 {
     int s = M.step, bs = s % STEPS, paso = M.paso > 0;
     if (s == 0 && (M.bar & 15) == 0 && M.bar && !paso && rnd() < 0.4f) M.beats = 5 - M.beats;      /* in two, or a slow waltz */
+    if (s == 0 && (M.bar & 15) == 0 && !paso) { M.key = m_slow.key; M.reg = m_slow.reg; }
     if (s == 0 && (M.bar & 3) == 0) {
         M.ci = (M.bar >> 2) & 3;
-        m_bow_on(&M.pad[0], (f32)(roots[M.ci] + 12), 1); m_bow_on(&M.pad[1], (f32)(roots[M.ci] + 19), 1);
+        m_bow_on(&M.pad[0], (f32)(roots[M.ci] + 12 + M.key), 1); m_bow_on(&M.pad[1], (f32)(roots[M.ci] + 19 + M.key), 1);
     }
     if (M.roll > 0) { clack(M.roll & 1, M.roll == 1 ? 1.0f : 0.5f); M.roll--; }
     if (paso) {
@@ -64,11 +65,11 @@ static void step(void)
     if (M.vn_wait > 0) M.vn_wait--;
     if (M.vn_wait == 0 && s % 6 == 0) {
         int n = snap(M.vn_note + (int)(rnd() * 9.0f) - 4);
-        if (n > 88) n -= 12; if (n < 67) n += 12;
+        if (n > 88 + 3 * M.reg) n -= 12; if (n < 67 + 3 * M.reg) n += 12;
         f32 r = rnd();
         int dur = paso ? (r < 0.3f ? 6 : r < 0.75f ? 12 : 24) : (r < 0.2f ? 24 : r < 0.5f ? 48 : r < 0.7f ? 36 : r < 0.9f ? 72 : 96);
-        int rest = !paso && rnd() < 0.35f - 0.3f * M.tide ? 24 : 0;
-        m_bow_on(&M.vn, (f32)n, 1);
+        int rest = !paso && rnd() < 0.35f - 0.3f * M.tide - 0.2f * m_slow.fill ? 24 : 0;
+        m_bow_on(&M.vn, (f32)(n + M.key), 1);
         M.vn_note = n; M.vn_off = rest ? dur - 2 : 0; M.vn_wait = dur + rest;
     }
     if (++M.step >= M.beats * STEPS) { M.step = 0; M.bar++; if (M.paso > 0) M.paso--; }
@@ -77,7 +78,7 @@ static void step(void)
 static void cancer_m_init(f32 sr)
 {
     for (unsigned i = 0; i < sizeof M; i++) ((uint8_t *)&M)[i] = 0;
-    M.dt = 1.0f / sr; M.rng = 0xC4AB01u; M.clock = 1.0f; M.beats = 2; M.vn_note = 76; M.vn_wait = 4 * STEPS + 1;
+    M.dt = 1.0f / sr; M.rng = m_seeded(0xC4AB01u); M.clock = 1.0f; M.beats = 2; M.vn_note = 76; M.vn_wait = 4 * STEPS + 1;
     M.pad[0].pan = 0.35f; M.pad[1].pan = 0.65f;
     m_fx_init(sr);
 }
@@ -98,12 +99,13 @@ static void cancer_m_render(f32 *lr, int n, const ZParams *p)
     f32 cut = sat((1100.0f + 2000.0f * light) * 6.2832f * dt), pcut = sat(650.0f * 6.2832f * dt);
     f32 rel = m_k(0.05f, dt), gcut = sat((1600.0f + 2500.0f * light) * 6.2832f * dt), cdec = m_k(0.016f, dt), kz = m_k(0.3f, dt);
     f32 bpm = BPM * m_drift(M.secs += (f32)n * dt, 14u, 0.12f);
+    f32 v0 = m_slow.v[0], v1 = m_slow.v[1];
     for (int i = 0; i < n; i++) {
         M.clock += (f32)STEPS * bpm / 60.0f * dt;
         if (M.clock >= 1.0f) { M.clock -= 1.0f; step(); }
         M.pz += ((M.paso > 0 ? 1.0f : 0.0f) - M.pz) * kz;
-        f32 v = m_bow(&M.vn, dt, up, dn, glide, 0.009f, cut) * (0.28f + 0.14f * M.tide + 0.08f * M.pz);
-        f32 a = m_bow(&M.pad[0], dt, pup, pdn, glide, 0.003f, pcut), b = m_bow(&M.pad[1], dt, pup, pdn, glide, 0.003f, pcut);
+        f32 v = m_bow(&M.vn, dt, up, dn, glide, 0.009f, cut) * (0.28f + 0.14f * M.tide + 0.08f * M.pz) * v1;
+        f32 a = m_bow(&M.pad[0], dt, pup, pdn, glide, 0.003f, pcut), b = m_bow(&M.pad[1], dt, pup, pdn, glide, 0.003f, pcut); a *= v0; b *= v0;
         f32 gl = 0.0f, gr = 0.0f;
         for (int k = 0; k < NG; k++) { f32 x = m_pluck(&M.g[k], dt, rel, gcut); gl += x * (1.0f - M.g[k].pan); gr += x * M.g[k].pan; }
         f32 c0, c1;

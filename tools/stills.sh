@@ -5,7 +5,7 @@ set -eu
 cd "$(dirname "$0")/.."
 SIGNS="aries taurus gemini cancer"
 ALL="$SIGNS leo virgo libra scorpio sagittarius capricorn aquarius pisces"
-SRC="core/gfx.c core/sign.c core/scene.c core/signs.c"
+SRC="core/gfx.c core/sign.c core/scene.c core/signs.c core/music.c $(echo core/m_*.c)"
 for s in $SIGNS; do python3 tools/svg2sign.py art/$s.svg core/art_$s.h $s; SRC="$SRC core/$s.c"; done
 python3 tools/img2pic.py art/pic/aries.jpg core/pic_aries.h aries F0E4BC C0202A F58A1C 3048B8 >/dev/null
 python3 tools/img2pic.py art/pic/taurus.png core/pic_taurus.h taurus ECDFB4 A4522C E4A93C 5C9E3C >/dev/null

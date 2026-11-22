@@ -4,6 +4,8 @@
 #include "mathx.h"
 #include "pic_aries.h"
 
+extern int z_led;                  /* music.c: 1 while the piece is playing */
+
 enum { INK_GOLD, INK_RED, INK_AMBER, INK_BLUE };
 
 #define NEMBER 56
@@ -155,6 +157,7 @@ void aries_frame(f32 dt, const ZParams *want)
 
     /* it roars by itself now and then (sooner when hot), and whenever it is struck */
     A.next_roar -= dt;
+    if (z_led) A.next_roar = 5.0f;                          /* with its piece playing, the blare does the bleating */
     if (A.next_roar < 0.0f) { A.next_roar = (7.0f + rnd() * 9.0f) * (1.3f - 0.9f * A.p.heat); aries_strike(); }
     f32 aim = 0.0f;
     if (A.roar_t >= 0.0f) {

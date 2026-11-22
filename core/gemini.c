@@ -128,7 +128,7 @@ void gemini_frame(f32 dt, const ZParams *want)
     G.next_blink2 -= dt;
     if (G.next_blink2 < 0.0f) G.next_blink2 = 2.5f + sc_rnd(&G.s) * 6.0f;
     G.blink2 = sc_follow(G.blink2, G.next_blink2 < 0.16f ? 1.0f : 0.0f, dt, 30.0f, 30.0f);
-    G.next_flip -= dt;
+    { extern int z_led; if (!z_led) G.next_flip -= dt; }      /* with its piece playing, the music says when */
     if (G.next_flip < 0.0f) { G.next_flip = (14.0f + sc_rnd(&G.s) * 14.0f) * (1.3f - 0.8f * wv); turn_over(); }
     if (G.wink_t >= 0.0f) { G.wink_t += dt; if (G.wink_t > 1.6f) G.wink_t = -1.0f; }
     G.wink = sc_follow(G.wink, G.wink_t >= 0.0f && G.wink_t < 0.5f ? 1.0f : 0.0f, dt, 40.0f, 25.0f);

@@ -2,7 +2,7 @@
 # Builds the pictures as one web page (build/zodiac.html) that opens straight from the disk. Needs emcc.
 set -eu
 cd "$(dirname "$0")/.."
-SRC="core/gfx.c core/sign.c core/scene.c core/signs.c"
+SRC="core/gfx.c core/sign.c core/scene.c core/signs.c core/music.c $(echo core/m_*.c)"
 for s in aries taurus gemini cancer; do python3 tools/svg2sign.py art/$s.svg core/art_$s.h $s >/dev/null; SRC="$SRC core/$s.c"; done
 python3 tools/img2pic.py art/pic/aries.jpg core/pic_aries.h aries F0E4BC C0202A F58A1C 3048B8 >/dev/null
 python3 tools/img2pic.py art/pic/taurus.png core/pic_taurus.h taurus ECDFB4 A4522C E4A93C 5C9E3C >/dev/null
@@ -19,5 +19,5 @@ python3 tools/img2pic.py art/pic/aquarius.jpg core/pic_aquarius.h aquarius D8F8F
 python3 tools/img2pic.py art/pic/pisces.jpg core/pic_pisces.h pisces E8ECD8 80D0B0 5870A0 E87078 >/dev/null
 mkdir -p build
 emcc -O2 -std=c99 $SRC port/web/main.c -o build/zodiac.html \
-  --shell-file port/web/shell.html -sSINGLE_FILE=1 -sENVIRONMENT=web -sEXPORTED_RUNTIME_METHODS=HEAPU8
+  --shell-file port/web/shell.html -sSINGLE_FILE=1 -sENVIRONMENT=web -sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32
 echo build/zodiac.html

@@ -81,7 +81,7 @@ void cancer_frame(f32 dt, const ZParams *want)
 {
     sc_step(&C.s, dt, want);
     f32 t = C.s.t;
-    C.next_start -= dt;
+    { extern int z_led; if (!z_led) C.next_start -= dt; }      /* with its piece playing, the music says when */
     if (C.next_start < 0.0f) { C.next_start = 16.0f + sc_rnd(&C.s) * 20.0f; C.hide_t = 0.0f; }     /* it is easily startled */
     if (C.hide_t >= 0.0f) { C.hide_t += dt; if (C.hide_t > 1.5f) C.hide_t = -1.0f; }
     C.hide = sc_follow(C.hide, C.hide_t >= 0.0f ? 1.0f : 0.0f, dt, 22.0f, 0.9f);

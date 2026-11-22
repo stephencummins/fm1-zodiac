@@ -151,7 +151,7 @@ void taurus_frame(f32 dt, const ZParams *want)
     T.steam += dt * T.s.p.echo * out * 22.0f;
     if (T.jet > 0) { T.jet--; snort(0.75f + 0.25f * sc_rnd(&T.s)); }
     if (T.steam >= 1.0f) { T.steam -= 1.0f; snort(0.25f + 0.6f * T.s.p.echo); }
-    T.next_snort -= dt;
+    { extern int z_led; if (!z_led) T.next_snort -= dt; }      /* with its piece playing, the music says when */
     if (T.next_snort < 0.0f) { T.next_snort = 9.0f + sc_rnd(&T.s) * 9.0f; snort(0.3f); }
     /* it chews in spells, and not at all when it is cross */
     f32 spell = noise1(T.s.t * 0.09f, 61u) > 0.33f && T.temper < 0.45f ? 1.0f : 0.0f;

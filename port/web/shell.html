@@ -22,8 +22,8 @@
  <label for="mist">Mist</label><input id="mist" type="range" min="0" max="1" step="0.01" value="0.15">
  <label for="light">Light</label><input id="light" type="range" min="0" max="1" step="0.01" value="0.7">
 </div>
-<button id="roar">Strike (a note)</button>
-<p>First drafts, at the FM-1's 240 by 240 pixels, shown twice the size. The sliders stand in for the knobs; the button, the picture or any key stands in for a note played.</p>
+<button id="roar">Strike (a note)</button> <button id="snd">Sound: off</button>
+<p>First drafts, at the FM-1's 240 by 240 pixels, shown twice the size. The sliders stand in for the knobs; the button, the picture or any key stands in for a note played. With the sound on, each sign plays its piece and the picture moves with it.</p>
 <script>
 var Module = { onRuntimeInitialized: function () {
   var ctx = document.getElementById('c').getContext('2d'), img = ctx.createImageData(240, 240);
@@ -41,6 +41,17 @@ var Module = { onRuntimeInitialized: function () {
   S.forEach(function (s, i) { var b = document.createElement('button'); b.textContent = s[0]; b.onclick = function () { pick(i); }; document.getElementById('signs').appendChild(b); });
   var first = 0; S.forEach(function (s, i) { if (location.hash === '#' + s[0].toLowerCase()) first = i; });
   pick(first);
+  var ac = null, node = null;
+  document.getElementById('snd').onclick = function () {
+    if (ac) { node.disconnect(); ac.close(); ac = null; Module._z_sound(0); this.textContent = 'Sound: off'; return; }
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    node = ac.createScriptProcessor(2048, 0, 2);
+    node.onaudioprocess = function (e) {
+      var n = e.outputBuffer.length, p = Module._z_audio(n) >> 2, h = Module.HEAPF32, l = e.outputBuffer.getChannelData(0), r = e.outputBuffer.getChannelData(1);
+      for (var i = 0; i < n; i++) { l[i] = h[p + 2 * i]; r[i] = h[p + 2 * i + 1]; }
+    };
+    node.connect(ac.destination); Module._z_sound(ac.sampleRate); this.textContent = 'Sound: on';
+  };
   var hit = function () { Module._z_strike(); };
   document.getElementById('roar').onclick = hit; document.getElementById('c').onclick = hit;
   addEventListener('keydown', function (e) { if (!e.repeat && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') hit(); });

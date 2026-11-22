@@ -112,7 +112,7 @@ static void sagittarius_m_render(f32 *lr, int n, const ZParams *p)
         f32 l = h * 0.26f + h2 * 0.22f + t * 0.12f + a * str * 1.3f + b * str * 0.7f + timp * 0.45f + wh * 0.6f;
         f32 r = h * 0.30f + h2 * 0.16f + t * 0.18f + a * str * 0.7f + b * str * 1.3f + timp * 0.45f + wh * 1.2f;
         m_fx_tick(&l, &r, (h + h2) * 0.4f + t * 0.3f + (a + b) * 0.25f + timp * 0.25f + wh, h * 0.2f + t * 0.2f);
-        lr[2 * i] = m_clip(l * 0.7f); lr[2 * i + 1] = m_clip(r * 0.7f);
+        lr[2 * i] = m_clip(l * 0.394f); lr[2 * i + 1] = m_clip(r * 0.394f);
     }
 }
 

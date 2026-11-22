@@ -80,7 +80,7 @@ static void virgo_m_render(f32 *lr, int n, const ZParams *p)
         f32 d = (a + b) * 0.5f * turn;
         f32 l = c * 0.34f + d * 0.6f + a * 0.2f + buzz, r = c * 0.42f + d * 0.6f + b * 0.2f + buzz;
         m_fx_tick(&l, &r, c * 0.6f + d * 0.4f + buzz * 0.5f, c * 0.5f);
-        lr[2 * i] = m_clip(l * 0.8f); lr[2 * i + 1] = m_clip(r * 0.8f);
+        lr[2 * i] = m_clip(l * 0.566f); lr[2 * i + 1] = m_clip(r * 0.566f);
     }
 }
 

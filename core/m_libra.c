@@ -68,7 +68,7 @@ static void libra_m_render(f32 *lr, int n, const ZParams *p)
         f32 send = (l + r) * 1.2f + (w[0] + w[1]) * 0.4f;
         l += w[0]; r += w[1];
         m_fx_tick(&l, &r, send, (l + r) * 0.5f);
-        lr[2 * i] = m_clip(l * 0.9f); lr[2 * i + 1] = m_clip(r * 0.9f);
+        lr[2 * i] = m_clip(l * 0.506f); lr[2 * i + 1] = m_clip(r * 0.506f);
     }
 }
 

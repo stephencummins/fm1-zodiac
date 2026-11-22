@@ -111,7 +111,8 @@ static void leo_m_render(f32 *lr, int n, const ZParams *p)
             tl += x * (1.0f - M.tp[v].pan); tr += x * M.tp[v].pan; if (M.tp[v].env > te) te = M.tp[v].env;
         }
         f32 duck = 1.0f - 0.5f * te;
-        f32 m = m_horn(&M.mel, dt, mup, mdn, bend, 0.9f + 0.5f * light, 1.8f, 0.004f) * duck;
+        f32 ks = 0.4f + 0.6f * sat(330.0f / (M.mel.hz + 1.0f));          /* the higher the note, the plainer the tone: no rasp at the top */
+        f32 m = m_horn(&M.mel, dt, mup, mdn, bend, (0.9f + 0.5f * light) * ks, 1.8f * ks, 0.004f) * duck;
         f32 nz = m_noise(&M.rng);
         M.thump -= M.thump * thdec;
         f32 timp = m_drum(&M.timp, dt, tdec, tbend) + nz * M.thump * 0.12f;
@@ -120,7 +121,7 @@ static void leo_m_render(f32 *lr, int n, const ZParams *p)
         f32 l = ll * 0.2f * duck + m * 0.26f + tl * 0.2f + timp * 0.5f + sn * 0.8f;
         f32 r = lrr * 0.2f * duck + m * 0.26f + tr * 0.2f + timp * 0.5f + sn * 1.0f;
         m_fx_tick(&l, &r, (ll + lrr) * 0.14f + m * 0.4f + (tl + tr) * 0.3f + timp * 0.25f + sn * 0.6f, (tl + tr) * 0.25f);
-        lr[2 * i] = m_clip(l * 0.78f); lr[2 * i + 1] = m_clip(r * 0.78f);
+        lr[2 * i] = m_clip(l * 0.62f); lr[2 * i + 1] = m_clip(r * 0.62f);
     }
 }
 

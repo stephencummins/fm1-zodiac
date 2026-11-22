@@ -60,7 +60,7 @@ static void scorpio_m_init(f32 sr)
 static void scorpio_m_strike(void)
 {
     m_drum_on(&M.deep, m_hz(note(M.low, 25)), 1.0f, 2.0f);
-    m_bell_on(&M.bell, note(M.deg + 4, 73), 0.6f, m_k(1.2f, M.dt));
+    m_bell_on(&M.bell, note(M.deg + 2, 73), 0.6f, m_k(2.8f, M.dt));
     m_event();
 }
 

@@ -97,7 +97,7 @@ static void gemini_m_render(f32 *lr, int n, const ZParams *p)
         for (int k = 0; k < NV; k++) { f32 x = m_pluck(&M.v[k], dt, rel, cut); l += x * (1.0f - M.v[k].pan); r += x * M.v[k].pan; }
         l *= 0.5f; r *= 0.5f;
         m_fx_tick(&l, &r, (l + r) * 0.8f, (l + r) * 0.6f);
-        lr[2 * i] = m_clip(l * 1.15f); lr[2 * i + 1] = m_clip(r * 1.15f);
+        lr[2 * i] = m_clip(l * 0.8f); lr[2 * i + 1] = m_clip(r * 0.8f);
     }
 }
 

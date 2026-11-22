@@ -16,7 +16,7 @@ static struct {
     int step, bar, ci, paso, roll, gi;
     MBow vn, pad[2]; int vn_note, vn_wait, vn_off;
     MPluck g[NG];
-    f32 c_env[2], c_ph[2], pz, tide;
+    f32 c_env[2], c_ph[2], c_pan[2], pz, tide;
 } M;
 
 static f32 rnd(void) { return m_rnd(&M.rng); }
@@ -33,7 +33,12 @@ static void pluck(int midi, f32 vel, f32 pan, f32 secs)
     int k = M.gi; M.gi = (M.gi + 1) % NG;
     m_pluck_on(&M.g[k], (f32)midi, vel, m_k(secs, M.dt)); M.g[k].pan = pan;
 }
-static void clack(int which, f32 vel) { M.c_env[which] = vel; M.c_ph[which] = 0.0f; }
+/* the castanets walk from the left to the right: the roll in one sweep, then once across in every bar */
+static void clack(int which, f32 vel)
+{
+    M.c_env[which] = vel; M.c_ph[which] = 0.0f;
+    M.c_pan[which] = M.roll > 0 ? 0.06f + 0.22f * (f32)(5 - M.roll) : 0.06f + 0.88f * (f32)M.step / (f32)(M.beats * STEPS - 1);
+}
 
 static void step(void)
 {
@@ -89,15 +94,15 @@ static void cancer_m_render(f32 *lr, int n, const ZParams *p)
     M.tide = sat(p->heat);
     m_fx.room = 0.6f + 0.35f * mist; m_fx.damp = 0.4f + 0.35f * mist - 0.15f * light; m_fx.wet = 0.2f + 0.5f * mist;
     m_fx.echo_secs = 60.0f / BPM * 1.5f; m_fx.echo_fb = 0.3f + 0.4f * echo; m_fx.echo_wet = echo;
-    f32 up = m_k(0.07f, dt), dn = m_k(0.22f, dt), glide = m_k(0.06f, dt), pup = m_k(0.5f, dt), pdn = m_k(0.6f, dt);
-    f32 cut = sat((1700.0f + 2600.0f * light) * 6.2832f * dt), pcut = sat(650.0f * 6.2832f * dt);
+    f32 up = m_k(0.14f, dt), dn = m_k(0.22f, dt), glide = m_k(0.06f, dt), pup = m_k(0.5f, dt), pdn = m_k(0.6f, dt);
+    f32 cut = sat((1100.0f + 2000.0f * light) * 6.2832f * dt), pcut = sat(650.0f * 6.2832f * dt);
     f32 rel = m_k(0.05f, dt), gcut = sat((1600.0f + 2500.0f * light) * 6.2832f * dt), cdec = m_k(0.016f, dt), kz = m_k(0.3f, dt);
     f32 bpm = BPM * m_drift(M.secs += (f32)n * dt, 14u, 0.12f);
     for (int i = 0; i < n; i++) {
         M.clock += (f32)STEPS * bpm / 60.0f * dt;
         if (M.clock >= 1.0f) { M.clock -= 1.0f; step(); }
         M.pz += ((M.paso > 0 ? 1.0f : 0.0f) - M.pz) * kz;
-        f32 v = m_bow(&M.vn, dt, up, dn, glide, 0.009f, cut) * (0.55f + 0.25f * M.tide + 0.2f * M.pz);
+        f32 v = m_bow(&M.vn, dt, up, dn, glide, 0.009f, cut) * (0.28f + 0.14f * M.tide + 0.08f * M.pz);
         f32 a = m_bow(&M.pad[0], dt, pup, pdn, glide, 0.003f, pcut), b = m_bow(&M.pad[1], dt, pup, pdn, glide, 0.003f, pcut);
         f32 gl = 0.0f, gr = 0.0f;
         for (int k = 0; k < NG; k++) { f32 x = m_pluck(&M.g[k], dt, rel, gcut); gl += x * (1.0f - M.g[k].pan); gr += x * M.g[k].pan; }
@@ -105,12 +110,12 @@ static void cancer_m_render(f32 *lr, int n, const ZParams *p)
         M.c_env[0] -= M.c_env[0] * cdec; M.c_env[1] -= M.c_env[1] * cdec;
         M.c_ph[0] += 1450.0f * dt; if (M.c_ph[0] >= 1.0f) M.c_ph[0] -= 1.0f;
         M.c_ph[1] += 1900.0f * dt; if (M.c_ph[1] >= 1.0f) M.c_ph[1] -= 1.0f;
-        c0 = (sin_turns(M.c_ph[0]) * 0.6f + m_noise(&M.rng) * 0.5f) * M.c_env[0] * 0.5f;
-        c1 = (sin_turns(M.c_ph[1]) * 0.6f + m_noise(&M.rng) * 0.5f) * M.c_env[1] * 0.5f;
-        f32 l = v * 0.9f + a * 0.5f + b * 0.2f + gl * 0.45f + c0 * 0.9f + c1 * 0.3f;
-        f32 r = v * 0.7f + a * 0.2f + b * 0.5f + gr * 0.45f + c0 * 0.3f + c1 * 0.9f;
-        m_fx_tick(&l, &r, v * 1.3f + (a + b) * 0.4f + (gl + gr) * 0.3f + (c0 + c1) * 0.5f, v * 0.8f);
-        lr[2 * i] = m_clip(l * 0.62f); lr[2 * i + 1] = m_clip(r * 0.62f);
+        c0 = (sin_turns(M.c_ph[0]) * 0.6f + m_noise(&M.rng) * 0.5f) * M.c_env[0] * 0.95f;
+        c1 = (sin_turns(M.c_ph[1]) * 0.6f + m_noise(&M.rng) * 0.5f) * M.c_env[1] * 0.95f;
+        f32 l = v * 0.9f + a * 0.5f + b * 0.2f + gl * 0.45f + c0 * (1.0f - M.c_pan[0]) * 1.3f + c1 * (1.0f - M.c_pan[1]) * 1.3f;
+        f32 r = v * 0.7f + a * 0.2f + b * 0.5f + gr * 0.45f + c0 * M.c_pan[0] * 1.3f + c1 * M.c_pan[1] * 1.3f;
+        m_fx_tick(&l, &r, v * 1.3f + (a + b) * 0.4f + (gl + gr) * 0.3f + (c0 + c1) * 0.3f, v * 0.8f);
+        lr[2 * i] = m_clip(l * 0.58f); lr[2 * i + 1] = m_clip(r * 0.58f);
     }
 }
 

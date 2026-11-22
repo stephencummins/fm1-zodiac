@@ -4,10 +4,10 @@
 #include "music.h"
 
 #define STEPS 4
-#define BPM 96.0f
+#define BPM 93.0f
 static const int8_t major[7] = {0, 2, 4, 5, 7, 9, 11};
 static const int8_t prog[4][4] = {{0, 0, 3, 4}, {0, 5, 3, 4}, {0, 3, 0, 4}, {0, 4, 5, 3}};
-static const int8_t ct[7] = {-5, -3, 0, 2, 4, 7, 9};         /* the notes of a chord, upward */
+static const int8_t ct[8] = {-7, -5, -3, 0, 2, 4, 7, 9};         /* the notes of a chord, upward */
 static const uint8_t pat[4][16] = {                          /* the tune's rhythms: a number is a note that long, in steps */
     {6, 0, 0, 0, 0, 0, 2, 0, 8, 0, 0, 0, 0, 0, 0, 0}, {4, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0, 0, 0, 0, 2, 0},
     {12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0}, {3, 0, 0, 1, 4, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0}};
@@ -26,15 +26,15 @@ static f32 note(int idx, int base) { return (f32)(base + m_scale(major, idx)); }
 
 static void blast(int q)
 {
-    for (int v = 0; v < 3; v++) m_horn_on(&M.tp[v], note(M.low + ct[q - v], 70) + (rnd() - 0.5f) * 0.08f, 0.94f);
+    for (int v = 0; v < 3; v++) m_horn_on(&M.tp[v], note(M.low + ct[q + 1 - v], 70) + (rnd() - 0.5f) * 0.08f, 0.94f);
 }
 static void fanfare_step(void)
 {
     int f = M.fan++;
-    if (f == 0 || f == 3) blast(2);
-    else if (f == 4) blast(3);
-    else if (f == 6) blast(4);
-    else if (f == 8) { blast(5); m_drum_on(&M.timp, m_hz(note(M.low, 34)), 1.0f, 1.12f); M.thump = 1.0f; }
+    if (f == 0 || f == 3) blast(1);                      /* from the fifth below, up the chord, to end on the fifth above */
+    else if (f == 4) blast(2);
+    else if (f == 6) blast(3);
+    else if (f == 8) { blast(4); m_drum_on(&M.timp, m_hz(note(M.low, 34)), 1.0f, 1.12f); M.thump = 1.0f; }
     if (f == 2 || f == 22) for (int v = 0; v < 3; v++) M.tp[v].gate = 0.0f;
     if (f >= 26) M.fan = -1;
 }

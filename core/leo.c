@@ -1,5 +1,5 @@
 /* LEO: the lion, fire. Warm, proud, generous, ruled by the Sun: it sits crowned in its own light.
- * At a note it shakes out its mane and swells, and the sun behind it flares.
+ * At a note it roars, shakes out its mane and swells, and the sun behind it flares.
  * The lion is art/pic/leo.jpg; the rays and the sparks are drawn here. */
 #include "scene.h"
 #include "pic_leo.h"
@@ -7,6 +7,7 @@
 enum { K_CREAM, K_GOLD, K_ORANGE, K_PURPLE };
 
 static struct { Scene s; f32 shake; } L;
+static uint8_t head[GW * GH];             /* the head with its mouth open, before it is shaken */
 
 void leo_init(void) { sc_init(&L.s, 53u); L.shake = 0.0f; }
 void leo_strike(void) { L.shake = 1.0f; }
@@ -36,14 +37,23 @@ void leo_frame(f32 dt, const ZParams *want)
 {
     sc_step(&L.s, dt, want);
     f32 t = L.s.t;
-    L.shake = maxf(0.0f, L.shake - dt * 0.75f);
+    L.shake = maxf(0.0f, L.shake - dt * 0.6f);
     f32 w = L.shake * L.shake * (3.0f - 2.0f * L.shake);
     sc_begin(&L.s);
     sun(w);
     sc_mist(&L.s, K_ORANGE);
-    /* the head inside its frame: the mane shakes from side to side and fluffs out, the crown hops */
+    /* it roars: the jaw drops and trembles, the mouth open behind it, a tongue, no teeth */
+    int jaw = (int)(w * (10.0f + 1.5f * sin_turns(t * 10.0f)) + 0.5f);
     p_begin(leo_pic);
-    p_warp(leo_pic, 120.0f, 126.0f, 86.0f, 86.0f, 0.085f * w + 0.006f * sin_turns(t * 0.09f),
+    if (jaw > 0) {
+        p_fill(103, 156, 34, jaw, 0xC0 | 63);
+        p_fill(106, 157, 28, jaw, 0xC0 | 22);
+        if (jaw > 4) p_fill(112, 157 + jaw - 4, 16, 4, 0x80 | 63);
+        p_move(leo_pic, 100, 156, 40, 22, 0, jaw);
+    }
+    /* then the whole head, mouth and all: the mane shakes from side to side and fluffs out */
+    for (int i = 0; i < GW * GH; i++) head[i] = g_work[i];
+    p_warp(head, 120.0f, 126.0f, 86.0f, 86.0f, 0.085f * w + 0.006f * sin_turns(t * 0.09f),
            0.022f * w * sin_turns(t * 4.2f) + 0.003f * sin_turns(t * 0.05f), 0.0f, -3.0f * w, 0);
     g_blit(g_work, 1.0f + 0.008f * sin_turns(t * 0.08f), 0.0f, 0.3f + 1.3f * L.s.p.heat, 0.03f, t * 0.6f, 0.95f + 0.25f * w);
 }

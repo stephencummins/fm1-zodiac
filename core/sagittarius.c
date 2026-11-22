@@ -42,12 +42,14 @@ void sagittarius_frame(f32 dt, const ZParams *want)
     sc_mist(&A.s, K_RED);
     p_begin(sagittarius_pic);
     if (dy != 0 || gone) {
-        p_fill(103, 58, 35, 142, 0x00 | 63);                       /* the bare field behind the arrow */
-        p_fill(103, 94, 35, 11, 0xC0 | 63);                         /* and the grip of the bow across it */
+        p_fill(103, 58, 35, 35, 0x00 | 63);                        /* the bare field behind the arrow, above the bow */
+        p_fill(103, 106, 35, 94, 0x00 | 63);                        /* and below it */
+        p_fill(115, 93, 10, 13, 0);                                 /* the shaft out of the grip... */
+        p_fill(115, 96, 10, 7, 0xC0 | 63);                          /* ...and the grip made whole; it stays with the bow */
         if (!gone)                                                  /* the arrow alone, without the field round it */
             for (int y = 58; y < 200; y++) {
                 int Y = y + dy; if (Y < 0 || Y >= 200) continue;
-                for (int x = 103; x < 138; x++) { uint8_t v = sagittarius_pic[y * GW + x]; if (v >> 6 != K_IVORY && v) g_work[Y * GW + x] = v; }
+                for (int x = (y >= 93 && y < 106) ? 116 : 103, xe = (y >= 93 && y < 106) ? 124 : 138; x < xe; x++) { uint8_t v = sagittarius_pic[y * GW + x]; if (v >> 6 != K_IVORY && v) g_work[Y * GW + x] = v; }
             }
     }
     /* the limbs of the bow spring as it looses */

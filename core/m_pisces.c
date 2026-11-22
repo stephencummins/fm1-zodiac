@@ -47,7 +47,7 @@ static void pisces_m_render(f32 *lr, int n, const ZParams *p)
     m_fx.room = 0.6f + 0.38f * mist; m_fx.damp = 0.4f + 0.35f * mist - 0.15f * light; m_fx.wet = 0.2f + 0.5f * mist;
     m_fx.echo_secs = 0.45f; m_fx.echo_fb = 0.3f + 0.4f * echo; m_fx.echo_wet = echo;
     f32 klo = sat(170.0f * 6.2832f * dt), khi = sat(2800.0f * 6.2832f * dt), bdec = m_k(0.035f, dt), sdec = m_k(0.22f, dt);
-    f32 up = m_k(2.5f, dt), bend = m_k(1.5f, dt), water = 1.0f - 0.65f * M.dream, pad = 0.10f + 0.22f * M.dream, spray = 0.05f + 0.16f * light;
+    f32 up = m_k(2.5f, dt), bend = m_k(1.5f, dt), water = 1.0f - 0.65f * M.dream, pad = 0.07f + 0.16f * M.dream, spray = 0.05f + 0.16f * light;
     for (int i = 0; i < n; i++) {
         if ((M.n++ & 63u) == 0) control(64.0f * dt);
         f32 nz[2] = {m_noise(&M.rng), m_noise(&M.rng)}, w[2];

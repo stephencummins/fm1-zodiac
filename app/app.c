@@ -172,16 +172,16 @@ static float wh_at, wh_vel, wh_idle, wh_t, wh_clock;
 typedef struct { const char *say, *head, *line[5]; } Tip;
 #define TIP_LINES 5
 static const Tip TIPS[] = {
-    {"WELCOME", "WELCOME TO ZODIAC", {"Turn SELECT", "to choose a sign.", "Turn the four knobs.", "Hold any key.", "ALGO for more."}},
+    {"WELCOME", "WELCOME TO ZODIAC", {"Turn SELECT", "to choose a sign.", "Turn the four knobs.", "Hold a bottom button.", "ALGO for more."}},
     {"TIP SIGNS", "TWELVE SIGNS", {"Each is a picture", "and a piece that", "plays itself, never", "the same way twice.", 0}},
     {"TIP WHEEL", "THE WHEEL", {"Turn SELECT.", "Rest on a sign", "and it opens.", "PRESET steps", "straight to the next."}},
     {"TIP BUTTONS", "A BUTTON EACH", {"FX to REC are", "the twelve signs,", "Aries to Pisces.", "The lit one", "is playing."}},
     {"TIP KNOBS", "THE FOUR KNOBS", {"K1 low pass", "K2 high pass", "K3 echo", "K4 reverb", 0}},
-    {"TIP STRIKE", "THE LOWEST KEY", {"Strikes: the sign", "answers, in the", "music and in the", "picture together.", 0}},
-    {"TIP KEYS", "THE OTHER KEYS", {"Each is an effect", "for as long as", "you hold it.", "Try them all.", "Hold several."}},
-    {"TIP TRY", "TRY THIS", {"Hold the 9th white", "key from the left.", "Press another sign.", "Let go: the piece", "winds up to speed."}},
+    {"TIP STRIKE", "BOTTOM LEFT BUTTON", {"Press it and the", "sign answers:", "the ram bleats,", "the lion roars,", "the water pours."}},
+    {"TIP KEYS", "THE BOTTOM ROW", {"Every other button", "there is an effect", "for as long as", "you hold it.", "Hold several."}},
+    {"TIP TRY", "TRY THIS", {"Hold the 9th white", "button from the left.", "Press another sign.", "Let go: the piece", "winds up to speed."}},
     {"TIP PLAY", "PLAY AND SAVE", {"OCT- stops", "and starts.", "OCT+ keeps the", "four knobs", "for next time."}},
-    {"TIP MIDI", "FROM OUTSIDE", {"Any MIDI note", "strikes. Program", "change 0 to 11", "chooses the sign.", 0}},
+    {"TIP MIDI", "FROM OUTSIDE", {"Any MIDI note", "makes the sign", "answer. Program", "change 0 to 11", "chooses the sign."}},
 };
 #define NTIPS ((int32_t)(sizeof TIPS / sizeof TIPS[0]))
 #define TIP_SECS 12.0f

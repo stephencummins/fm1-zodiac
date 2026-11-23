@@ -8,10 +8,10 @@ that plays itself. No numbers are shown on the screen: the picture is the readou
 ## The twelve pieces
 
 Every piece is ambient and changes by itself: the tempo drifts, and most pieces move between three and four
-beats in the bar. The lowest key sets off the sign's own event, in the music and in the picture together; left
+beats in the bar. The bottom left button (the first key) sets off the sign's own event, in the music and in the picture together; left
 alone, each piece does this by itself now and then.
 
-| Sign | The piece | On the lowest key |
+| Sign | The piece | On the bottom left button |
 |---|---|---|
 | Aries | soft, dark, slightly jazzy horns | a blare, as the ram bleats |
 | Taurus | cellos in long notes over a low bass, plodding | a huff |
@@ -60,9 +60,9 @@ zero and no key held, a piece sounds exactly as written.
 | K2 | high pass, with resonance: up thins it to a whisper |
 | K3 | echo: the whole piece into a dub echo that feeds on itself |
 | K4 | reverb: a great hall |
-| lowest key, any MIDI note | strikes: the sign answers |
-| white keys, low to high | Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze |
-| black keys, low to high | Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut |
+| bottom left button, any MIDI note | the sign answers |
+| white buttons of the bottom row (the keys), left to right after the first | Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze |
+| black buttons of the bottom row, left to right | Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut |
 
 A key's effect lasts while the key is held, and several can be held together. They use no memory of their own:
 Repeat and Roll borrow the echo's line, and Half time, Tape stop and Wow play the piece itself slower.

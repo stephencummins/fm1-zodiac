@@ -15,6 +15,25 @@ void g_fade(int mul256)
     }
 }
 
+void g_echo(int mul256, f32 zoom)
+{
+    /* each pixel takes the one nearer the middle, so from the edges inward nothing is read after it is written */
+    uint8_t from[GW];
+    f32 inv = 1.0f / zoom;
+    for (int x = 0; x < GW; x++) from[x] = (uint8_t)(120.0f + ((f32)x + 0.5f - 120.0f) * inv);
+    for (int j = 0; j < GH; j++) {
+        int y = j < GH / 2 ? j : GH - 1 - (j - GH / 2);
+        const uint8_t *src = &g_fb[from[y] * GW];
+        uint8_t *dst = &g_fb[y * GW];
+        for (int i = 0; i < GW; i++) {
+            int x = i < GW / 2 ? i : GW - 1 - (i - GW / 2);
+            uint8_t p = src[from[x]];
+            int lv = ((p & 63) * mul256) >> 8;
+            dst[x] = lv ? (uint8_t)((p & 0xC0) | lv) : 0;
+        }
+    }
+}
+
 void g_ink(int ink) { ink_bits = (ink & 3) << 6; }
 void g_mode(int m) { mode = m; }
 

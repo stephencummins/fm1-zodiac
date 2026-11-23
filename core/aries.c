@@ -1,6 +1,7 @@
 /* ARIES: the ram, fire. The ram is art/aries.svg; the fire, the embers and the mist are drawn here. */
 #include "zodiac.h"
 #include "sign.h"
+#include "scene.h"
 #include "mathx.h"
 #include "pic_aries.h"
 
@@ -121,27 +122,6 @@ static void embers(f32 dt)
     }
 }
 
-static void mist(void)
-{
-    f32 m = A.p.mist;
-    if (m < 0.01f) return;
-    g_mode(G_MAX); g_ink(INK_BLUE);
-    for (int i = 0; i < 6; i++) {
-        f32 sp = 3.0f + 4.0f * hash01((uint32_t)i * 7u + 1u);
-        f32 x = hash01((uint32_t)i * 13u) * 340.0f + A.t * sp;
-        x = x - 340.0f * (f32)(int)(x / 340.0f) - 50.0f;
-        f32 y = 70.0f + 150.0f * hash01((uint32_t)i * 29u + 3u) + sin_turns(A.t * 0.03f + (f32)i * 0.3f) * 12.0f;
-        g_glow(x, y, 46.0f + 34.0f * hash01((uint32_t)i * 5u + 9u), m * (0.30f + 0.25f * noise1(A.t * 0.2f + (f32)i, 77u)));
-    }
-    int n = (int)(m * 260.0f);
-    for (int i = 0; i < n; i++) {
-        f32 x = hash01((uint32_t)i * 3u + 100u) * 240.0f + A.t * (1.5f + 3.0f * hash01((uint32_t)i + 500u));
-        x -= 240.0f * (f32)(int)(x / 240.0f);
-        f32 y = hash01((uint32_t)i * 3u + 101u) * 240.0f + sin_turns(A.t * 0.05f + (f32)i * 0.13f) * 4.0f;
-        g_dot(x, y, m * (0.35f + 0.5f * noise1(A.t * 0.4f + (f32)i * 0.7f, 9u)));
-    }
-}
-
 void aries_frame(f32 dt, const ZParams *want)
 {
     f32 k = 1.0f - 1.0f / (1.0f + dt * 5.0f);
@@ -168,9 +148,9 @@ void aries_frame(f32 dt, const ZParams *want)
     }
     A.roar += (aim - A.roar) * (1.0f - 1.0f / (1.0f + dt * (aim > A.roar ? 22.0f : 7.0f)));
 
-    if (A.p.echo > 0.02f) g_fade((int)(256.0f * (0.62f + 0.36f * A.p.echo))); else g_clear();
+    sc_echo(A.p.echo);
     fire();
-    mist();
+    sc_mist_at(A.p.mist, A.t, INK_BLUE);
     /* a bleat: the jaw drops and trembles, the mouth dark behind it */
     p_begin(aries_pic);
     int jaw = (int)(A.roar * (4.6f + 1.9f * sin_turns(A.t * 11.0f)) + 0.5f);
@@ -195,11 +175,13 @@ void aries_palette(uint16_t pal[256])
     /* the ground behind everything takes its colour from the four settings, so a turn of any knob shows at once:
      * Heat red, Echo violet, Mist blue, Light yellow; a roar flashes it */
     static const f32 tint[4][3] = {{150, 14, 8}, {96, 22, 132}, {22, 70, 150}, {150, 118, 10}};
-    f32 wt[4] = {A.p.heat * A.p.heat, A.p.echo, A.p.mist, l * l * 0.8f}, c[3];
+    f32 wt[4] = {A.p.heat * A.p.heat, A.p.echo, A.p.mist + 0.3f * sc_mist_over(A.p.mist), l * l * 0.8f}, c[3];
+    uint32_t veiled[G_INKS];
+    sc_veil(inks, A.p.mist, veiled);
     for (int k = 0; k < 3; k++) {
         f32 v = 0.0f;
         for (int j = 0; j < 4; j++) v += tint[j][k] * wt[j];
         c[k] = minf(170.0f, v * (0.58f + 0.45f * A.roar));
     }
-    g_palette_on(inks, 0.30f + 0.85f * l + 0.25f * A.roar, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
+    g_palette_on(veiled, sc_light(l) + 0.25f * A.roar, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
 }

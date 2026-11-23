@@ -23,29 +23,53 @@ void sc_step(Scene *s, f32 dt, const ZParams *want)
     s->blink = sc_follow(s->blink, s->next_blink < 0.16f ? 1.0f : 0.0f, dt, 30.0f, 30.0f);
 }
 
-void sc_begin(const Scene *s)
+/* Echo: the last frame stays, fading, and grows from the middle, so the figure throws rings of itself outward */
+void sc_echo(f32 e)
 {
-    if (s->p.echo > 0.02f) g_fade((int)(256.0f * (0.62f + 0.36f * s->p.echo))); else g_clear();
+    if (e > 0.02f) g_echo((int)(256.0f * (0.72f + 0.22f * e)), 1.006f + 0.034f * e); else g_clear();
+}
+void sc_begin(const Scene *s) { sc_echo(s->p.echo); }
+
+/* Light: 0.895 where the pictures were made (0.7); nearly out at nothing, glaring at full */
+f32 sc_light(f32 l) { return l < 0.7f ? 0.16f + 0.735f * l / 0.7f : 0.895f + (l - 0.7f) * 1.15f; }
+
+f32 sc_mist_over(f32 m) { return sat((m - 0.15f) / 0.85f); }
+
+/* Mist past where the pictures were made pales every ink towards fog */
+void sc_veil(const uint32_t inks[G_INKS], f32 mist, uint32_t out[G_INKS])
+{
+    f32 o = 0.5f * sc_mist_over(mist);
+    static const f32 fog[3] = {196.0f, 204.0f, 216.0f};
+    for (int k = 0; k < G_INKS; k++) {
+        uint32_t c = 0;
+        for (int j = 0; j < 3; j++) {
+            f32 v = (f32)((inks[k] >> (16 - 8 * j)) & 255);
+            c = c << 8 | (uint32_t)(v + (fog[j] - v) * o);
+        }
+        out[k] = c;
+    }
 }
 
-void sc_mist(const Scene *s, int ink)
+void sc_mist(const Scene *s, int ink) { sc_mist_at(s->p.mist, s->t, ink); }
+
+void sc_mist_at(f32 m, f32 t, int ink)
 {
-    f32 m = s->p.mist, t = s->t;
     if (m < 0.01f) return;
+    m += 1.7f * (m > 0.15f ? m - 0.15f : 0.0f);          /* thick past where the pictures were made */
     g_mode(G_MAX); g_ink(ink);
     for (int i = 0; i < 6; i++) {
         f32 sp = 3.0f + 4.0f * hash01((uint32_t)i * 7u + 1u);
         f32 x = hash01((uint32_t)i * 13u) * 340.0f + t * sp;
         x = x - 340.0f * (f32)(int)(x / 340.0f) - 50.0f;
         f32 y = 70.0f + 150.0f * hash01((uint32_t)i * 29u + 3u) + sin_turns(t * 0.03f + (f32)i * 0.3f) * 12.0f;
-        g_glow(x, y, 46.0f + 34.0f * hash01((uint32_t)i * 5u + 9u), m * (0.30f + 0.25f * noise1(t * 0.2f + (f32)i, 77u)));
+        g_glow(x, y, 46.0f + 34.0f * hash01((uint32_t)i * 5u + 9u), minf(1.0f, m * (0.30f + 0.25f * noise1(t * 0.2f + (f32)i, 77u))));
     }
     int n = (int)(m * 260.0f);
     for (int i = 0; i < n; i++) {
         f32 x = hash01((uint32_t)i * 3u + 100u) * 240.0f + t * (1.5f + 3.0f * hash01((uint32_t)i + 500u));
         x -= 240.0f * (f32)(int)(x / 240.0f);
         f32 y = hash01((uint32_t)i * 3u + 101u) * 240.0f + sin_turns(t * 0.05f + (f32)i * 0.13f) * 4.0f;
-        g_dot(x, y, m * (0.35f + 0.5f * noise1(t * 0.4f + (f32)i * 0.7f, 9u)));
+        g_dot(x, y, minf(1.0f, m * (0.35f + 0.5f * noise1(t * 0.4f + (f32)i * 0.7f, 9u))));
     }
 }
 
@@ -78,7 +102,7 @@ void sc_frame_line(f32 beat, f32 rays)
 
 void sc_palette(const Scene *s, const uint32_t inks[G_INKS], f32 boost, uint16_t pal[256])
 {
-    g_palette(inks, 0.30f + 0.85f * s->p.light + boost, pal);
+    g_palette(inks, sc_light(s->p.light) + boost, pal);
 }
 
 void sc_rot(f32 *xy, int n, f32 cx, f32 cy, f32 turns)
@@ -98,11 +122,13 @@ void sc_shift(f32 *xy, int n, f32 dx, f32 dy) { for (int k = 0; k < n; k++) { xy
 void sc_palette_tint(const Scene *s, const uint32_t inks[G_INKS], f32 boost, const f32 tint[4][3], f32 flash, uint16_t pal[256])
 {
     f32 l = s->p.light;
-    f32 wt[4] = {s->p.heat * s->p.heat, s->p.echo, s->p.mist, l * l * 0.8f}, c[3];
+    f32 wt[4] = {s->p.heat * s->p.heat, s->p.echo, s->p.mist + 0.3f * sc_mist_over(s->p.mist), l * l * 0.8f}, c[3];
+    uint32_t veiled[G_INKS];
+    sc_veil(inks, s->p.mist, veiled);
     for (int k = 0; k < 3; k++) {
         f32 v = 0.0f;
         for (int j = 0; j < 4; j++) v += tint[j][k] * wt[j];
         c[k] = minf(170.0f, v * (0.58f + 0.45f * flash));
     }
-    g_palette_on(inks, 0.30f + 0.85f * l + boost, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
+    g_palette_on(veiled, sc_light(l) + boost, ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | (uint32_t)c[2], pal);
 }

@@ -11,6 +11,7 @@ words = "words.tsv"
 ble = false                     # Bluetooth MIDI (--no-ble builds without it)
 ble_central = false             # and the FM-1 connects to Bluetooth MIDI devices too
 companion = false              # the companion services: the saved settings as a file for a page (app.h APP_FILE_OBJS)
+lcd_panel = true               # the FM-1 panel's own voltages and gamma at start-up: without them the screen is pale
 # the site (tools/make_site.py, tools/publish_site.sh)
 tagline = "Twelve signs that play themselves"
 repo = ""

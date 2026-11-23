@@ -19,6 +19,12 @@ f32 sc_rnd(Scene *s);
 void sc_step(Scene *s, f32 dt, const ZParams *want);
 void sc_begin(const Scene *s);                                   /* Echo: the last frame fades; else a clean sheet */
 void sc_mist(const Scene *s, int ink);
+/* the same three for a sign that keeps its own settings: Echo's sheet, Mist's drift, Light's brightness, Mist's veil */
+void sc_echo(f32 echo);
+void sc_mist_at(f32 mist, f32 t, int ink);
+f32 sc_light(f32 light);
+f32 sc_mist_over(f32 mist);                                      /* 0 up to where the pictures were made (0.15) .. 1 full */
+void sc_veil(const uint32_t inks[G_INKS], f32 mist, uint32_t out[G_INKS]);
 void sc_hex(f32 r, f32 xy[12]);
 void sc_frame_back(f32 beat, int ink, f32 glow);                 /* the frame hides what is behind it */
 void sc_frame_line(f32 beat, f32 rays);

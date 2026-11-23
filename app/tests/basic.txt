@@ -20,8 +20,8 @@ shot taurus.png
 turn K1 3
 turn K2 5
 wait 100
-expect heat 102
-expect echo 20
+expect heat 120
+expect echo 50
 # SAVE keeps the sign and the knobs
 tap SAVE
 wait 50
@@ -30,8 +30,8 @@ expect store_writes 1
 reboot
 wait 1500
 expect sign 1
-expect heat 102
-expect echo 20
+expect heat 120
+expect echo 50
 # back past Aries wraps to Pisces
 turn PRESET -2
 wait 1500
@@ -54,3 +54,22 @@ said ZODIAC. LEO
 turn SELECT 1
 wait 300
 said VIRGO
+# PLAY stops the music, the picture goes on; PLAY again and it sounds
+tap PLAY
+wait 300
+expect stopped 1
+said STOP
+peakreset
+wav stopped.wav
+wait 1500
+wavstop
+expect peak_db_max -80
+tap PLAY
+wait 100
+expect stopped 0
+said PLAY
+peakreset
+wav again.wav
+wait 4000
+wavstop
+expect peak_db_min -40

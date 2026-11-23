@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 /* Zodiac on the FM-1: twelve signs, each a picture and a piece of music that plays itself (the core, ../core).
  * PRESET (or SELECT) steps through the signs; any key, and any MIDI note, strikes; K1 .. K4 are the sign's own
- * knob, echo, mist and light; a MIDI program change 0 .. 11 chooses a sign; SAVE keeps the sign and the knobs.
+ * knob, echo, mist and light; PLAY stops the music and starts it where it stopped; a MIDI program change 0 .. 11 chooses a sign; SAVE keeps the sign and the knobs.
  * Nothing is written on the picture: a screen reader is told the names.
  * Part of the unity build, after the platform. Begun from fm1-base's template, Copyright (C) 2026 Charles Vestal.
  *
@@ -13,7 +13,7 @@
 
 #define SET_MAGIC 0x5A4F4431u            /* "ZOD1" */
 #define P_MAX 200                        /* a knob's range in the settings; one detent is P_STEP */
-#define P_STEP 4
+#define P_STEP 10                        /* twenty detents end to end: a turn is seen and heard */
 typedef struct {
     uint32_t magic;
     uint8_t sign;                        /* 0 Aries .. 11 Pisces */
@@ -27,6 +27,7 @@ static volatile int32_t want;            /* the sign asked for: the encoder (mai
 static volatile uint32_t key_strikes;    /* keys pressed: the main loop adds, the interrupt plays them */
 static volatile uint32_t pic_strikes;    /* strikes for the picture: the interrupt adds (the music's, MIDI's) */
 static volatile uint8_t silent;          /* app_panic */
+static volatile uint8_t stopped;         /* PLAY: the main loop sets it, the interrupt fades out and holds the piece still */
 static volatile ZParams P = {0.45f, 0.0f, 0.15f, 0.7f};   /* the knobs as the core reads them */
 
 /* ------------------------------------------------------------------ music --- */
@@ -42,7 +43,7 @@ static void midi_in(void)
     while (plat_midi_in(&pkt, &port)) {
         uint32_t st = (pkt >> 8) & 0xF0u, d1 = (pkt >> 16) & 0x7Fu, d2 = pkt >> 24;
         if (st == 0x90u && d2) {
-            if (Mu)
+            if (Mu && !stopped)
                 Mu->strike();
             else
                 pic_strikes++;
@@ -71,14 +72,16 @@ void app_render(int32_t *lr, uint32_t n, uint32_t master_q12)
     }
     while (keys_done != key_strikes) {
         keys_done++;
-        if (Mu)
+        if (Mu && !stopped)
             Mu->strike();
         else
             pic_strikes++;
     }
     if (n > APP_BLOCK)
         n = APP_BLOCK;
-    if (Mu && !silent) {
+    if (stopped)
+        gain = 0.0f;
+    if (Mu && !silent && !(stopped && gain_now < 64.0f)) {       /* stopped and faded out: the piece waits where it is */
         z_music_render(Mu, mbuf, (int)n, &p);
         pic_strikes += (uint32_t)z_music_event();    /* the music leads, the picture follows */
     } else {
@@ -203,6 +206,10 @@ static void input(void)
             app_say("SAVE", "FAILED");
         }
     }
+    if ((btn & ~was_btn) >> B_PLAY & 1u) {
+        stopped = !stopped;
+        app_say(stopped ? "STOP" : "PLAY", "");
+    }
     e = plat_enc(EN_PRESET) + plat_enc(EN_SELECT);
     if (e) {
         int32_t s = (want + e) % z_nsigns;
@@ -223,7 +230,7 @@ static void input(void)
     was_keys = keys;
     was_btn = btn;
     plat_glow(1);
-    plat_leds(set_dirty ? 1u << B_SAVE : 0u, keys);
+    plat_leds((set_dirty ? 1u << B_SAVE : 0u) | (stopped ? 0u : 1u << B_PLAY), keys);
 }
 
 void app_input_only(void) { input(); }
@@ -277,6 +284,8 @@ int app_expect(const char *what, int *got)
         *got = pic_sign;
     else if (!strcmp(what, "playing"))   /* the piece the interrupt is on */
         *got = mu_sign;
+    else if (!strcmp(what, "stopped"))
+        *got = stopped;
     else if (!strcmp(what, "dirty"))
         *got = set_dirty;
     else if (!strcmp(what, "strikes"))   /* strikes the picture has had */

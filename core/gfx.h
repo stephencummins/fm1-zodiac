@@ -24,6 +24,7 @@ extern uint8_t g_fb[GW * GH];
 
 void g_clear(void);
 void g_fade(int mul256);                 /* every pixel's ink times mul256 / 256: trails */
+void g_echo(int mul256, f32 zoom);       /* the last frame fades and grows from the middle: what was drawn spreads outward */
 void g_ink(int ink);                     /* 0 .. 3 */
 void g_mode(int mode);
 void g_line(f32 x0, f32 y0, f32 x1, f32 y1, f32 w, f32 a);

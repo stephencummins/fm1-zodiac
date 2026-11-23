@@ -117,16 +117,20 @@ static inline f32 m_drum(MDrum *d, f32 dt, f32 dec, f32 bend)
 /* every piece wanders: its speed drifts a little either way over a minute or so */
 static inline f32 m_drift(f32 secs, uint32_t seed, f32 depth) { return 1.0f + depth * (2.0f * noise1(secs / 41.0f, seed + m_seed) - 1.0f); }
 
-/* a small bell, celesta kind */
-typedef struct { f32 ph, mph, hz, env, dec, pan; } MBell;
-static inline void m_bell_on(MBell *b, f32 midi, f32 vel, f32 dec) { b->hz = m_hz(midi); b->env = vel; b->dec = dec; }
+/* a small bell, celesta kind. High up, its brightness is held back: the bright part of a bell is four times the
+ * note, and above about 2 kHz that part and its partners pass the top of what 44.1 kHz can carry and come back down
+ * as false tones (heard as distortion). `fit` is how many of those partners still have room; under two and a half
+ * of them the brightness thins, and with room for only one the bell is nearly a plain tone. */
+typedef struct { f32 ph, mph, hz, env, dec, pan, fit; } MBell;
+static inline void m_bell_on(MBell *b, f32 midi, f32 vel, f32 dec) { b->hz = m_hz(midi); b->env = vel; b->dec = dec; b->fit = -1.0f; }
 static inline f32 m_bell(MBell *b, f32 dt, f32 ratio, f32 depth)
 {
     if (b->env < 0.0004f) return 0.0f;
+    if (b->fit < 0.0f) b->fit = sat(((0.45f / dt - b->hz) / (b->hz * ratio) - 1.0f) * (1.0f / 1.5f));     /* once a note */
     b->env -= b->env * b->dec;
     b->ph += b->hz * dt; if (b->ph >= 1.0f) b->ph -= 1.0f;
     b->mph += b->hz * ratio * dt; while (b->mph >= 1.0f) b->mph -= 1.0f;
-    return sin_turns(b->ph + depth * b->env * sin_turns(b->mph)) * b->env;
+    return sin_turns(b->ph + depth * b->fit * b->env * sin_turns(b->mph)) * b->env;
 }
 
 /* the room and the echo, shared by all pieces: set the fields, then one call a sample */

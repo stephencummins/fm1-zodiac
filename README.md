@@ -67,7 +67,7 @@ buffers in the platform's pool). The computer and browser builds do not use them
   must stay spare. It fits, with little memory left over. Nothing has been on an FM-1.
 - How much of the FM-1's processor the pictures and the music need has not been measured.
 - The 16-bit echo measures about 95 dB below the float one, but has not been listened to.
-- `app/words.tsv` still carries the template's link for the screen reader's words; `tests/` is the template's.
+- `tests/` is the template's.
 
 ## Licence and credits
 

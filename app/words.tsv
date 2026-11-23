@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MPL-2.0
 # Zodiac's words for a screen reader (fm1-reader): the text sent <TAB> what to say.
-# The link below is still the template's: Zodiac has no site yet. Before a release it must be Zodiac's own.
-# url: https://charlesvestal.github.io/fm1-base/words/
+# url: https://zodiac.stephen8n.com/words/
 ZODIAC	zodiac
 ARIES	aries
 TAURUS	taurus

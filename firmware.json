@@ -1,11 +1,16 @@
 {
   "schema": 1,
   "id": "zodiac",
-  "name": "zodiac",
+  "name": "Zodiac",
   "author": "Stephen Cummins",
+  "license": "GPL-3.0-only",
   "tagline": "Twelve signs that play themselves",
   "description": "Twelve signs of the zodiac, each a picture and a piece of music that plays itself.",
   "tags": ["synth", "experimental"],
+  "install": "https://zodiac.stephen8n.com/install/",
+  "site": "https://zodiac.stephen8n.com/",
+  "source": "https://github.com/stephencummins/fm1-zodiac",
+  "screenshot": "docs/img/screen-playing.png",
   "hardware": {
     "models": ["FM-1"],
     "flash": ["856014", "B36014"],

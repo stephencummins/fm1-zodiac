@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zodiac for the FM-1</title>
+<meta name="description" content="Twelve signs of the zodiac for the M-VAVE FM-1, each a picture and a piece of music that plays itself.">
+<meta property="og:title" content="Zodiac: twelve signs that play themselves">
+<meta property="og:image" content="https://zodiac.stephen8n.com/img/leo.png">
+<link rel="icon" type="image/svg+xml" href="mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="brand.css">
+<style>
+  .hero { padding: 40px 16px 28px; border-bottom: 1px solid var(--rule); }
+  .hero h1 { font-size: clamp(34px, 7vw, 60px); line-height: 1.02; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 14px; max-width: 14ch; }
+  .hero p { max-width: 56ch; margin: 0 0 22px; font-size: 17px; }
+  .acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .acts .label { margin-left: 4px; }
+  .signs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule); margin: 0; padding: 0; list-style: none; }
+  @media (max-width: 760px) { .signs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .signs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .signs li { background: var(--paper); padding: 12px; }
+  .signs img { display: block; width: 100%; height: auto; aspect-ratio: 1; image-rendering: pixelated; border: 1px solid var(--rule); }
+  .signs h2 { font: 500 13.5px/1.4 var(--mono); letter-spacing: 0.08em; margin: 10px 0 4px; }
+  .signs h2 span { display: block; color: var(--mute); font-weight: 400; font-size: 12.5px; letter-spacing: 0.045em; }
+  .signs p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--mute); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule); }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .cols section { background: var(--paper); padding: 22px 16px 26px; }
+  .cols h2 { font: 12.5px/1.55 var(--mono); letter-spacing: 0.045em; color: var(--mute); font-weight: 400; margin: 0 0 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  td { padding: 7px 0; border-top: 1px solid var(--soft); vertical-align: top; }
+  td:first-child { font: 13.5px/1.6 var(--mono); white-space: nowrap; padding-right: 16px; }
+  ol { margin: 0; padding-left: 20px; } ol li { margin-bottom: 6px; }
+  footer { padding: 18px 16px 22px; font-size: 13.5px; color: var(--mute); }
+  footer p { margin: 0 0 6px; max-width: 80ch; }
+</style>
+</head>
+<body>
+<div class="wall" aria-hidden="true"></div>
+<div class="sheet">
+  <header class="bar">
+    <img class="mark" src="mark.svg" alt="">
+    <a class="word" href="./">zodiac</a>
+    <span class="model">twelve signs that play themselves · for the m-vave fm-1 · {{VERSION}}</span>
+    <nav aria-label="Zodiac">
+      <button type="button" id="theme">theme</button>
+      <a href="install/">install</a>
+      <a href="emu/">in the browser</a>
+      <a href="https://github.com/stephencummins/fm1-zodiac">source</a>
+      <a href="https://stephen8n.com">stephen8n</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Twelve signs that play themselves.</h1>
+      <p>Zodiac is a firmware for the M-VAVE FM-1. Each sign is a picture and a piece of music, and each piece composes itself as it goes, so no two playings are alike. Choose a sign and leave it running, or press a key and it answers.</p>
+      <div class="acts">
+        <a class="btn go" href="install/">Install on an FM-1</a>
+        <a class="btn" href="emu/">Play it in the browser</a>
+        <span class="label">version {{VERSION}} · <a href="firmware/{{PKG}}">{{PKG}}</a></span>
+      </div>
+    </div>
+
+    <ul class="signs">
+{{SIGNS}}
+    </ul>
+
+    <div class="cols">
+      <section>
+        <h2>the controls</h2>
+        <table>
+          <tr><td>PRESET</td><td>the next sign, or the one before</td></tr>
+          <tr><td>any key</td><td>the sign answers: the ram bleats, the lion roars, the water pours</td></tr>
+          <tr><td>K1</td><td>the sign's own knob (its name is under each picture)</td></tr>
+          <tr><td>K2</td><td>echo</td></tr>
+          <tr><td>K3</td><td>mist</td></tr>
+          <tr><td>K4</td><td>light</td></tr>
+          <tr><td>PLAY</td><td>stops the music and starts it where it stopped</td></tr>
+          <tr><td>SAVE</td><td>keeps the sign and the knobs for next time</td></tr>
+        </table>
+        <p class="label" style="margin:14px 0 0">Over MIDI, any note is a key and program change 0 to 11 chooses a sign. Nothing is written on the picture; a screen reader is told the names.</p>
+      </section>
+      <section>
+        <h2>to install</h2>
+        <ol>
+          <li>Connect the FM-1 to a computer by USB.</li>
+          <li>Open the <a href="install/">install page</a> in Chrome or Edge and press Install.</li>
+          <li>Do not unplug the cable while it writes. The FM-1 restarts as Zodiac.</li>
+        </ol>
+        <p class="label" style="margin:14px 0 0">The same page puts M-VAVE's own firmware back. Zodiac replaces the firmware on the FM-1 while it is installed; it is an early version, offered with no warranty.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>Zodiac is free software under the GNU General Public License, version 3. Source: <a href="https://github.com/stephencummins/fm1-zodiac">github.com/stephencummins/fm1-zodiac</a>.</p>
+    <p>Built on fm1-base by Charles Vestal and felucca-bsp, which come from Felucca by Leo Kuroshita, Hügelton Instruments.</p>
+    <p>Not made by or connected with M-VAVE.</p>
+  </footer>
+</div>
+<script>
+(function () {
+  var k = "zodiac:theme", r = document.documentElement, t = null;
+  try { t = localStorage.getItem(k); } catch (e) {}
+  if (t) r.dataset.theme = t;
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    r.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem(k, r.dataset.theme); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

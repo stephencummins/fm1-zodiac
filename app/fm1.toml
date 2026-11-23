@@ -15,14 +15,14 @@ ble_central = false             # and the FM-1 connects to Bluetooth MIDI device
 companion = false              # the companion services: the saved settings as a file for a page (app.h APP_FILE_OBJS)
 lcd_panel = true               # the FM-1 panel's own voltages and gamma at start-up: without them the screen is pale
 # the site (tools/make_site.py, tools/publish_site.sh)
-tagline = "Twelve signs that play themselves"
+tagline = "Switch it on and it plays: a first firmware, and one to leave running"
 repo = "https://github.com/stephencummins/fm1-zodiac"
 licence = "GPL-3.0-only"
 credits = "Zodiac is built on fm1-base by Charles Vestal and felucca-bsp, which come from Felucca by Leo Kuroshita, Hügelton Instruments."                   # a sentence for the installer's footer: what your firmware is built from
 # firmware.json, for firmware hubs (docs/FIRMWARE-JSON.md): the build writes it from these and the keys above
 author = "Stephen Cummins"      # who made it
-description = "Twelve signs of the zodiac, each a picture and a piece of music that plays itself."
-tags = ["synth", "experimental"]    # from the list in docs/FIRMWARE-JSON.md; the build refuses another
+description = "A good place to start with the FM-1. Twelve signs of the zodiac, each a moving picture and a piece of ambient music that plays itself: nothing to learn first, and you can leave it running for hours."
+tags = ["ambient", "generative"]    # from the list in docs/FIRMWARE-JSON.md; the build refuses another
 install = "https://zodiac.stephen8n.com/install/"   # the page that installs it
 site = "https://zodiac.stephen8n.com/"
-screenshot = "docs/img/screen-playing.png"   # for the hubs' cards: a square PNG, at least 240 x 240, in your repository
+screenshot = "docs/img/card.png"   # for the hubs' cards: a square PNG, at least 240 x 240, in your repository

@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: template-release-${{ github.ref }}             # <- yours
+  group: zodiac-release-${{ github.ref }}             # <- yours
   cancel-in-progress: false
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TITLE: TEMPLATE                                  # <- yours
+          TITLE: Zodiac                                    # <- yours
         run: |
           set -euo pipefail
           if [[ "$GITHUB_REF" != refs/tags/* ]]; then exit 0; fi
@@ -65,7 +65,7 @@ jobs:
       tests-block: true
       build: |
         set -euo pipefail
-        pkg=template                                       # <- yours
+        pkg=zodiac                                         # <- yours
         # the builder checks out without submodules: fm1-base (base/) and its felucca-bsp (base/bsp/), at the
         # commits this one links
         git submodule update --init --recursive
@@ -103,7 +103,7 @@ jobs:
         # <- yours: any other assets, into build/release-assets/
       test: |
         set -euo pipefail
-        pkg=template                                       # <- yours
+        pkg=zodiac                                         # <- yours
         [ -f "app/build/$pkg.fwsc" ]
         # <- yours: anything the tests need beside this repository, fetched at fixed commits
         sh tests/run_tests.sh

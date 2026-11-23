@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zodiac for the FM-1</title>
-<meta name="description" content="Twelve signs of the zodiac for the M-VAVE FM-1, each a picture and a piece of music that plays itself.">
+<meta name="description" content="A first firmware for the M-VAVE FM-1: twelve signs of the zodiac, each a picture and a piece of music that plays itself. Switch it on and leave it running.">
 <meta property="og:title" content="Zodiac: twelve signs that play themselves">
 <meta property="og:image" content="https://zodiac.stephen8n.com/img/leo.png">
 <link rel="icon" type="image/svg+xml" href="mark.svg">
@@ -47,6 +47,7 @@
     <span class="model">twelve signs that play themselves · for the m-vave fm-1 · {{VERSION}}</span>
     <nav aria-label="Zodiac">
       <button type="button" id="theme">theme</button>
+      <a href="controls/">controls</a>
       <a href="install/">install</a>
       <a href="emu/">in the browser</a>
       <a href="https://github.com/stephencummins/fm1-zodiac">source</a>
@@ -57,8 +58,8 @@
 
   <main>
     <div class="hero">
-      <h1>Twelve signs that play themselves.</h1>
-      <p>Zodiac is a firmware for the M-VAVE FM-1. Each sign is a picture and a piece of music, and each piece composes itself as it goes, so no two playings are alike. Choose a sign and leave it running, or press the bottom left button and it answers.</p>
+      <h1>Switch it on and it plays.</h1>
+      <p>Zodiac is a firmware for the M-VAVE FM-1, and a good first one: there is nothing to learn before it makes music. Twelve signs, each a picture and a piece that composes itself as it goes. Leave it running while you work or read, and it moves through the signs by itself; or press the bottom left button and the sign answers.</p>
       <div class="acts">
         <a class="btn go" href="install/">Install on an FM-1</a>
         <a class="btn" href="emu/">Play it in the browser</a>
@@ -74,7 +75,7 @@
       <section>
         <h2>the controls</h2>
         <table>
-          <tr><td>PRESET</td><td>the next sign, or the one before</td></tr>
+          <tr><td>PRESETS</td><td>the next sign, or the one before</td></tr>
           <tr><td>SELECT</td><td>turns the wheel of the twelve symbols on a sky of stars, the one at the top large in the middle; the one it rests on opens</td></tr>
           <tr><td>FX to REC</td><td>the twelve signs, Aries to Pisces, a button each</td></tr>
           <tr><td>bottom left button</td><td>the sign answers: the ram bleats, the lion roars, the water pours</td></tr>
@@ -82,13 +83,13 @@
           <tr><td>K2</td><td>high pass: turn up to thin it to a whisper</td></tr>
           <tr><td>K3</td><td>echo: a dub echo that feeds on itself</td></tr>
           <tr><td>K4</td><td>reverb: a great hall</td></tr>
-          <tr><td>white buttons, bottom row</td><td>an effect each while held, left to right after the first: Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze</td></tr>
-          <tr><td>black buttons, bottom row</td><td>an effect each while held, left to right: Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut</td></tr>
+          <tr><td>the lower buttons</td><td>an effect each for as long as you hold it, 26 of them: <a href="controls/">see them drawn</a></td></tr>
+          <tr><td>MASTER</td><td>the volume</td></tr>
           <tr><td>OCT-</td><td>stops the music and starts it where it stopped</td></tr>
           <tr><td>OCT+</td><td>keeps the four knobs for next time</td></tr>
-          <tr><td>ALGO</td><td>the tips: how to use it, a page a click</td></tr>
+          <tr><td>ALGORITHM</td><td>the tips: how to use it, a page a click</td></tr>
         </table>
-        <p class="label" style="margin:14px 0 0">Every switch-on begins with a welcome, at Aries: turn ALGO to read on, or press anything to go. With the knobs at zero and no button held, each piece plays as written. Over MIDI, any note makes the sign answer and program change 0 to 11 chooses a sign. Nothing is written on a sign's picture; a screen reader is told the names, and the tips.</p>
+        <p class="label" style="margin:14px 0 0">Every switch-on begins with a welcome, at Aries: turn ALGORITHM to read on, or press anything to go. After 30 minutes of playing, the next sign takes over. With the knobs at zero and no button held, each piece plays as written. Over MIDI, any note makes the sign answer and program change 0 to 11 chooses a sign. Nothing is written on a sign's picture; a screen reader is told the names, and the tips.</p>
       </section>
       <section>
         <h2>to install</h2>

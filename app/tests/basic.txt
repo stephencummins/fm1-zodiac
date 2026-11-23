@@ -22,7 +22,7 @@ wait 900
 expect tip 4
 turn ALGO -5
 wait 600
-expect tip 9
+expect tip 10
 tap LFO
 wait 1500
 expect tip -1
@@ -181,3 +181,8 @@ expect wheel 0
 tap REC
 wait 1500
 expect sign 11
+# thirty minutes of playing and the next sign takes over (Pisces, then Aries)
+wait 1790000
+expect sign 11
+wait 12000
+expect sign 0

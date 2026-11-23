@@ -99,7 +99,7 @@ void wheel_frame(f32 at, f32 open, f32 t)
         if (d > 6.0f) d -= 12.0f;
         if (d < -6.0f) d += 12.0f;
         f32 near = sat(1.0f - absf(d)), th = d * (1.0f / 12.0f) - 0.25f;
-        f32 r = 86.0f, half = 11.0f + 4.0f * near, a = 0.38f + 0.62f * near, w = 1.5f + 0.6f * near;
+        f32 r = 91.0f, half = 11.0f + 3.0f * near, a = 0.38f + 0.62f * near, w = 1.5f + 0.6f * near;
         f32 x = 120.0f + r * cos_turns(th), y = 120.0f + r * sin_turns(th);
         g_ink(i & 3);
         x += (x - 120.0f) * 1.2f * e; y += (y - 120.0f) * 1.2f * e;      /* opening: outward and gone */
@@ -107,7 +107,7 @@ void wheel_frame(f32 at, f32 open, f32 t)
         /* and the one at the top stands large in the middle: as the wheel turns one gives way to the next; opening,
          * it grows and thins out */
         if (near > 0.0f)
-            symbol(i, 120.0f, 120.0f, 44.0f + 40.0f * e, 3.2f + 1.5f * e,
+            symbol(i, 120.0f, 106.0f + 14.0f * e, 40.0f + 44.0f * e, 3.2f + 1.5f * e,      /* (a little high: its name goes under it) */
                    near * near * (i == top ? 1.0f - sat((o - 0.55f) * (1.0f / 0.45f)) : out));
     }
     /* the top is marked: a small notch on the outer ring */

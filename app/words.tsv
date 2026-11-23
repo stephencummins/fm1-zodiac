@@ -43,13 +43,14 @@ SIREN	siren
 VINYL	vinyl
 SPIN	spin
 CUT	cut
-WELCOME	welcome to zodiac. turn select to choose a sign. turn the four knobs. hold a bottom button. turn algo for more.
-TIP SIGNS	twelve signs. each is a picture and a piece that plays itself, never the same way twice. leave it running.
-TIP WHEEL	the wheel. turn select for the wheel. rest on a sign and it opens. preset steps straight to the next.
+WELCOME	welcome to zodiac. octave down stops and starts. master is the volume. turn algorithm for more tips.
+TIP SIGNS	the star signs. each has an image and music that plays itself. after thirty minutes the next takes over.
+TIP WHEEL	the wheel. turn select for the wheel. rest on a sign and it opens. turn presets and it goes to the next.
 TIP BUTTONS	a button each. f x to rec are the twelve signs, aries to pisces. the lit one is playing.
 TIP KNOBS	a d j's hands. knobs one to four: low pass, high pass, echo, reverb. all the way down, the piece as it is.
 TIP STRIKE	the bottom left button. press it and the sign answers. the ram bleats, the lion roars, the water pours.
-TIP KEYS	the bottom row. every other button there is an effect for as long as you hold it. hold several at once.
-TIP TRY	try this. hold the ninth white button from the left, tape stop. press another sign. let go. the piece winds up to speed.
-TIP PLAY	play and save. octave down stops and starts. octave up keeps the four knobs for next time.
-TIP MIDI	from outside. any midi note makes the sign answer. program change zero to eleven chooses the sign.
+TIP KEYS	the lower buttons. each is an effect for as long as you hold it. hold several at once.
+TIP TRY	try this. count nine along the bottom edge. hold that button. choose another sign. let go. the music winds up to speed.
+TIP PLAY	save. octave up keeps the four knobs for next time.
+TIP THIRTY	thirty minutes. after thirty minutes of playing, the next sign takes over. like the thirty degrees each has in the sky.
+TIP LEAVE	leave it playing. keep it playing for as long as you like. the music changes all the time.

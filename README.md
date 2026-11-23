@@ -3,12 +3,17 @@
 A firmware for the M-VAVE FM-1: twelve signs of the zodiac, each a moving picture and a piece of ambient music
 that plays itself. No numbers are shown on the screen: the picture is the readout.
 
-**State: runs on a computer and in a browser. It has not yet been built for, or run on, an FM-1.**
+**A good place to start.** Switch the FM-1 on and it plays; there is nothing to learn first. OCT− stops and
+starts the music, MASTER is the volume, and ALGORITHM turns through the tips on the screen. And it is made to be
+left running: after 30 minutes a sign hands over to the next, so it goes round all twelve in six hours.
+
+Install it, or try it in a browser: <https://zodiac.stephen8n.com/>. Every knob and button, drawn:
+<https://zodiac.stephen8n.com/controls/>.
 
 ## The twelve pieces
 
 Every piece is ambient and changes by itself: the tempo drifts, and most pieces move between three and four
-beats in the bar. The bottom left button (the first key) sets off the sign's own event, in the music and in the picture together; left
+beats in the bar. The bottom left button sets off the sign's own event, in the music and in the picture together; left
 alone, each piece does this by itself now and then.
 
 | Sign | The piece | On the bottom left button |
@@ -35,7 +40,7 @@ alone, each piece does this by itself now and then.
 - `art/`   the pictures' sources: drawings (`*.svg`), the chosen pictures (`art/pic/`) and the candidates they
   were chosen from (`art/gen/`)
 - `tools/`   the build scripts below, and the converters from pictures to C headers
-- `app/`   the FM-1 app. Still fm1-base's template under a new name; it does not yet run the core
+- `app/`   the FM-1 firmware: fm1-base's platform around the core
 - `base/`   [fm1-base](https://github.com/charlesvestal/fm1-base), a git submodule
 
 ## Try it
@@ -47,11 +52,11 @@ alone, each piece does this by itself now and then.
 
 In the page, the `Sound` button starts the music.
 
-## On the FM-1 (so far only in the simulator)
+## On the FM-1
 
 `app/` is the FM-1 firmware: fm1-base's platform around the core (`app/core` is a link to `core/`).
-PRESET steps through the signs, SELECT turns the wheel of their symbols (the one it rests on opens), the twelve buttons FX to REC are the twelve signs in order, a MIDI program change 0 to 11 chooses a sign, and OCT+ keeps
-the knobs for next time (every switch-on begins with the welcome, at Aries). ALGO turns through the tips. The knobs and keys are a DJ's hands on the piece (`z_dj` in `core/music.h`); with the knobs at
+PRESETS steps through the signs, SELECT turns the wheel of their symbols (the one it rests on opens), the twelve buttons FX to REC are the twelve signs in order, a MIDI program change 0 to 11 chooses a sign, and OCT+ keeps
+the knobs for next time (every switch-on begins with the welcome, at Aries). ALGORITHM turns through the tips. After 30 minutes of playing, the next sign takes over. The knobs and keys are a DJ's hands on the piece (`z_dj` in `core/music.h`); with the knobs at
 zero and no key held, a piece sounds exactly as written.
 
 | Control | What it does |
@@ -61,10 +66,10 @@ zero and no key held, a piece sounds exactly as written.
 | K3 | echo: the whole piece into a dub echo that feeds on itself |
 | K4 | reverb: a great hall |
 | bottom left button, any MIDI note | the sign answers |
-| white buttons of the bottom row (the keys), left to right after the first | Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze |
-| black buttons of the bottom row, left to right | Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut |
+| the long lower buttons, left to right after the first | Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze |
+| the short lower buttons above them, left to right | Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut |
 
-A key's effect lasts while the key is held, and several can be held together. They use no memory of their own:
+A button's effect lasts while it is held, and several can be held together. They use no memory of their own:
 Repeat and Roll borrow the echo's line, and Half time, Tape stop and Wow play the piece itself slower.
 
     ./build.sh --host

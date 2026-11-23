@@ -169,22 +169,60 @@ static float wh_at, wh_vel, wh_idle, wh_t, wh_clock;
 
 /* the words: a welcome at a first switch-on, and ALGO's tips. The only writing Zodiac shows, and only when asked
  * (and at every switch-on). Each is a heading and up to four lines, and a word for a screen reader. */
-typedef struct { const char *say, *head, *line[5]; } Tip;
-#define TIP_LINES 5
+#define TIP_LINES 6
+typedef struct { const char *say, *head, *line[TIP_LINES]; uint8_t at[TIP_LINES + 1]; } Tip;      /* at: for the heading and each line, the control it means (AT_*), or 0 */
+/* where a tip's controls are, seen from the screen: an arrow at the screen's edge points at each */
+enum { AT_SELECT = 1, AT_PRESET, AT_KNOBS, AT_BUTTONS, AT_OCT, AT_ROW, AT_LEFT };
+static const struct { float x, y, dx, dy; } ARROWS[7] = {
+    {5.0f, 57.0f, -1.0f, 0.0f},          /* SELECT: left of the screen, high */
+    {5.0f, 164.0f, -1.0f, 0.0f},         /* PRESET and ALGO: left, lower */
+    {235.0f, 57.0f, 1.0f, 0.0f},         /* the four knobs: right, high */
+    {235.0f, 185.0f, 1.0f, 0.0f},        /* FX to REC: right, lower */
+    {7.0f, 233.0f, -0.71f, 0.71f},       /* OCT- and OCT+: under the left corner */
+    {120.0f, 235.0f, 0.0f, 1.0f},        /* the bottom row: below */
+    {34.0f, 235.0f, -0.5f, 0.87f},       /* its left end */
+};
+static void arrows(const Tip *w, float t, float a)
+{
+    int32_t n = 0;
+    while (n < TIP_LINES && w->line[n])
+        n++;
+    g_ink(2);
+    for (int32_t k = 0; k <= n; k++) {
+        if (!w->at[k])
+            continue;
+        const char *txt = k ? w->line[k - 1] : w->head;
+        float dx = ARROWS[w->at[k] - 1].dx, dy = ARROWS[w->at[k] - 1].dy, nod = 2.0f * sin_turns(t * 0.8f);
+        float x = ARROWS[w->at[k] - 1].x, y = ARROWS[w->at[k] - 1].y, half = 0.5f * (float)text_w(&FONT_M, txt);
+        if (dy == 0.0f) {                /* to one side: the arrow stands at the end of its own line */
+            y = (float)(120 - (34 + 27 * n) / 2 + (k ? 34 + 27 * (k - 1) : 0)) + 13.0f;
+            x = 120.0f + dx * (half + 22.0f);
+            if (x < 5.0f) x = 5.0f;
+            if (x > 235.0f) x = 235.0f;
+        }
+        x += dx * nod; y += dy * nod;    /* it nods toward the control */
+        g_line(x - 15.0f * dx, y - 15.0f * dy, x, y, 2.2f, a);
+        g_line(x - 7.0f * (dx + 0.8f * dy), y - 7.0f * (dy - 0.8f * dx), x, y, 2.2f, a);
+        g_line(x - 7.0f * (dx - 0.8f * dy), y - 7.0f * (dy + 0.8f * dx), x, y, 2.2f, a);
+    }
+}
 static const Tip TIPS[] = {
-    {"WELCOME", "WELCOME TO ZODIAC", {"Turn SELECT", "to choose a sign.", "Turn the four knobs.", "Hold a bottom button.", "ALGO for more."}},
-    {"TIP SIGNS", "TWELVE SIGNS", {"Each is a picture", "and a piece that", "plays itself, never", "the same way twice.", 0}},
-    {"TIP WHEEL", "THE WHEEL", {"Turn SELECT.", "Rest on a sign", "and it opens.", "PRESET steps", "straight to the next."}},
-    {"TIP BUTTONS", "A BUTTON EACH", {"FX to REC are", "the twelve signs,", "Aries to Pisces.", "The lit one", "is playing."}},
-    {"TIP KNOBS", "THE FOUR KNOBS", {"K1 low pass", "K2 high pass", "K3 echo", "K4 reverb", 0}},
-    {"TIP STRIKE", "BOTTOM LEFT BUTTON", {"Press it and the", "sign answers:", "the ram bleats,", "the lion roars,", "the water pours."}},
-    {"TIP KEYS", "THE BOTTOM ROW", {"Every other button", "there is an effect", "for as long as", "you hold it.", "Hold several."}},
-    {"TIP TRY", "TRY THIS", {"Hold the 9th white", "button from the left.", "Press another sign.", "Let go: the piece", "winds up to speed."}},
-    {"TIP PLAY", "PLAY AND SAVE", {"OCT- stops", "and starts.", "OCT+ keeps the", "four knobs", "for next time."}},
-    {"TIP MIDI", "FROM OUTSIDE", {"Any MIDI note", "makes the sign", "answer. Program", "change 0 to 11", "chooses the sign."}},
+    /* the first says only what a beginner needs at once: stop and start, the volume, and where the rest is */
+    {"WELCOME", "WELCOME TO ZODIAC", {"OCT- stops", "and starts.", "MASTER is", "the volume.", "Turn ALGORITHM", "for more tips."}, {0, AT_OCT, 0, AT_SELECT, 0, AT_PRESET}},
+    {"TIP WHEEL", "THE WHEEL", {"Turn SELECT.", "Rest on a sign", "and it opens.", "Turn PRESETS and", "it goes to the next."}, {0, AT_SELECT, 0, 0, AT_PRESET}},
+    {"TIP KNOBS", "THE FOUR KNOBS", {"K1 low pass", "K2 high pass", "K3 echo", "K4 reverb", 0}, {AT_KNOBS}},
+    {"TIP KEYS", "THE LOWER BUTTONS", {"Each is an effect", "for as long as", "you hold it.", "Hold several.", 0}, {AT_ROW}},
+    {"TIP STRIKE", "BOTTOM LEFT BUTTON", {"Press it and the", "sign answers:", "the ram bleats,", "the lion roars,", "the water pours."}, {AT_LEFT}},
+    {"TIP TRY", "TRY THIS", {"Count nine along", "the bottom edge.", "Hold that button.", "Choose another sign.", "Let go: the music", "winds up to speed."}, {0, AT_ROW, 0, 0, AT_BUTTONS}},
+    {"TIP BUTTONS", "A BUTTON EACH", {"FX to REC are", "the twelve signs,", "Aries to Pisces.", "The lit one", "is playing."}, {0, AT_BUTTONS}},
+    {"TIP PLAY", "SAVE", {"OCT+ keeps the four", "knobs for next time.", 0}, {0, AT_OCT}},
+    {"TIP SIGNS", "THE STAR SIGNS", {"Each has an image", "and music that", "plays itself, never", "the same way twice.", "After 30 minutes", "the next takes over."}, {0}},
+    {"TIP THIRTY", "THIRTY MINUTES", {"After 30 minutes", "of playing, the next", "sign takes over:", "like the 30 degrees", "each has in the sky."}, {0}},
+    {"TIP LEAVE", "LEAVE IT PLAYING", {"Keep it playing", "for as long as", "you like. The music", "changes all the time.", 0}, {0}},
 };
 #define NTIPS ((int32_t)(sizeof TIPS / sizeof TIPS[0]))
 #define TIP_SECS 12.0f
+#define SIGN_MS (30u * 60u * 1000u)
 static int32_t tip = -1;                 /* the one showing, or -1 */
 static float tip_left, tip_clock;
 static int32_t tip_was = -1;             /* the page going out as this one comes in */
@@ -404,6 +442,8 @@ void app_input_only(void) { input(); }
 static const Tip *words;                 /* written over the frame by draw(), at this strength */
 static float words_a, words_cov;         /* words_cov under 1: only that share of their pixels, glittering */
 static uint32_t words_seed;
+static int32_t words_y = -1;             /* where the heading goes; under 0, the page stands in the middle */
+static Tip wheel_name;                   /* the wheel's: the name of the sign at its top, and nothing under it */
 
 static uint16_t ink(uint32_t r, uint32_t g, uint32_t b)      /* a colour at the words' strength */
 {
@@ -417,7 +457,7 @@ static void words_strip(int32_t y0)      /* the part of the words that falls in 
     int32_t n = 0, k, y;
     while (n < TIP_LINES && t->line[n])
         n++;
-    y = 120 - (34 + 27 * n) / 2;
+    y = words_y >= 0 ? words_y : 120 - (34 + 27 * n) / 2;
     if (y < y0 + (int32_t)STRIP && y + 28 > y0)
         cv_text((240 - text_w(&FONT_M, t->head)) / 2, y - y0, &FONT_M, t->head, ink(255, 190, 110));
     for (k = 0; k < n; k++) {
@@ -509,6 +549,17 @@ void app_frame(void)
     uint32_t now = plat_ms(), s;
     float dt = (float)(now - last_ms) * 0.001f;
     ZParams p = P;
+    {   /* a sign has the sky for thirty minutes of playing, as it has thirty degrees of the year; then the next */
+        static uint32_t sign_ms;
+        static int32_t sign_was = -1;
+        int32_t w = want;
+        if (w != sign_was) {
+            sign_was = w;
+            sign_ms = 0;
+        } else if (!stopped && (sign_ms += now - last_ms) >= SIGN_MS) {
+            want = (w + 1) % z_nsigns;
+        }
+    }
     last_ms = now;
     if (dt > 0.1f)
         dt = 0.1f;
@@ -531,6 +582,7 @@ void app_frame(void)
             if (out < 1.0f)              /* and at the end they glitter away */
                 words_cov = out;
             words_seed = now * 2246822519u;
+            arrows(words, tip_clock, words_cov);
             draw(wheel_palette, -1.0f);
             words = 0;
             return;
@@ -539,7 +591,19 @@ void app_frame(void)
     if (wh_mode == 1 || wh_mode == 2) {  /* the wheel has the screen; the piece plays on under it */
         wheel_step(dt);
         speak();
+        {   /* the name of the sign at the top, under its symbol: it fades as the wheel turns on, and as the sign opens */
+            float r = wh_at + 1200.5f, d = r - (float)(int32_t)r - 0.5f, a = 1.0f - 2.4f * (d < 0.0f ? -d : d);
+            if (wh_mode == 2)
+                a *= 1.0f - 3.0f * wh_t;
+            wheel_name.head = z_signs[(int32_t)r % (int32_t)z_nsigns].name;
+            words = a > 0.02f ? &wheel_name : 0;
+            words_a = a > 1.0f ? 1.0f : a;
+            words_cov = 1.0f;
+            words_y = 156;
+        }
         draw(wheel_palette, -1.0f);
+        words = 0;
+        words_y = -1;
         return;
     }
     sign_show();

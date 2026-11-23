@@ -5,7 +5,8 @@
   tools/site.py app/build/zodiac-X.Y.Z.fwsc X.Y.Z [OUT_DIR, default build/site]
 
 fm1-base's tools/make_site.py makes the installer, the browser emulator, the words files and the firmware folder;
-then this puts Zodiac's own front page over the base's (site/index.html, site/brand.css, site/mark.svg, site/img)
+then this puts Zodiac's own front page over the base's (site/index.html, site/brand.css, site/mark.svg, site/img),
+adds the controls page (site/controls.html with tools/controls.py's drawing of the panel)
 and dresses the made installer in the same look. Nothing in base/ is changed: only the copy in OUT_DIR.
 The browser emulator must be built first (./build.sh --web)."""
 import re
@@ -15,6 +16,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import controls  # noqa: E402  (the panel drawn: tools/controls.py)
 SIGNS = [  # name, element, its own knob, a line on its piece
     ("Aries", "fire", "Heat", "Soft low horns and a muted trumpet, a slow swing. When the ram bleats the horns blare."),
     ("Taurus", "earth", "Growth", "Cellos on long notes over a bass that plods, one hoof a beat."),
@@ -63,6 +66,10 @@ def main(pkg, version, out):
     for f in ("brand.css", "mark.svg"):
         shutil.copy(ROOT / "site" / f, out / f)
     shutil.copytree(ROOT / "site/img", out / "img", dirs_exist_ok=True)
+    (out / "controls").mkdir(exist_ok=True)
+    page = (ROOT / "site/controls.html").read_text(encoding="utf-8")
+    (out / "controls/index.html").write_text(page.replace("{{PANEL}}", controls.panel()).replace("{{SKINS}}", controls.skin_buttons()).replace("{{VERSION}}", version),
+                                             encoding="utf-8")
     inst = out / "install/index.html"
     h = inst.read_text(encoding="utf-8")
     if h.count("</head>") != 1 or h.count("<body>") != 1:

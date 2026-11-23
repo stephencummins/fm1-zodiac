@@ -56,8 +56,24 @@ EMU_CSS = """<style>
   :root, :root[data-theme="light"] { --ground: #ffffff; --ink: #111110; --muted: #6e6a64; --rule: #d9d6d1; --accent: #d83f00; --card: #f6f5f3; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground: #0e0d0c; --ink: #f3f1ee; --muted: #98928a; --rule: #2e2b27; --accent: #ff5f1f; --card: #181614; } }
   :root[data-theme="dark"] { --ground: #0e0d0c; --ink: #f3f1ee; --muted: #98928a; --rule: #2e2b27; --accent: #ff5f1f; --card: #181614; }
-  body { font-family: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif; padding-block: 0 48px; }
-  body > header.zbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 0; margin: 0 auto 18px; border-bottom: 1px solid var(--rule); }
+  :root { --zwall: 0.16; } :root[data-theme="dark"] { --zwall: 0.22; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --zwall: 0.22; } }
+  body { font-family: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif; padding: 0; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .zwall { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: url(../img/wall.png) center top / 360px; image-rendering: pixelated; opacity: var(--zwall);
+    --m: linear-gradient(to right, #000 calc(50% - 560px), transparent calc(50% - 500px), transparent calc(50% + 500px), #000 calc(50% + 560px)); -webkit-mask-image: var(--m); mask-image: var(--m); }
+  .zsheet { max-width: 960px; margin: 24px auto; border: 1px solid var(--rule); background: var(--ground); }
+  @media (max-width: 1000px) { .zsheet { margin: 0; border-width: 0 0 1px; } }
+  .zsheet main { max-width: none; padding: 16px; }
+  header.zbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px; margin: 0; max-width: none; border-bottom: 1px solid var(--rule); }
+  .bar button, .speak button { border-radius: 0; border-color: var(--ink); background: none; font: 500 13px/1 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.045em; padding: 9px 14px; }
+  .bar button:hover, .speak button:hover { border-color: var(--accent); }
+  .start button { border-radius: 0; background: var(--accent); color: #fff; font: 500 15px/1 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.045em; padding: 14px 22px; }
+  .speak { border-radius: 0; background: none; padding: 14px 16px; }
+  .speak summary h2 { font: 12.5px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.045em; color: var(--muted); font-weight: 400; text-transform: lowercase; }
+  .speak input { accent-color: var(--accent); }
+  .zfoot { padding: 18px 16px 22px; font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--rule); } .zfoot p { margin: 0 0 6px; max-width: 80ch; }
   .zbar img { width: 32px; height: 32px; flex: none; }
   .zbar h1 { font: 600 19px/1.2 "Archivo", sans-serif; letter-spacing: -0.01em; margin: 0; }
   .zbar h1 a { color: var(--ink); text-decoration: none; }
@@ -66,7 +82,7 @@ EMU_CSS = """<style>
   .zbar nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; }
   .zbar nav a, .zbar nav button { color: var(--muted); text-decoration: none; background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; cursor: pointer; }
   .zbar nav a:hover, .zbar nav button:hover { color: var(--ink); }
-  .zhow { max-width: 1040px; margin: 34px auto 0; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .zhow { padding: 18px 16px; border-top: 1px solid var(--rule); }
   .zhow h2 { font: 600 24px/1.15 "Archivo", sans-serif; letter-spacing: -0.02em; margin: 0 0 6px; }
   .zhow p { margin: 0 0 12px; max-width: 64ch; }
   .device svg.zlab { z-index: 1; } .zlab text { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; text-anchor: middle; }
@@ -160,18 +176,21 @@ def main(pkg, version, out):
         raise SystemExit("the emulator's page has changed shape: tools/site.py no longer fits it")
     h = h.replace("<title>zodiac in the browser</title>", "<title>Zodiac in the browser</title>")
     h = h.replace("</head>", f'<link rel="icon" type="image/svg+xml" href="../mark.svg">\n{FONTS}\n{EMU_CSS}\n</head>')
-    h = h.replace(head, f'<header class="zbar"><img src="../mark.svg" alt=""><h1><a href="../">zodiac</a></h1>'
+    h = h.replace(head, f'<div class="zwall" aria-hidden="true"></div>\n<div class="zsheet">\n<header class="zbar"><img src="../mark.svg" alt=""><h1><a href="../">zodiac</a></h1>'
                         f'<span class="model">in the browser · {version}</span>'
                         '<nav aria-label="Zodiac"><button type="button" id="ztheme">theme</button><button type="button" id="zlabels" aria-pressed="true">labels</button><a href="../">home</a>'
                         '<a href="../controls/">controls</a><a href="../install/">install</a>'
-                        '<a href="https://github.com/stephencummins/fm1-zodiac">source</a></nav></header>')
+                        '<a href="https://github.com/stephencummins/fm1-zodiac">source</a><a href="https://aisling.stephen8n.com/">aisling</a>'
+                        '<a href="https://stephen8n.com">stephen8n</a></nav></header>')
     ctl = '<div id="controls"'
     if h.count(ctl) != 1:
         raise SystemExit("the emulator's page has changed shape: tools/site.py no longer fits it")
     h = h.replace(ctl, emu_labels() + "\n  " + ctl)
     h = h.replace("</main>", "</main>\n<section class=\"zhow\"><p>To begin you need three: OCT− stops the music and starts it again, "
                              "MASTER is the volume, and ALGORITHM turns through the tips on the screen. Each lower button is an effect "
-                             "for as long as you hold it. <a href=\"../controls/\">The controls, in words</a>.</p></section>\n" + EMU_JS, 1)
+                             "for as long as you hold it. <a href=\"../controls/\">The controls, in words</a>.</p></section>\n<footer class=\"zfoot\"><p>Zodiac is free software under the GNU General Public License, "
+                             "version 3. Source: <a href=\"https://github.com/stephencummins/fm1-zodiac\">github.com/stephencummins/fm1-zodiac</a>.</p>"
+                             "<p>Not made by or connected with M-VAVE.</p></footer>\n</div>\n" + EMU_JS, 1)
     emu.write_text(h, encoding="utf-8")
     print(f"zodiac's pages: {out}/index.html, install/ and emu/ dressed")
 

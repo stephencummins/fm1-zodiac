@@ -58,6 +58,20 @@ static void symbol(int s, f32 x, f32 y, f32 half, f32 w, f32 a)
     }
 }
 
+/* the sky behind: stars that twinkle, each in its own time, turning a little with the wheel */
+static void sky(f32 at, f32 t, f32 dim)
+{
+    for (uint32_t i = 0; i < 150u; i++) {
+        f32 rr = 8.0f + 160.0f * sqrtf_(hash01(i * 3u + 1u)), th = hash01(i * 3u + 2u) - at * (1.0f / 48.0f);
+        f32 x = 120.0f + rr * cos_turns(th), y = 120.0f + rr * sin_turns(th);
+        f32 tw = 0.5f + 0.5f * sin_turns(t * (0.15f + 0.5f * hash01(i * 3u + 3u)) + hash01(i + 700u));
+        f32 a = (0.3f + 0.7f * tw * tw) * (i % 9u == 0u ? 1.0f : 0.85f) * dim;
+        g_ink(i % 5u == 0u ? 3 : 2);
+        if (i % 9u == 0u) g_disc(x, y, 1.3f, a);                /* a few are near */
+        else g_dot(x, y, a);
+    }
+}
+
 /* at: the place in the ring that is at the top, in signs (3.0 Cancer; 2.5 half way from Gemini to it); it may run
  * past 12 or below 0. open: 0 the wheel, to 1 the chosen sign grown in the middle and everything else gone.
  * Ink k is element k (fire, earth, air, water): a sign is drawn in its element's. */
@@ -67,10 +81,10 @@ void wheel_frame(f32 at, f32 open, f32 t)
     f32 o = sat(open), e = o * o * (3.0f - 2.0f * o), out = 1.0f - e;
     g_clear();
     g_mode(G_MAX);
+    sky(at, t, 1.0f - 0.7f * e);
     /* the ring the symbols ride on, and a mark between each two */
     g_ink(2);
     g_ring(120.0f, 120.0f, 111.0f + 80.0f * e, 1.2f, 0.28f * out);
-    g_ring(120.0f, 120.0f, 55.0f + 120.0f * e, 1.2f, 0.22f * out);
     for (int i = 0; i < 12; i++) {
         f32 th = ((f32)i + 0.5f - at) * (1.0f / 12.0f), c = cos_turns(th - 0.25f), s = sin_turns(th - 0.25f);
         f32 r0 = 104.0f + 80.0f * e, r1 = 111.0f + 80.0f * e;
@@ -78,25 +92,23 @@ void wheel_frame(f32 at, f32 open, f32 t)
     }
     /* the middle: the chosen sign's element, breathing */
     g_ink(top & 3);
-    g_glow(120.0f, 120.0f, 34.0f + 3.0f * sin_turns(t * 0.2f) + 60.0f * e, 0.3f * out + 0.25f * e * (1.0f - o));
+    g_glow(120.0f, 120.0f, 58.0f + 4.0f * sin_turns(t * 0.2f) + 50.0f * e, 0.22f * out + 0.2f * e * (1.0f - o));
     for (int i = 0; i < 12; i++) {
         f32 d = (f32)i - at;                        /* how far round from the top, -6 .. 6 signs */
         d -= 12.0f * (f32)(int)(d * (1.0f / 12.0f));
         if (d > 6.0f) d -= 12.0f;
         if (d < -6.0f) d += 12.0f;
         f32 near = sat(1.0f - absf(d)), th = d * (1.0f / 12.0f) - 0.25f;
-        f32 r = 83.0f, half = 11.0f + 9.0f * near, a = 0.38f + 0.62f * near, w = 1.5f + 1.0f * near;
+        f32 r = 86.0f, half = 11.0f + 4.0f * near, a = 0.38f + 0.62f * near, w = 1.5f + 0.6f * near;
         f32 x = 120.0f + r * cos_turns(th), y = 120.0f + r * sin_turns(th);
         g_ink(i & 3);
-        if (i == top) {                             /* to the middle, growing, and thinning out at the last */
-            x += (120.0f - x) * e; y += (120.0f - y) * e;
-            half += 62.0f * e; w += 2.0f * e;
-            a *= 1.0f - sat((o - 0.55f) * (1.0f / 0.45f));
-        } else {                                    /* outward and gone */
-            x += (x - 120.0f) * 1.2f * e; y += (y - 120.0f) * 1.2f * e;
-            a *= out * out;
-        }
-        symbol(i, x, y, half, w, a);
+        x += (x - 120.0f) * 1.2f * e; y += (y - 120.0f) * 1.2f * e;      /* opening: outward and gone */
+        symbol(i, x, y, half, w, a * out * out);
+        /* and the one at the top stands large in the middle: as the wheel turns one gives way to the next; opening,
+         * it grows and thins out */
+        if (near > 0.0f)
+            symbol(i, 120.0f, 120.0f, 44.0f + 40.0f * e, 3.2f + 1.5f * e,
+                   near * near * (i == top ? 1.0f - sat((o - 0.55f) * (1.0f / 0.45f)) : out));
     }
     /* the top is marked: a small notch on the outer ring */
     g_ink(2);
@@ -107,4 +119,14 @@ void wheel_palette(uint16_t pal[256])
 {
     static const uint32_t inks[G_INKS] = {0xFF7A3Du, 0x86D46Au, 0xF4E7B4u, 0x58A9FFu};     /* fire, earth, air, water */
     g_palette(inks, 1.0f, pal);
+}
+
+/* the sky alone, with a soft light low in it: what the words stand on */
+void wheel_sky(f32 t)
+{
+    g_clear();
+    g_mode(G_MAX);
+    sky(t * 0.15f, t, 0.8f);
+    g_ink(3);
+    g_glow(120.0f, 250.0f, 120.0f + 6.0f * sin_turns(t * 0.1f), 0.22f);
 }

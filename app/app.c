@@ -142,7 +142,8 @@ static void settings_load(void)
         set.p[0] = set.p[1] = set.p[2] = set.p[3] = 0;       /* the piece as it is */
     }
     params_set();
-    want = set.sign;
+    set.sign = 0;                        /* (kept in the store's layout; no longer used) */
+    want = 0;                            /* every switch-on begins at Aries: only the knobs are kept */
 }
 
 void app_init(void) { settings_load(); }
@@ -165,6 +166,30 @@ static float wh_at, wh_vel, wh_idle, wh_t, wh_clock;
 #define WH_GATHER 0.45f
 #define WH_OPEN 0.75f
 #define WH_DIP 0.72f
+
+/* the words: a welcome at a first switch-on, and ALGO's tips. The only writing Zodiac shows, and only when asked
+ * (and at every switch-on). Each is a heading and up to four lines, and a word for a screen reader. */
+typedef struct { const char *say, *head, *line[5]; } Tip;
+#define TIP_LINES 5
+static const Tip TIPS[] = {
+    {"WELCOME", "WELCOME TO ZODIAC", {"Turn SELECT", "to choose a sign.", "Turn the four knobs.", "Hold any key.", "ALGO for more."}},
+    {"TIP SIGNS", "TWELVE SIGNS", {"Each is a picture", "and a piece that", "plays itself, never", "the same way twice.", 0}},
+    {"TIP WHEEL", "THE WHEEL", {"Turn SELECT.", "Rest on a sign", "and it opens.", "PRESET steps", "straight to the next."}},
+    {"TIP BUTTONS", "A BUTTON EACH", {"FX to REC are", "the twelve signs,", "Aries to Pisces.", "The lit one", "is playing."}},
+    {"TIP KNOBS", "THE FOUR KNOBS", {"K1 low pass", "K2 high pass", "K3 echo", "K4 reverb", 0}},
+    {"TIP STRIKE", "THE LOWEST KEY", {"Strikes: the sign", "answers, in the", "music and in the", "picture together.", 0}},
+    {"TIP KEYS", "THE OTHER KEYS", {"Each is an effect", "for as long as", "you hold it.", "Try them all.", "Hold several."}},
+    {"TIP TRY", "TRY THIS", {"Hold the 9th white", "key from the left.", "Press another sign.", "Let go: the piece", "winds up to speed."}},
+    {"TIP PLAY", "PLAY AND SAVE", {"OCT- stops", "and starts.", "OCT+ keeps the", "four knobs", "for next time."}},
+    {"TIP MIDI", "FROM OUTSIDE", {"Any MIDI note", "strikes. Program", "change 0 to 11", "chooses the sign.", 0}},
+};
+#define NTIPS ((int32_t)(sizeof TIPS / sizeof TIPS[0]))
+#define TIP_SECS 12.0f
+static int32_t tip = -1;                 /* the one showing, or -1 */
+static float tip_left, tip_clock;
+static int32_t tip_was = -1;             /* the page going out as this one comes in */
+static float tip_turn;                   /* 0 .. 1: the old page glitters away, then the new one in */
+#define TIP_TURN 0.7f
 
 static float own_wait;
 static uint32_t own_rng;
@@ -218,12 +243,30 @@ static void sign_show(void)              /* the picture moves to the sign asked 
     g_clear();
     Z->init();
     pic_done = pic_strikes;              /* strikes meant for the last picture are let go */
-    if (set.sign != (uint8_t)w) {
-        set.sign = (uint8_t)w;
-        set_dirty = 1;
-    }
     if (wh_mode != 3)                    /* the wheel has said it already */
         app_say(Z->name, "");
+}
+
+static void tip_off(void)                /* the words go: the picture opens out from the middle */
+{
+    if (tip < 0)
+        return;
+    tip = -1;
+    pic_sign = -1;
+    wh_mode = 3;
+    wh_t = 0.0f;
+}
+
+static void tip_show(int32_t k)
+{
+    tip_was = tip;
+    tip_turn = tip < 0 ? 0.5f : 0.0f;    /* (from the picture: only in) */
+    tip = k;
+    tip_left = TIP_SECS;
+    if (wh_mode == 1 || wh_mode == 2)
+        dip = 0.0f;
+    wh_mode = 0;
+    app_say(TIPS[k].say, "");
 }
 
 static void wheel_step(float dt)         /* the wheel moves on by dt, and draws */
@@ -268,6 +311,12 @@ static void input(void)
     static const int8_t KEYFX[27] = {-1, 15, 0, 16, 1, 17, 2, 3, 18, 4, 19, 5, 6, 20, 7, 21, 8, 22, 9, 10, 23, 11, 24, 12, 13, 25, 14};
     uint32_t keys = plat_keys(), btn = plat_buttons(), k, fx = 0;
     int32_t e;
+    if ((keys & ~was_keys) || (btn & ~was_btn))      /* any touch but ALGO's puts the words away */
+        tip_off();
+    if ((e = plat_enc(EN_ALGO)) != 0) {              /* ALGO: the tips, one a click */
+        int32_t k = tip < 0 ? (e > 0 ? 1 : NTIPS - 1) : (tip + e) % NTIPS;
+        tip_show(k < 0 ? k + NTIPS : k);
+    }
     if (keys & ~was_keys & 1u)          /* the lowest key down: a strike */
         key_strikes++;
     for (k = 1; k < 27u; k++) {
@@ -306,10 +355,12 @@ static void input(void)
     }
     if ((e = plat_enc(EN_PRESET)) != 0) {            /* PRESET: straight to the next sign */
         int32_t s = (want + e) % z_nsigns;
+        tip_off();
         want = s < 0 ? s + z_nsigns : s;
     }
     if ((e = plat_enc(EN_SELECT)) != 0) {            /* SELECT: the wheel */
         int32_t s;
+        tip_off();
         if (wh_mode == 0 || wh_mode == 3) {
             wh_sel = wh_want = want;
             wh_at = (float)wh_sel;
@@ -331,6 +382,7 @@ static void input(void)
         int32_t v;
         if ((e = plat_enc((int)(EN_K1 + k))) == 0)
             continue;
+        tip_off();
         v = clamp((int32_t)set.p[k] + e * P_STEP, 0, P_MAX);
         if (v != set.p[k]) {
             set.p[k] = (uint8_t)v;
@@ -349,6 +401,32 @@ void app_input_only(void) { input(); }
 
 /* g_fb through this frame's colours to the screen. iris: under 0 all of it; or only a disc that many pixels across
  * its half about the middle, the rest black, a bright rim at its edge */
+static const Tip *words;                 /* written over the frame by draw(), at this strength */
+static float words_a, words_cov;         /* words_cov under 1: only that share of their pixels, glittering */
+static uint32_t words_seed;
+
+static uint16_t ink(uint32_t r, uint32_t g, uint32_t b)      /* a colour at the words' strength */
+{
+    uint32_t a = (uint32_t)(words_a * 256.0f);
+    return RGB(r * a >> 8, g * a >> 8, b * a >> 8);
+}
+
+static void words_strip(int32_t y0)      /* the part of the words that falls in the strip starting at row y0 */
+{
+    const Tip *t = words;
+    int32_t n = 0, k, y;
+    while (n < TIP_LINES && t->line[n])
+        n++;
+    y = 120 - (34 + 27 * n) / 2;
+    if (y < y0 + (int32_t)STRIP && y + 28 > y0)
+        cv_text((240 - text_w(&FONT_M, t->head)) / 2, y - y0, &FONT_M, t->head, ink(255, 190, 110));
+    for (k = 0; k < n; k++) {
+        int32_t ly = y + 34 + 27 * k;
+        if (ly < y0 + (int32_t)STRIP && ly + 28 > y0)
+            cv_text((240 - text_w(&FONT_M, t->line[k])) / 2, ly - y0, &FONT_M, t->line[k], ink(236, 232, 220));
+    }
+}
+
 static void draw(void (*palette)(uint16_t pal[256]), float iris)
 {
     static uint16_t pal[256];
@@ -390,7 +468,29 @@ static void draw(void (*palette)(uint16_t pal[256]), float iris)
                 }
             }
         }
-        lcd_blit(0, y, 240, STRIP, strip);
+        if (words) {                     /* through the platform's canvas, which is where its lettering draws */
+            cv_begin(240, STRIP, 0);
+            for (i = 0; i < 240u * STRIP; i++)
+                cv_px[i] = strip[i];
+            words_strip((int32_t)y);
+            if (words_cov < 1.0f) {      /* a shimmer: each lit pixel there or not by chance, the edge of it white */
+                uint32_t cut = (uint32_t)(words_cov * 256.0f), h = words_seed + y * 2654435761u;
+                for (i = 0; i < 240u * STRIP; i++) {
+                    uint32_t v;
+                    h = h * 1664525u + 1013904223u;
+                    if (cv_px[i] == strip[i])
+                        continue;
+                    v = h >> 24;
+                    if (v >= cut)
+                        cv_px[i] = strip[i];
+                    else if (v + 40u >= cut)
+                        cv_px[i] = 0xFFFFu;
+                }
+            }
+            lcd_blit(0, y, 240, STRIP, cv_px);
+        } else {
+            lcd_blit(0, y, 240, STRIP, strip);
+        }
     }
 }
 
@@ -399,6 +499,9 @@ void app_ui_init(void)
     lcd_fill(0, 0, 240, 240, 0);
     last_ms = plat_ms();
     sign_show();
+    tip = 0;                             /* every switch-on: the welcome, over the piece as it fades up */
+    tip_left = TIP_SECS;
+    tip_turn = 0.5f;
 }
 
 void app_frame(void)
@@ -410,6 +513,29 @@ void app_frame(void)
     if (dt > 0.1f)
         dt = 0.1f;
     input();
+    if (tip >= 0) {                      /* the words have the screen; the piece plays on under them */
+        tip_left -= dt;
+        tip_clock += dt;
+        if (tip_left <= 0.0f) {
+            tip_off();
+        } else {
+            float out = tip_left * 2.0f;
+            tip_turn += dt * (1.0f / TIP_TURN);
+            if (tip_turn > 1.0f)
+                tip_turn = 1.0f;
+            wheel_sky(tip_clock);
+            speak();
+            words = &TIPS[tip_turn < 0.5f && tip_was >= 0 ? tip_was : tip];
+            words_a = 1.0f;
+            words_cov = tip_turn < 0.5f ? 1.0f - 2.0f * tip_turn : 2.0f * tip_turn - 1.0f;
+            if (out < 1.0f)              /* and at the end they glitter away */
+                words_cov = out;
+            words_seed = now * 2246822519u;
+            draw(wheel_palette, -1.0f);
+            words = 0;
+            return;
+        }
+    }
     if (wh_mode == 1 || wh_mode == 2) {  /* the wheel has the screen; the piece plays on under it */
         wheel_step(dt);
         speak();
@@ -466,6 +592,21 @@ int app_expect(const char *what, int *got)
         *got = set.p[3];
     else if (!strcmp(what, "wheel"))     /* 0 the picture, 1 the wheel, 2 the symbol gathers, 3 the picture opens */
         *got = wh_mode;
+    else if (!strcmp(what, "tip"))       /* the words showing, or -1 */
+        *got = tip;
+    else if (!strcmp(what, "tipfits")) { /* the widest line of them all fits the screen, with a margin */
+        int32_t k, j, w, m = 0;
+        for (k = 0; k < NTIPS; k++) {
+            if ((w = text_w(&FONT_M, TIPS[k].head)) > m)
+                m = w;
+            for (j = 0; j < TIP_LINES && TIPS[k].line[j]; j++)
+                if ((w = text_w(&FONT_M, TIPS[k].line[j])) > m)
+                    m = w;
+        }
+        *got = m <= 232;
+        if (m > 232)
+            printf("tips: widest line %d px\n", (int)m);
+    }
     else if (!strcmp(what, "fx"))        /* the effects held, a bit each */
         *got = (int)fx_held;
     else

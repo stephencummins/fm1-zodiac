@@ -27,7 +27,7 @@ SIGNS = [  # name, element, its own knob, a line on its piece
     ("Sagittarius", "fire", "Flight", "Heroic horns leaping up the chord, strings driving in threes."),
     ("Capricorn", "earth", "Climb", "Alpine horns called across a valley, and the mountain under them."),
     ("Aquarius", "air", "Flow", "Small bells falling in ripples, a glass voice above, soft strings below."),
-    ("Pisces", "water", "Dream", "A rushing torrent, and far inside the water three soft notes."),
+    ("Pisces", "water", "Dream", "A rushing torrent, three soft notes far inside the water, and now and then a low, slow call."),
 ]
 FONTS = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600'
          '&family=IBM+Plex+Mono:wght@400;500&display=swap">')

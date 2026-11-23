@@ -50,8 +50,8 @@ In the page, the `Sound` button starts the music.
 ## On the FM-1 (so far only in the simulator)
 
 `app/` is the FM-1 firmware: fm1-base's platform around the core (`app/core` is a link to `core/`).
-PRESET steps through the signs, SELECT turns the wheel of their symbols (the one it rests on opens), the twelve buttons FX to REC are the twelve signs in order, a MIDI program change 0 to 11 chooses a sign, and OCT+ keeps the sign
-and the knobs. The knobs and keys are a DJ's hands on the piece (`z_dj` in `core/music.h`); with the knobs at
+PRESET steps through the signs, SELECT turns the wheel of their symbols (the one it rests on opens), the twelve buttons FX to REC are the twelve signs in order, a MIDI program change 0 to 11 chooses a sign, and OCT+ keeps
+the knobs for next time (every switch-on begins with the welcome, at Aries). ALGO turns through the tips. The knobs and keys are a DJ's hands on the piece (`z_dj` in `core/music.h`); with the knobs at
 zero and no key held, a piece sounds exactly as written.
 
 | Control | What it does |

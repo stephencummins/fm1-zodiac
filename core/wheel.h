@@ -3,4 +3,5 @@
 #include "gfx.h"
 
 void wheel_frame(f32 at, f32 open, f32 t);
+void wheel_sky(f32 t);                   /* the stars alone: behind the words */
 void wheel_palette(uint16_t pal[256]);

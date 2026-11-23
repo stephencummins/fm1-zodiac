@@ -9,6 +9,7 @@ o2_cflags = ["-DZ_FM1", "-DZ_PACKED", "-DZ_ECHO16"]   # big buffers in the pool,
 include = ["core"]
 ram_layout = "packed"          # one SRAM budget: the core's buffers need more than the fixed pool gives
 words = "words.tsv"
+font_full = ["M"]              # the welcome and the tips are written in the middle face, lower case too
 ble = false                     # Bluetooth MIDI (--no-ble builds without it)
 ble_central = false             # and the FM-1 connects to Bluetooth MIDI devices too
 companion = false              # the companion services: the saved settings as a file for a page (app.h APP_FILE_OBJS)

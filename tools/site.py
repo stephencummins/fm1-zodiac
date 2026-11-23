@@ -7,7 +7,7 @@
 fm1-base's tools/make_site.py makes the installer, the browser emulator, the words files and the firmware folder;
 then this puts Zodiac's own front page over the base's (site/index.html, site/brand.css, site/mark.svg, site/img),
 adds the controls page (site/controls.html with tools/controls.py's drawing of the panel)
-and dresses the made installer in the same look. Nothing in base/ is changed: only the copy in OUT_DIR.
+and dresses the made installer and the browser emulator in the same look (the emulator gets what each control does written over its panel). Nothing in base/ is changed: only the copy in OUT_DIR.
 The browser emulator must be built first (./build.sh --web)."""
 import re
 import shutil
@@ -51,6 +51,77 @@ INSTALL_CSS = """<style>
   .lang { padding: 4px 0 !important; }
 </style>"""
 
+EMU_CSS = """<style>
+  /* Zodiac's look over the emulator page's own (tools/site.py) */
+  :root, :root[data-theme="light"] { --ground: #ffffff; --ink: #111110; --muted: #6e6a64; --rule: #d9d6d1; --accent: #d83f00; --card: #f6f5f3; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground: #0e0d0c; --ink: #f3f1ee; --muted: #98928a; --rule: #2e2b27; --accent: #ff5f1f; --card: #181614; } }
+  :root[data-theme="dark"] { --ground: #0e0d0c; --ink: #f3f1ee; --muted: #98928a; --rule: #2e2b27; --accent: #ff5f1f; --card: #181614; }
+  body { font-family: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif; padding-block: 0 48px; }
+  body > header.zbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 0; margin: 0 auto 18px; border-bottom: 1px solid var(--rule); }
+  .zbar img { width: 32px; height: 32px; flex: none; }
+  .zbar h1 { font: 600 19px/1.2 "Archivo", sans-serif; letter-spacing: -0.01em; margin: 0; }
+  .zbar h1 a { color: var(--ink); text-decoration: none; }
+  .zbar .model, .zbar nav, .zskins, .zhow .label { font: 12.5px/1.5 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.045em; color: var(--muted); }
+  .zbar .model { flex: 1 1 200px; }
+  .zbar nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; }
+  .zbar nav a, .zbar nav button { color: var(--muted); text-decoration: none; background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; cursor: pointer; }
+  .zbar nav a:hover, .zbar nav button:hover { color: var(--ink); }
+  .zhow { max-width: 1040px; margin: 34px auto 0; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .zhow h2 { font: 600 24px/1.15 "Archivo", sans-serif; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .zhow p { margin: 0 0 12px; max-width: 64ch; }
+  .device svg.zlab { z-index: 1; } .zlab text { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; text-anchor: middle; }
+  .zlab .k { font-size: 12.5px; fill: #e8e8ea; } .zlab .s { font-size: 9.5px; fill: #c9cdd6; }
+  .zlab .f { font-size: 13px; font-weight: 600; fill: #17181b; }
+  :root[data-zlab="off"] .zlab { display: none; }
+</style>"""
+EMU_JS = """<script>
+(function () {
+  var k = "zodiac:theme", r = document.documentElement, t = null;
+  try { t = localStorage.getItem(k); } catch (e) {}
+  if (t) r.dataset.theme = t;
+  document.getElementById("ztheme").addEventListener("click", function () {
+    var dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    r.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem(k, r.dataset.theme); } catch (e) {}
+  });
+  var lk = "zodiac:labels", lb = document.getElementById("zlabels"), l = null;
+  function labels(on) { r.dataset.zlab = on ? "on" : "off"; lb.setAttribute("aria-pressed", on ? "true" : "false"); }
+  try { l = localStorage.getItem(lk); } catch (e) {}
+  labels(l !== "off");
+  lb.addEventListener("click", function () {
+    var on = r.dataset.zlab === "off";
+    labels(on);
+    try { localStorage.setItem(lk, on ? "on" : "off"); } catch (e) {}
+  });
+})();
+</script>"""
+
+
+def emu_labels():
+    """what each control does, written over the emulator's own drawn panel (base/web's, viewBox 0 0 1000 640): the places
+    are that drawing's. Pointer events pass through it."""
+    t = lambda x, y, w, c, extra="": f'<text x="{x:.1f}" y="{y:.1f}" class="{c}"{extra}>{w}</text>'
+    o = ['<svg class="zlab" viewBox="0 0 1000 640" aria-hidden="true" focusable="false">']
+    for x, y, w in ((105, 143, "Volume"), (215, 143, "Choose a sign"), (105, 248, "Next sign"), (215, 248, "Tips"),
+                    (113, 334, "Stop, play"), (211, 334, "Keep K1 to K4")):
+        o.append(t(x, y, w, "k"))
+    for i, w in enumerate(("Low pass", "High pass", "Echo", "Reverb")):
+        o.append(t(610 + i * 104, 143, w, "k"))
+    for i, n in enumerate(controls.SIGNS):
+        o.append(t(582 + (i % 6) * 63 + 27, (174 if i < 6 else 236) + 45.5, n, "s"))
+    fx = controls.effects()
+    x0, y0, w, h = 36, 340, 928, 270
+    pitch = (w - 24) / 16
+    after = [0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14]
+    longs, shorts = [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24, 26], [1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25]
+    for i, k in enumerate(longs):
+        cx, cy = x0 + 12 + (i + 0.5) * pitch + 4.5, y0 + h * 0.69
+        o.append(t(cx, cy, fx[k] or "The sign answers", "f", f' transform="rotate(-90 {cx:.1f} {cy:.1f})"'))
+    for i, k in enumerate(shorts):
+        cx, cy = x0 + 12 + (after[i] + 1) * pitch + 4.5, y0 + h * 0.225
+        o.append(t(cx, cy, fx[k], "f", f' transform="rotate(-90 {cx:.1f} {cy:.1f})"'))
+    return "".join(o) + "</svg>"
+
 
 def main(pkg, version, out):
     out = Path(out).resolve()
@@ -81,7 +152,28 @@ def main(pkg, version, out):
     h = h.replace("<body>", f'<body>\n<div class="zbar"><img src="../mark.svg" alt=""><a href="../">zodiac</a>'
                             f'<span>install · {version}</span></div>\n<div class="zrow" aria-hidden="true">{row}</div>')
     inst.write_text(h, encoding="utf-8")
-    print(f"zodiac's pages: {out}/index.html, install/ dressed")
+    # the browser emulator: Zodiac's bar and nav on top, and under it the drawing of what every control does
+    emu = out / "emu/index.html"
+    h = emu.read_text(encoding="utf-8")
+    head = "<header>\n  <h1>zodiac</h1>\n</header>"
+    if h.count("</head>") != 1 or h.count(head) != 1 or h.count("</main>") != 1:
+        raise SystemExit("the emulator's page has changed shape: tools/site.py no longer fits it")
+    h = h.replace("<title>zodiac in the browser</title>", "<title>Zodiac in the browser</title>")
+    h = h.replace("</head>", f'<link rel="icon" type="image/svg+xml" href="../mark.svg">\n{FONTS}\n{EMU_CSS}\n</head>')
+    h = h.replace(head, f'<header class="zbar"><img src="../mark.svg" alt=""><h1><a href="../">zodiac</a></h1>'
+                        f'<span class="model">in the browser · {version}</span>'
+                        '<nav aria-label="Zodiac"><button type="button" id="ztheme">theme</button><button type="button" id="zlabels" aria-pressed="true">labels</button><a href="../">home</a>'
+                        '<a href="../controls/">controls</a><a href="../install/">install</a>'
+                        '<a href="https://github.com/stephencummins/fm1-zodiac">source</a></nav></header>')
+    ctl = '<div id="controls"'
+    if h.count(ctl) != 1:
+        raise SystemExit("the emulator's page has changed shape: tools/site.py no longer fits it")
+    h = h.replace(ctl, emu_labels() + "\n  " + ctl)
+    h = h.replace("</main>", "</main>\n<section class=\"zhow\"><p>To begin you need three: OCT− stops the music and starts it again, "
+                             "MASTER is the volume, and ALGORITHM turns through the tips on the screen. Each lower button is an effect "
+                             "for as long as you hold it. <a href=\"../controls/\">The controls, in words</a>.</p></section>\n" + EMU_JS, 1)
+    emu.write_text(h, encoding="utf-8")
+    print(f"zodiac's pages: {out}/index.html, install/ and emu/ dressed")
 
 
 if __name__ == "__main__":

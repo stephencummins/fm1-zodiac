@@ -56,7 +56,7 @@ def main(pkg, version, out):
     name = f"zodiac-{re.sub(r'[^A-Za-z0-9.-]', '-', version)}.fwsc"
     signs = "\n".join(
         f'      <li><img src="img/{n.lower()}.png" width="480" height="480" loading="lazy" alt="{n}: the sign\'s picture, as on the FM-1\'s screen">'
-        f'<h2>{n.upper()} <span>{el} · {knob.lower()}</span></h2><p>{line}</p></li>' for n, el, knob, line in SIGNS)
+        f'<h2>{n.upper()} <span>{el}</span></h2><p>{line}</p></li>' for n, el, knob, line in SIGNS)
     html = (ROOT / "site/index.html").read_text(encoding="utf-8")
     html = html.replace("{{SIGNS}}", signs).replace("{{VERSION}}", version).replace("{{PKG}}", name)
     (out / "index.html").write_text(html, encoding="utf-8")

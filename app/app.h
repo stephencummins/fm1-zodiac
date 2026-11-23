@@ -23,6 +23,6 @@ void app_frame(void);                    /* input and the next frame of the pict
 void app_input_only(void);               /* between frames: input only */
 void app_say(const char *a, const char *b);   /* to a screen reader (nothing is written on the picture) */
 
-/* the host simulator's checks (host/plat_host.c "expect"): sign, dirty, strikes, heat, echo, mist, light, playing */
+/* the host simulator's checks (host/plat_host.c "expect"): sign, dirty, strikes, lp, hp, echo, verb, fx, playing */
 #define APP_HOST_EXPECT
 int app_expect(const char *what, int *got);

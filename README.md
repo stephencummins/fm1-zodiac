@@ -8,10 +8,10 @@ that plays itself. No numbers are shown on the screen: the picture is the readou
 ## The twelve pieces
 
 Every piece is ambient and changes by itself: the tempo drifts, and most pieces move between three and four
-beats in the bar. A key press sets off the sign's own event, in the music and in the picture together; left
+beats in the bar. The lowest key sets off the sign's own event, in the music and in the picture together; left
 alone, each piece does this by itself now and then.
 
-| Sign | The piece | On a key |
+| Sign | The piece | On the lowest key |
 |---|---|---|
 | Aries | soft, dark, slightly jazzy horns | a blare, as the ram bleats |
 | Taurus | cellos in long notes over a low bass, plodding | a huff |
@@ -50,8 +50,22 @@ In the page, the `Sound` button starts the music.
 ## On the FM-1 (so far only in the simulator)
 
 `app/` is the FM-1 firmware: fm1-base's platform around the core (`app/core` is a link to `core/`).
-PRESET or SELECT steps through the signs, any key or MIDI note strikes, K1 to K4 are the sign's own knob,
-echo, mist and light, a MIDI program change 0 to 11 chooses a sign, and SAVE keeps the sign and the knobs.
+PRESET steps through the signs, SELECT turns the wheel of their symbols (the one it rests on opens), the twelve buttons FX to REC are the twelve signs in order, a MIDI program change 0 to 11 chooses a sign, and OCT+ keeps the sign
+and the knobs. The knobs and keys are a DJ's hands on the piece (`z_dj` in `core/music.h`); with the knobs at
+zero and no key held, a piece sounds exactly as written.
+
+| Control | What it does |
+|---|---|
+| K1 | low pass, with resonance: up closes the piece down to a rumble |
+| K2 | high pass, with resonance: up thins it to a whisper |
+| K3 | echo: the whole piece into a dub echo that feeds on itself |
+| K4 | reverb: a great hall |
+| lowest key, any MIDI note | strikes: the sign answers |
+| white keys, low to high | Echo, Dub, Repeat, Roll, Gate, Pump, Half time, Tape stop, Wow, Drive, Crush, Ring, Phaser, Wash, Freeze |
+| black keys, low to high | Close, Rise, Sweep, Wah, Drop, Radio, Riser, Siren, Vinyl, Spin, Cut |
+
+A key's effect lasts while the key is held, and several can be held together. They use no memory of their own:
+Repeat and Roll borrow the echo's line, and Half time, Tape stop and Wow play the piece itself slower.
 
     ./build.sh --host
     app/build/host/zodiac_host app/tests/basic.txt app/build/host

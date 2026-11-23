@@ -141,3 +141,13 @@ typedef struct {
 extern MFx m_fx;
 void m_fx_init(f32 sr);
 void m_fx_tick(f32 *l, f32 *r, f32 to_room, f32 to_echo);   /* adds the room and echo to l and r */
+
+/* the hands on top of every piece (the FM-1's four knobs and its keys): strong ones, as on a DJ's mixer. All at 0 and
+ * no effect held: the piece exactly as it is. lp, hp, echo, verb 0 .. 1; fx: the effects held now, a bit each */
+enum { Z_FX_ECHO, Z_FX_DUB, Z_FX_REPEAT, Z_FX_ROLL, Z_FX_GATE, Z_FX_PUMP, Z_FX_HALF, Z_FX_TAPE, Z_FX_WOW, Z_FX_DRIVE,
+       Z_FX_CRUSH, Z_FX_RING, Z_FX_PHASER, Z_FX_WASH, Z_FX_FREEZE,                       /* the FM-1's white keys */
+       Z_FX_CLOSE, Z_FX_RISE, Z_FX_SWEEP, Z_FX_WAH, Z_FX_DROP, Z_FX_RADIO, Z_FX_RISER, Z_FX_SIREN, Z_FX_VINYL, Z_FX_SPIN,
+       Z_FX_CUT,                                                                         /* its black keys */
+       Z_NFX };
+extern const char *const z_fx_name[Z_NFX];
+void z_dj(f32 lp, f32 hp, f32 echo, f32 verb, uint32_t fx);     /* before z_music_render; kept until the next call */

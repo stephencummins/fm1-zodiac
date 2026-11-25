@@ -5,7 +5,7 @@
   tools/site.py app/build/zodiac-X.Y.Z.fwsc X.Y.Z [OUT_DIR, default build/site]
 
 fm1-base's tools/make_site.py makes the installer, the browser emulator, the words files and the firmware folder;
-then this puts Zodiac's own front page over the base's (site/index.html, site/brand.css, site/mark.svg, site/img),
+then this puts Zodiac's own front page over the base's (site/index.html, site/brand.css, site/mark.png, site/img),
 adds the controls page (site/controls.html with tools/controls.py's drawing of the panel)
 and dresses the made installer and the browser emulator in the same look (the emulator gets what each control does written over its panel). Nothing in base/ is changed: only the copy in OUT_DIR.
 The browser emulator must be built first (./build.sh --web)."""
@@ -150,7 +150,7 @@ def main(pkg, version, out):
     html = (ROOT / "site/index.html").read_text(encoding="utf-8")
     html = html.replace("{{SIGNS}}", signs).replace("{{VERSION}}", version).replace("{{PKG}}", name)
     (out / "index.html").write_text(html, encoding="utf-8")
-    for f in ("brand.css", "mark.svg"):
+    for f in ("brand.css", "mark.png"):
         shutil.copy(ROOT / "site" / f, out / f)
     shutil.copytree(ROOT / "site/img", out / "img", dirs_exist_ok=True)
     (out / "controls").mkdir(exist_ok=True)
@@ -164,8 +164,8 @@ def main(pkg, version, out):
     # the base writes the build's name ("zodiac") into its sentences: there it is the firmware's, with a capital
     h = re.sub(r'(?<![\w/.\-=>])zodiac(?![\w.\-/:"])', "Zodiac", h)
     row = "".join(f'<img src="../img/{n.lower()}.png" alt="">' for n, *_ in SIGNS)
-    h = h.replace("</head>", f'<link rel="icon" type="image/svg+xml" href="../mark.svg">\n{FONTS}\n{INSTALL_CSS}\n</head>')
-    h = h.replace("<body>", f'<body>\n<div class="zbar"><img src="../mark.svg" alt=""><a href="../">zodiac</a>'
+    h = h.replace("</head>", f'<link rel="icon" type="image/png" href="../mark.png">\n{FONTS}\n{INSTALL_CSS}\n</head>')
+    h = h.replace("<body>", f'<body>\n<div class="zbar"><img src="../mark.png" alt=""><a href="../">zodiac</a>'
                             f'<span>install · {version}</span></div>\n<div class="zrow" aria-hidden="true">{row}</div>')
     inst.write_text(h, encoding="utf-8")
     # the browser emulator: Zodiac's bar and nav on top, and under it the drawing of what every control does
@@ -175,8 +175,8 @@ def main(pkg, version, out):
     if h.count("</head>") != 1 or h.count(head) != 1 or h.count("</main>") != 1:
         raise SystemExit("the emulator's page has changed shape: tools/site.py no longer fits it")
     h = h.replace("<title>zodiac in the browser</title>", "<title>Zodiac in the browser</title>")
-    h = h.replace("</head>", f'<link rel="icon" type="image/svg+xml" href="../mark.svg">\n{FONTS}\n{EMU_CSS}\n</head>')
-    h = h.replace(head, f'<div class="zwall" aria-hidden="true"></div>\n<div class="zsheet">\n<header class="zbar"><img src="../mark.svg" alt=""><h1><a href="../">zodiac</a></h1>'
+    h = h.replace("</head>", f'<link rel="icon" type="image/png" href="../mark.png">\n{FONTS}\n{EMU_CSS}\n</head>')
+    h = h.replace(head, f'<div class="zwall" aria-hidden="true"></div>\n<div class="zsheet">\n<header class="zbar"><img src="../mark.png" alt=""><h1><a href="../">zodiac</a></h1>'
                         f'<span class="model">in the browser · {version}</span>'
                         '<nav aria-label="Zodiac"><button type="button" id="ztheme">theme</button><button type="button" id="zlabels" aria-pressed="true">labels</button><a href="../">home</a>'
                         '<a href="../controls/">controls</a><a href="../install/">install</a>'

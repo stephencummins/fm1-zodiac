@@ -83,7 +83,8 @@ buffers in the platform's pool). The computer and browser builds do not use them
 
 - Built for the FM-1 once (22 November 2026, in a container on another Mac; this one has no container runtime):
   the image is 457,352 bytes of the 581 KB slot, and memory 462,476 of 475,136 bytes, 12,660 free where 8,192
-  must stay spare. It fits, with little memory left over. Nothing has been on an FM-1.
+  must stay spare. It fits, with little memory left over.
+- 1.0.0 has run on two FM-1s: one with the newer flash chip and one with the older.
 - How much of the FM-1's processor the pictures and the music need has not been measured.
 - The 16-bit echo measures about 95 dB below the float one, but has not been listened to.
 - `tests/` is the template's.

@@ -1,0 +1,10 @@
+{
+  "what": "A playable toy for anyone, no music knowledge needed. Switch it on and it plays: twelve star signs, each a moving picture with its own gentle music. Press a button and the sign answers, turn a knob and the sound changes. Nothing to learn first, and you can leave it on for hours.",
+  "author": "CU_STE",
+  "kinds": ["synth"],
+  "play": "https://zodiac.stephen8n.com/emu/",
+  "cheat": "https://zodiac.stephen8n.com/controls/",
+  "image": "docs/img/card.png",
+  "color": "#FFE278",
+  "sounds": "none – all synthesised"
+}

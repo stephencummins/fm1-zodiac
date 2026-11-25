@@ -1,0 +1,25 @@
+# Zodiac
+
+> A firmware for the M-VAVE FM-1 synth: twelve signs of the zodiac, each a moving picture and a piece of ambient music that composes itself as it goes. By Stephen Cummins.
+
+- There is nothing to learn before it makes music. After 30 minutes of playing, the next sign takes over.
+- The bottom left button sets off the sign's own event, in the music and the picture together.
+- Four knobs: low pass, high pass, echo and reverb. The lower buttons are effects, each for as long as it is held.
+- No hardware is needed to try it: there is an emulator in the browser.
+- It replaces the firmware on the FM-1 while installed. It is an early version, offered with no warranty. The install page also puts M-VAVE's own firmware back.
+- GPL-3.0, built on fm1-base and felucca-bsp, which come from Felucca. Not made by or connected with M-VAVE.
+
+## Pages
+
+- [Zodiac](https://zodiac.stephen8n.com/): the twelve signs and how to install
+- [Controls](https://zodiac.stephen8n.com/controls/): every knob and button, drawn
+- [Emulator](https://zodiac.stephen8n.com/emu/): Zodiac in the browser, with sound
+- [Install](https://zodiac.stephen8n.com/install/): from Chrome or Edge on a computer, over USB
+
+## Source
+
+- [fm1-zodiac](https://github.com/stephencummins/fm1-zodiac)
+
+## Related
+
+- [AISLING](https://aisling.stephen8n.com/): an ambient instrument for the FM-1 that you play; an FM-1 holds one firmware at a time

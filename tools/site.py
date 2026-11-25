@@ -153,6 +153,7 @@ def main(pkg, version, out):
     for f in ("brand.css", "mark.png"):
         shutil.copy(ROOT / "site" / f, out / f)
     shutil.copytree(ROOT / "site/img", out / "img", dirs_exist_ok=True)
+    shutil.copy(ROOT / "site/llms.txt", out / "llms.txt")
     (out / "controls").mkdir(exist_ok=True)
     page = (ROOT / "site/controls.html").read_text(encoding="utf-8")
     (out / "controls/index.html").write_text(page.replace("{{PANEL}}", controls.panel()).replace("{{SKINS}}", controls.skin_buttons()).replace("{{VERSION}}", version),
